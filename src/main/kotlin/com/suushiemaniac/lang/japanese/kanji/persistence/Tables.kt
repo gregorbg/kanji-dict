@@ -1,12 +1,13 @@
 package com.suushiemaniac.lang.japanese.kanji.persistence
 
+import com.suushiemaniac.lang.japanese.kanji.model.AssociationType
 import com.suushiemaniac.lang.japanese.kanji.model.ReadingType
 import org.jetbrains.exposed.dao.IntIdTable
 
 object KanjiTable : IntIdTable("kanji") {
     val kanjiSymbol = varchar("symbol", 4).uniqueIndex()
     val strokeCount = integer("stroke_count")
-    val radical = reference("radical_id", RadicalTable)
+    val radical = reference("radical_id", RadicalTable).nullable()
 }
 
 object RadicalTable : IntIdTable("radicals") {
@@ -16,47 +17,28 @@ object RadicalTable : IntIdTable("radicals") {
 
 object DictionaryTable : IntIdTable("dictionary") {
     val title = varchar("title", 256)
-}
-
-object AuthorTable : IntIdTable("dictionary_authors") {
-    val dictionary = reference("dictionary_id", DictionaryTable)
-    val name = varchar("name", 256)
+    val isbn = varchar("isbn", 256)
 }
 
 object ReadingTable : IntIdTable("readings") {
     val kanjiId = reference("kanji_id", KanjiTable)
     val kanaReading = varchar("reading", 256)
-    val readingType = enumeration("type", ReadingType::class)
+    val readingType = enumerationByName("type", 32, ReadingType::class)
 }
 
-open class SampleTable(name: String) : IntIdTable(name) {
+open class SampleTable(name: String, parentTable: IntIdTable) : IntIdTable(name) {
+    val reading = varchar("reading", 1024)
     val translation = varchar("translation", 1024)
     val sourceDictionary = reference("source_id", DictionaryTable)
+    val parentId = reference("parent_id", parentTable)
 }
 
-object SampleWordTable : SampleTable("sample_words") {
-    val kanjiId = reference("kanji_id", KanjiTable)
-}
+object SampleWordTable : SampleTable("sample_words", KanjiTable)
+object SamplePhraseTable : SampleTable("sample_phrases", SampleWordTable)
 
-object SamplePhraseTable : SampleTable("sample_phrases") {
-    val sampleWordId = reference("sample_word_id", SampleWordTable)
-}
-
-open class SampleTokensTable(name: String, foreign: IntIdTable) : IntIdTable(name) {
-    val sampleId = reference("sample_id", foreign)
-    val orderingIndex = integer("ordering_index")
-    val kanjiContent = varchar("kanji_content", 256)
-    val reading = varchar("reading", 256)
-}
-
-object SampleWordTokensTable : SampleTokensTable("sample_word_tokens", SampleWordTable)
-object SamplePhraseTokensTable : SampleTokensTable("sample_phrase_tokens", SamplePhraseTable)
-
-open class AssociationTable(name: String, associationName: String) : IntIdTable(name) {
+object AssociationTable : IntIdTable("teaching_associations") {
     val kanjiId = integer("kanji_id").references(KanjiTable.id)
+    val associationType = enumerationByName("type", 32, AssociationType::class)
     val dictionaryId = integer("dictionary_id").references(DictionaryTable.id)
-    val association = integer(associationName)
+    val association = integer("assoc_value")
 }
-
-object PageAssociationTable : AssociationTable("associations_page", "page")
-object LessonAssociationTable : AssociationTable("associations_lesson", "lesson")
