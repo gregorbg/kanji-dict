@@ -16,6 +16,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
     implementation("org.jetbrains.exposed:exposed:0.17.7")
+    implementation("com.mariten:kanatools:1.3.0")
 
     runtime("com.h2database:h2:1.4.200")
 }
