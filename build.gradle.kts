@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.3.50"
+    kotlin("jvm") version "1.3.61"
 }
 
 group = "com.suushiemaniac"
@@ -18,7 +18,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed:0.17.7")
     implementation("com.mariten:kanatools:1.3.0")
 
-    runtime("com.h2database:h2:1.4.200")
+    runtimeOnly("com.h2database:h2:1.4.200")
 }
 
 tasks.withType<KotlinCompile> {
