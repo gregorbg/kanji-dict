@@ -3,34 +3,35 @@ package com.suushiemaniac.lang.japanese.kanji.parser
 import com.suushiemaniac.lang.japanese.kanji.util.allTo
 import com.suushiemaniac.lang.japanese.kanji.util.toStringifiedChars
 import kotlin.math.ceil
+import kotlin.math.max
 import kotlin.math.roundToInt
-
-abstract class FileParser<T>(val rawContent: String) {
-    abstract fun getAssociations(): Map<String, T>
-}
 
 class NumericalIndexParser(rawContent: String): FileParser<Int>(rawContent) {
     override fun getAssociations(): Map<String, Int> {
-        val lines = rawContent.lines()
-        val chars = lines.flatMap { it.toStringifiedChars() }
+        val chars = nonBlankLines.flatMap { it.toStringifiedChars() }
 
         return chars.mapIndexed { i, k -> k to i }.toMap()
     }
 }
 
-open class PageGroupsParser(rawContent: String, val pagesPerLine: Int = 2): FileParser<Int>(rawContent) {
+open class PageGroupsParser(rawContent: String, val pagesPerLine: Int = 2, val fixShortLines: Boolean = true): FileParser<Int>(rawContent) {
     override fun getAssociations(): Map<String, Int> {
-        val lines = rawContent.lines()
+        val lines = this.nonBlankLines
 
-        val lineGroups = lines.mapIndexed { i, ln ->
+        val avgLineLength = lines.map { it.length }.average().roundToInt()
+
+        val lineGroups = lines.flatMap { ln ->
             val chunkSizeDecimal = ln.length.toFloat() / pagesPerLine
             val chunkSize = ceil(chunkSizeDecimal).roundToInt()
 
-            i to ln.chunked(chunkSize)
+            val usedChunkSize = chunkSize.takeUnless { fixShortLines }
+                ?: max(avgLineLength, chunkSize)
+
+            ln.chunked(usedChunkSize)
         }
 
-        val pairAssociations = lineGroups.flatMap { (i, ks) -> ks allTo i }
-        return pairAssociations.toMap()
+        val pairAssociations = lineGroups.mapIndexed { i, ks -> ks.toStringifiedChars() allTo i }
+        return pairAssociations.flatten().toMap()
     }
 }
 
