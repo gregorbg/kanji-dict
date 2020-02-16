@@ -37,8 +37,8 @@ object SampleWordTable : SampleTable("sample_words", KanjiTable)
 object SamplePhraseTable : SampleTable("sample_phrases", SampleWordTable)
 
 object AssociationTable : IntIdTable("teaching_associations") {
-    val kanjiId = integer("kanji_id").references(KanjiTable.id)
+    val kanjiId = reference("kanji_id", KanjiTable)
     val associationType = enumerationByName("type", 32, AssociationType::class)
-    val dictionaryId = integer("dictionary_id").references(DictionaryTable.id)
+    val dictionaryId = reference("dictionary_id", DictionaryTable)
     val association = integer("assoc_value")
 }

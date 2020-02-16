@@ -37,8 +37,6 @@ open class SampleDao(id: EntityID<Int>, table: SampleTable, parentEntity: IntEnt
     val translation by table.translation
     val source by DictionaryDao referencedOn table.sourceDictionary
     val reading by table.reading
-
-    private companion object : IntEntityClass<SampleDao>(SampleTable("", IntIdTable()))
 }
 
 class SampleWordDao(id: EntityID<Int>) : SampleDao(id, SampleWordTable, KanjiDao) {
