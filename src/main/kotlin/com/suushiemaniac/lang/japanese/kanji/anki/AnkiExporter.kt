@@ -21,7 +21,7 @@ object AnkiExporter {
         val onYomiParser = OnYomiParser(readings).getAssociations()
         val kunYomiParser = KunYomiParser(readings).getAssociations()
 
-        val sampleWords = SampleWordParser(samples).getAssociations()
+        val sampleWords = VocabularyParser(samples).getAssociations()
 
         val bookKanjis = indexParser.keys.toList()
 
