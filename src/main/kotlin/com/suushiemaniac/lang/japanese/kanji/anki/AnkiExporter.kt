@@ -7,9 +7,9 @@ object AnkiExporter {
     fun makeCSVs(bookNumber: Int, idOffset: Int = 0) {
         val folder = File("/home/suushie_maniac/jvdocs/kanji-dict")
 
-        val orderingsFile = SampleWord::class.java.getResource("/cram/15kanji_$bookNumber.txt")
-        val readingsFile = SampleWord::class.java.getResource("/cram/15kanji_${bookNumber}_readings.txt")
-        val samplesFile = SampleWord::class.java.getResource("/cram/15kanji_${bookNumber}_samples.txt")
+        val orderingsFile = this::class.java.getResource("/cram/15kanji_$bookNumber.txt")
+        val readingsFile = this::class.java.getResource("/cram/15kanji_${bookNumber}_readings.txt")
+        val samplesFile = this::class.java.getResource("/cram/15kanji_${bookNumber}_samples.txt")
 
         val orderings = orderingsFile.readText()
         val readings = readingsFile.readText()
@@ -44,10 +44,10 @@ object AnkiExporter {
         val csvVocabularyStructure = sampleWords.flatMap { (k, wd) ->
             wd.map {
                 listOf(
-                    it.kanji,
+                    it.fullText,
                     it.reading,
-                    it.translation,
-                    it.sentence,
+                    it.translations.joinToString(),
+                    it.sampleSentence.orEmpty(),
                     "$k L${lessonsParser.getValue(k)+1}"
                 )
             }
