@@ -24,5 +24,5 @@ data class KanjiDictEntry(
     val kanken: Int?,
     val frequency: Int?,
     val meaning: List<String>,
-    val compactMeaning: String
+    val compactMeaning: List<String>
 )

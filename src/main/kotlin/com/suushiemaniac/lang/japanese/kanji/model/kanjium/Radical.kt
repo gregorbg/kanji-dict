@@ -7,5 +7,5 @@ data class Radical(
     val strokes: Int,
     val names: List<String>,
     val meanings: List<String>,
-    val notes: String
+    val notes: String?
 )

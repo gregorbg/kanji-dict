@@ -4,7 +4,6 @@ import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.dao.id.EntityID
 
 class KanjiDictDao(id: EntityID<String>) : Entity<String>(id) {
-    val symbol by KanjiDictTable.id
     val radical by RadicalBaseDao referencedOn KanjiDictTable.radical
     val radVar by RadVarDao optionalReferencedOn KanjiDictTable.radvar
     val phonetic by KanjiDictTable.phonetic
@@ -27,7 +26,6 @@ class KanjiDictDao(id: EntityID<String>) : Entity<String>(id) {
 }
 
 open class RadicalDao(id: EntityID<String>, table: RadicalTable, parentEntity: EntityClass<String, RadicalDao>) : Entity<String>(id) {
-    val symbol by table.id
     val parentRef by parentEntity optionalReferencedOn table.parentRef
     val number by table.number
     val strokes by table.strokes
@@ -45,7 +43,7 @@ class RadVarDao(id: EntityID<String>) : RadicalDao(id, RadVarTable, RadicalBaseD
 }
 
 class ElementsDao(id: EntityID<String>) : Entity<String>(id) {
-    val kanji by ElementsTable.id
+    val kanji by KanjiDictDao referencedOn ElementsTable.id
     val strokes by ElementsTable.strokes
     val grade by ElementsTable.grade
     val idc by ElementsTable.idc
