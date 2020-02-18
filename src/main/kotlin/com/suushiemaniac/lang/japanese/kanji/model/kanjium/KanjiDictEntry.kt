@@ -4,7 +4,9 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KanjiMini
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KanjiType
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class KanjiDictEntry(
     val kanji: Char,
     val radical: Radical,

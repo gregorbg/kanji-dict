@@ -1,5 +1,8 @@
 package com.suushiemaniac.lang.japanese.kanji.model.kanjium
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class Radical(
     val radical: Char,
     val parentRadical: Radical?,
