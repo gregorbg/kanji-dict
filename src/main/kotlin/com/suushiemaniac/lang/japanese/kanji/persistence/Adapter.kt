@@ -44,13 +44,12 @@ private fun List<String>.parseOn(backingReadings: List<OnYomi> = emptyList()): L
         .mapKeys { it.key.kanaReading }
 
     return normalizeAllSymbols().map {
-        if ('(' in it && ')' in it) {
-            val fakeParse = KunYomiAnnotationMode.BracketKunYomiParser.parse(it)
-            val epoch = ReadingEra.parseSymbol(fakeParse.okurigana.first())
-            OnYomi(fakeParse.coreReading, epoch)
-        } else {
-            OnYomi(it, helperIndex[it])
-        }
+        val fakeParse = KunYomiAnnotationMode.BracketKunYomiParser.parse(it)
+
+        val epoch = fakeParse.okurigana?.first()?.let(ReadingEra.Companion::parseSymbol)
+        val indexEpoch = epoch ?: helperIndex[fakeParse.coreReading]
+
+        OnYomi(fakeParse.coreReading, indexEpoch)
     }
 }
 
@@ -97,10 +96,12 @@ fun ElementsDao.toModel(): Elements {
 const val ELEMENTS_KANJI_PARTS_SEP = ","
 const val ELEMENTS_PART_OF_SEP = ELEMENTS_KANJI_PARTS_SEP
 
-fun <T : RadicalDao> T.toModel(): Radical {
+fun <T : RadicalBaseDao> T.toModel(): Radical {
+    val parentRef = if (this is RadVarDao) this.parentRef.toModel() else null
+
     return Radical(
         this.id.value.first(),
-        this.parentRef?.toModel(),
+        parentRef,
         this.number,
         this.strokes,
         this.names.splitAndTrim(RADICAL_NAME_SEP),

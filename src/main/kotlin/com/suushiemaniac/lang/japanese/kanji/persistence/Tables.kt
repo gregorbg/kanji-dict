@@ -4,7 +4,7 @@ import org.jetbrains.exposed.dao.id.IdTable
 
 object KanjiDictTable : IdTable<String>("kanjidict") {
     override val id = text("kanji").entityId()
-    val radical = reference("radical", RadicalBaseTable)
+    val radical = reference("radical", RadicalTable)
     val radvar = reference("radvar", RadVarTable).nullable()
     val phonetic = text("phonetic").nullable()
     val idc = text("idc")
@@ -23,10 +23,8 @@ object KanjiDictTable : IdTable<String>("kanjidict") {
     val compactMeaning = text("compact_meaning").nullable()
 }
 
-open class RadicalTable(name: String, idName: String, refName: String, refTable: IdTable<String>) :
-    IdTable<String>(name) {
+abstract class RadicalBaseTable(name: String, idName: String) : IdTable<String>(name) {
     override val id = text(idName).entityId()
-    val parentRef = reference(refName, refTable).nullable() // FIXME dynamic nullability?
     val number = integer("number")
     val strokes = integer("strokes")
     val names = text("names")
@@ -46,5 +44,8 @@ object ElementsTable : IdTable<String>("elements") {
     val compactMeaning = text("compact_meaning")
 }
 
-object RadicalBaseTable : RadicalTable("radicals", "radical", "radvar", RadVarTable)
-object RadVarTable : RadicalTable("radvars", "radvar", "radical", RadicalBaseTable)
+object RadicalTable : RadicalBaseTable("radicals", "radical")
+
+object RadVarTable : RadicalBaseTable("radvars", "radvar") {
+    val parentRef = reference("radical", RadicalTable)
+}

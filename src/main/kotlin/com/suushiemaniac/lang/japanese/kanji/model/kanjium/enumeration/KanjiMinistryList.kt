@@ -32,7 +32,7 @@ enum class KanjiMinistryList {
 
             if (list in SCHOOL_GRADE_LISTS) {
                 val fakeParse = KunYomiAnnotationMode.BracketKunYomiParser.parse(gradeDescription)
-                val descriptionText = fakeParse.okurigana
+                val descriptionText = fakeParse.okurigana.orEmpty()
 
                 if (descriptionText == SCHOOL_GRADE_HIGHSCHOOL) {
                     return 10

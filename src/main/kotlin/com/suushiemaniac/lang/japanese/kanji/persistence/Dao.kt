@@ -4,7 +4,7 @@ import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.dao.id.EntityID
 
 class KanjiDictDao(id: EntityID<String>) : Entity<String>(id) {
-    val radical by RadicalBaseDao referencedOn KanjiDictTable.radical
+    val radical by RadicalDao referencedOn KanjiDictTable.radical
     val radVar by RadVarDao optionalReferencedOn KanjiDictTable.radvar
     val phonetic by KanjiDictTable.phonetic
     val idc by KanjiDictTable.idc
@@ -25,8 +25,7 @@ class KanjiDictDao(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, KanjiDictDao>(KanjiDictTable)
 }
 
-open class RadicalDao(id: EntityID<String>, table: RadicalTable, parentEntity: EntityClass<String, RadicalDao>) : Entity<String>(id) {
-    val parentRef by parentEntity optionalReferencedOn table.parentRef
+abstract class RadicalBaseDao(id: EntityID<String>, table: RadicalBaseTable) : Entity<String>(id) {
     val number by table.number
     val strokes by table.strokes
     val names by table.names
@@ -34,12 +33,14 @@ open class RadicalDao(id: EntityID<String>, table: RadicalTable, parentEntity: E
     val notes by table.notes
 }
 
-class RadicalBaseDao(id: EntityID<String>) : RadicalDao(id, RadicalBaseTable, RadVarDao) {
-    companion object : EntityClass<String, RadicalDao>(RadicalBaseTable)
+class RadicalDao(id: EntityID<String>) : RadicalBaseDao(id, RadicalTable) {
+    companion object : EntityClass<String, RadicalBaseDao>(RadicalTable)
 }
 
-class RadVarDao(id: EntityID<String>) : RadicalDao(id, RadVarTable, RadicalBaseDao) {
-    companion object : EntityClass<String, RadicalDao>(RadVarTable)
+class RadVarDao(id: EntityID<String>) : RadicalBaseDao(id, RadVarTable) {
+    val parentRef by RadicalDao referencedOn RadVarTable.parentRef
+
+    companion object : EntityClass<String, RadicalBaseDao>(RadVarTable)
 }
 
 class ElementsDao(id: EntityID<String>) : Entity<String>(id) {
