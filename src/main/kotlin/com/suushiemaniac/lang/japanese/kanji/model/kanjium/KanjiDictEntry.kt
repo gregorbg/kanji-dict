@@ -10,6 +10,7 @@ data class KanjiDictEntry(
     val radical: Radical,
     val radicalVariant: Radical?,
     val phoneticCarrier: Char?,
+    val idc: String,
     val type: KanjiType?,
     val regularOnYomi: List<OnYomi>,
     val regularKunYomi: List<KunYomi>,

@@ -6,5 +6,6 @@ data class Elements(
     val elements: List<String>,
     val extraElements: List<String>,
     val kanjiParts: List<String>,
-    val partOf: List<KanjiDictEntry>
+    val partOf: List<KanjiDictEntry>,
+    val compactMeaning: String
 )

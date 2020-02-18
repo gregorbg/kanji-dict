@@ -1,55 +1,59 @@
 package com.suushiemaniac.lang.japanese.kanji.persistence
 
 import org.jetbrains.exposed.dao.*
+import org.jetbrains.exposed.dao.id.EntityID
 
-class KanjiDao(id: EntityID<Int>) : IntEntity(id) {
-    val symbol by KanjiTable.kanjiSymbol
-    val strokeCount by KanjiTable.strokeCount
-    val radical by RadicalDao optionalReferencedOn KanjiTable.radical
+class KanjiDictDao(id: EntityID<String>) : Entity<String>(id) {
+    val symbol by KanjiDictTable.id
+    val radical by RadicalBaseDao referencedOn KanjiDictTable.radical
+    val radVar by RadVarDao optionalReferencedOn KanjiDictTable.radvar
+    val phonetic by KanjiDictTable.phonetic
+    val idc by KanjiDictTable.idc
+    val type by KanjiDictTable.type
+    val regOn by KanjiDictTable.regOn
+    val regKun by KanjiDictTable.regKun
+    val onyomi by KanjiDictTable.onyomi
+    val kunyomi by KanjiDictTable.kunyomi
+    val nanori by KanjiDictTable.nanori
+    val strokes by KanjiDictTable.strokes
+    val grade by KanjiDictTable.grade
+    val jlpt by KanjiDictTable.jlpt
+    val kanken by KanjiDictTable.kanken
+    val frequency by KanjiDictTable.frequency
+    val meaning by KanjiDictTable.meaning
+    val compactMeaning by KanjiDictTable.compactMeaning
 
-    companion object : IntEntityClass<KanjiDao>(KanjiTable)
+    companion object : EntityClass<String, KanjiDictDao>(KanjiDictTable)
 }
 
-class RadicalDao(id: EntityID<Int>) : IntEntity(id) {
-    val symbol by RadicalTable.radicalSymbol
-    val name by RadicalTable.name
-
-    companion object : IntEntityClass<RadicalDao>(RadicalTable)
+open class RadicalDao(id: EntityID<String>, table: RadicalTable, parentEntity: EntityClass<String, RadicalDao>) : Entity<String>(id) {
+    val symbol by table.id
+    val parentRef by parentEntity optionalReferencedOn table.parentRef
+    val number by table.number
+    val strokes by table.strokes
+    val names by table.names
+    val meaning by table.meaning
+    val notes by table.notes
 }
 
-class DictionaryDao(id: EntityID<Int>) : IntEntity(id) {
-    val title by DictionaryTable.title
-    val isbn by DictionaryTable.isbn
-
-    companion object : IntEntityClass<DictionaryDao>(DictionaryTable)
+class RadicalBaseDao(id: EntityID<String>) : RadicalDao(id, RadicalBaseTable, RadVarDao) {
+    companion object : EntityClass<String, RadicalDao>(RadicalBaseTable)
 }
 
-class ReadingDao(id: EntityID<Int>) : IntEntity(id) {
-    val kanji by KanjiDao referencedOn ReadingTable.kanjiId
-    val kanaReading by ReadingTable.kanaReading
-    val readingType by ReadingTable.readingType
-
-    companion object : IntEntityClass<ReadingDao>(ReadingTable)
+class RadVarDao(id: EntityID<String>) : RadicalDao(id, RadVarTable, RadicalBaseDao) {
+    companion object : EntityClass<String, RadicalDao>(RadVarTable)
 }
 
-open class SampleDao(id: EntityID<Int>, table: SampleTable, parentEntity: IntEntityClass<IntEntity>) : IntEntity(id) {
-    val referenceObject by parentEntity referencedOn table.parentId
-    val translation by table.translation
-    val source by DictionaryDao referencedOn table.sourceDictionary
-    val reading by table.reading
-}
+class ElementsDao(id: EntityID<String>) : Entity<String>(id) {
+    val kanji by ElementsTable.id
+    val strokes by ElementsTable.strokes
+    val grade by ElementsTable.grade
+    val idc by ElementsTable.idc
+    val elements by ElementsTable.elements
+    val extraElements by ElementsTable.extraElements
+    val kanjiParts by ElementsTable.kanjiParts
+    val partOf by ElementsTable.partOf
+    val compactMeaning by ElementsTable.compactMeaning
 
-class SampleWordDao(id: EntityID<Int>) : SampleDao(id, SampleWordTable, KanjiDao) {
-    companion object : IntEntityClass<SampleWordDao>(SampleWordTable)
-}
-
-class SamplePhraseDao(id: EntityID<Int>) : SampleDao(id, SamplePhraseTable, SampleWordDao) {
-    companion object : IntEntityClass<SamplePhraseDao>(SamplePhraseTable)
-}
-
-open class AssociationDao(id: EntityID<Int>) : IntEntity(id) {
-    val kanji by KanjiDao referencedOn AssociationTable.kanjiId
-    val type by AssociationTable.associationType
-    val dictionary by DictionaryDao referencedOn AssociationTable.dictionaryId
-    val association by AssociationTable.association
+    companion object : EntityClass<String, ElementsDao>(ElementsTable)
 }
