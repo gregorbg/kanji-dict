@@ -1,46 +1,116 @@
 package com.suushiemaniac.lang.japanese.kanji.anki
 
-import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
+import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
+import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
+import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.util.singleOrAll
+import com.suushiemaniac.lang.japanese.kanji.util.toHiragana
+import com.suushiemaniac.lang.japanese.kanji.util.toKatakana
+import kotlinx.serialization.internal.StringSerializer
+import kotlinx.serialization.list
+import kotlinx.serialization.map
 
-data class KanjiNote(val kanji: KanjiDictEntry) : AnkiDeckNote {
+data class KanjiNote(
+    val kanjiSymbol: Char,
+    val kunReadingsWithSamples: Map<KunYomi, List<String>>,
+    val onReadingsWithSamples: Map<OnYomi, List<String>>,
+    val radicalDescription: String,
+    val idcGraphNum: Int,
+    val elementsWithName: Map<Char, String>,
+    val coreMeaning: String,
+    val sampleTranslations: Map<String, String>,
+    val sampleReadings: Map<String, ReadingWithSurfaceForm>,
+    val lesson: Int,
+    val id: Int,
+    val kanken: String?,
+    val jlpt: Int?
+) : AnkiDeckNote {
     override fun getCSVFacts(): List<String> {
-        val kanjiSym = this.kanji.kanji
+        val ankiHackReadings = sampleReadings.mapValues { it.value.asFurigana(RubyFuriganaFormatter) }
+            .mapValues {
+                it.value.replace(
+                    RubyFuriganaFormatter.format(KanjiReading(kanjiSymbol, it.key)),
+                    " $kanjiSymbol "
+                ).trim()
+            }
 
-        // TODO
-        val kunReadings = emptyMap<String, List<String>>()
-        val onReadings = emptyMap<String, List<String>>()
-
-        val radicalText = this.kanji.radicalVariant?.let {
-            "${radicalDesc(it)} (variant of ${this.kanji.radical.radical})"
-        } ?: radicalDesc(this.kanji.radical)
-
-        val idcGraph = idcImageNum(kanji.idc)
-        val idcTag = "<img src=\"idc_$idcGraph.png\"/>"
-
-        val kanjiParts = emptyList<Elements>().single()
-        val partsData = kanjiParts.kanjiParts.associateWith { it }
-        val partsListing = partsData.entries.joinToString("\r\n") { "${it.key} ${it.value.singleOrAll()}" }
-
-        val sampleWords = emptyList<VocabularyItem>()
-        val annotatedTranslations = sampleWords.associateBy({ it.fullText }, { it.translations.singleOrAll() })
-
-        return emptyList()
+        return listOf(
+            kanjiSymbol.toString(),
+            JSON.stringify(
+                (StringSerializer to StringSerializer.list).map,
+                kunReadingsWithSamples.mapKeys { it.key.coreReading.toHiragana() }),
+            JSON.stringify(
+                (StringSerializer to StringSerializer.list).map,
+                onReadingsWithSamples.mapKeys { it.key.kanaReading.toKatakana() }),
+            radicalDescription,
+            "<img src=\"idcGraph-$idcGraphNum.png\">",
+            elementsWithName.entries.joinToString("\r\n") { "${it.key} ${it.value}" },
+            coreMeaning,
+            JSON.stringify((StringSerializer to StringSerializer).map, sampleTranslations),
+            JSON.stringify((StringSerializer to StringSerializer).map, ankiHackReadings)
+        )
     }
 
     override fun getTags(): List<String> {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        return listOfNotNull("L$lesson", "id-$id", jlpt?.let { "JLPT-N$it" }, kanken?.let { "Kanken:$it" })
     }
 
-    private fun radicalDesc(r: Radical): String {
-        val listedNames = r.names.singleOrAll()
-        return "${r.radical} - $listedNames"
-    }
+    companion object {
+        // https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt
+        val IDC_GRAPH_MAPPING =
+            listOf("⿰", "⿱", "⿲", "⿳", "⿴", "⿵", "⿶", "⿷", "⿸", "⿹", "⿺", "囗", "品", "品u", "品l", "品r", "⿱1", "⿰4", "⿰5", "⿰1", "⿰2", "⿰3")
 
-    private fun idcImageNum(idc: String): Int {
-        return 0 // FIXME
+        fun from(kanji: KanjiDictEntry, lesson: Int, id: Int): KanjiNote {
+            val radicalDescription =
+                kanji.radicalVariant?.let { radicalDesc(it) + "(Variante von " + radicalDesc(kanji.radical) + ")" }
+                    ?: radicalDesc(kanji.radical)
+
+            val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
+
+            val elements = Elements()
+            val elementsWithName = mapOf<Char, String>()
+
+            val suitableMeanings = kanji.compactMeaning.takeUnless { it.isEmpty() }?.joinToString()
+                ?: elements.compactMeaning
+
+            val translatedSamples = mapOf<String, String>() // FIXME
+            val readingsForSamples = mapOf<String, ReadingWithSurfaceForm>() // FIXME
+
+            return KanjiNote(
+                kanji.kanji,
+                kanji.kunYomi.associateWith { emptyList() }, // FIXME
+                kanji.onYomi.associateWith { emptyList() }, // FIXME
+                radicalDescription,
+                idcIndex,
+                elementsWithName,
+                suitableMeanings,
+                translatedSamples,
+                readingsForSamples,
+                lesson,
+                id,
+                kanji.kanken?.toKankenDescription(),
+                kanji.jlpt
+            )
+        }
+
+        private fun radicalDesc(r: Radical): String {
+            val listedNames = r.names.singleOrAll()
+            return "${r.radical} - $listedNames"
+        }
+
+        private fun Int.toKankenDescription(): String {
+            val prefix = "Pre-".takeIf { this % 2 == 0 }.orEmpty()
+
+            return when {
+                this <= 4 -> prefix + this.minus(this.div(2)).toString()
+                else -> this.minus(2).toString()
+            }
+        }
     }
 }

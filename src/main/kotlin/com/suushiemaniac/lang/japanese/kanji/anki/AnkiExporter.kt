@@ -4,6 +4,8 @@ import com.suushiemaniac.lang.japanese.kanji.parser.*
 import com.suushiemaniac.lang.japanese.kanji.persistence.ElementsDao
 import com.suushiemaniac.lang.japanese.kanji.persistence.KanjiDictDao
 import com.suushiemaniac.lang.japanese.kanji.persistence.toModel
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonConfiguration
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -12,6 +14,8 @@ import java.lang.Exception
 import java.sql.Connection
 
 object AnkiExporter {
+    val JSON = Json(JsonConfiguration.Stable)
+
     fun makeCSVs(bookNumber: Int, idOffset: Int = 0) {
         val folder = File("/home/suushie_maniac/jvdocs/kanji-dict")
 
