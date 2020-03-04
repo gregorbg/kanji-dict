@@ -1,7 +1,15 @@
 package com.suushiemaniac.lang.japanese.kanji.anki
 
 import com.suushiemaniac.lang.japanese.kanji.parser.*
+import com.suushiemaniac.lang.japanese.kanji.persistence.ElementsDao
+import com.suushiemaniac.lang.japanese.kanji.persistence.KanjiDictDao
+import com.suushiemaniac.lang.japanese.kanji.persistence.toModel
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.File
+import java.lang.Exception
+import java.sql.Connection
 
 object AnkiExporter {
     fun makeCSVs(bookNumber: Int, idOffset: Int = 0) {
@@ -32,7 +40,7 @@ object AnkiExporter {
                 kunYomiParser.getValue(it).joinToString("<br/>"),
                 "TBD",
                 "TBD",
-                "L${lessonsParser.getValue(it)+1} id-${indexParser.getValue(it)+1+idOffset}"
+                "L${lessonsParser.getValue(it) + 1} id-${indexParser.getValue(it) + 1 + idOffset}"
             )
         }
 
@@ -48,7 +56,7 @@ object AnkiExporter {
                     it.reading,
                     it.translations.joinToString(),
                     it.sampleSentence.orEmpty(),
-                    "$k L${lessonsParser.getValue(k)+1}"
+                    "$k L${lessonsParser.getValue(k) + 1}"
                 )
             }
         }
@@ -61,6 +69,10 @@ object AnkiExporter {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        makeCSVs(3)
+        Database.connect("jdbc:sqlite:/home/suushie_maniac/sqldocs/kanjium/data/kanjidb.sqlite", "org.sqlite.JDBC")
+        TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+
+        val allKanjis = transaction { KanjiDictDao.all().map { it.toModel() } }
+        println(allKanjis.size)
     }
 }
