@@ -7,6 +7,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.*
 import com.suushiemaniac.lang.japanese.kanji.parser.KunYomiAnnotationMode
 import com.suushiemaniac.lang.japanese.kanji.util.japaneseSymbolsToASCII
 import com.suushiemaniac.lang.japanese.kanji.util.splitAndTrim
+import com.suushiemaniac.lang.japanese.kanji.util.toStringifiedChars
 
 fun KanjiDictDao.toModel(): KanjiDictEntry {
     val fullOn = this.onyomi?.splitAndTrim(KANJI_DICT_ONYOMI_SEP).orEmpty().parseOn()
@@ -79,11 +80,10 @@ const val KANJI_DICT_MEANING_SEP = ";"
 
 fun ElementsDao.toModel(): Elements {
     val partOfData = this.partOf?.splitAndTrim(ELEMENTS_PART_OF_SEP)
-        ?.map { KanjiDictDao[it] }
-        ?.map { it.toModel() }.orEmpty()
+        ?.flatMap { it.toList() }.orEmpty()
 
     return Elements(
-        this.kanji.toModel(),
+        this.kanji.id.value.first(),
         this.idc,
         this.elements.split(EMPTY_SEP),
         this.extraElements?.split(EMPTY_SEP).orEmpty(),
