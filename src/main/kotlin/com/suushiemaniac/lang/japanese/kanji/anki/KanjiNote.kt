@@ -12,9 +12,9 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceFor
 import com.suushiemaniac.lang.japanese.kanji.util.singleOrAll
 import com.suushiemaniac.lang.japanese.kanji.util.toHiragana
 import com.suushiemaniac.lang.japanese.kanji.util.toKatakana
-import kotlinx.serialization.internal.StringSerializer
-import kotlinx.serialization.list
-import kotlinx.serialization.map
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 
 data class KanjiNote(
     val kanjiSymbol: Char,
@@ -43,17 +43,17 @@ data class KanjiNote(
         return listOf(
             kanjiSymbol.toString(),
             JSON.stringify(
-                (StringSerializer to StringSerializer.list).map,
+                MapSerializer(String.serializer(), ListSerializer(String.serializer())),
                 kunReadingsWithSamples.mapKeys { it.key.coreReading.toHiragana() }),
             JSON.stringify(
-                (StringSerializer to StringSerializer.list).map,
+                MapSerializer(String.serializer(), ListSerializer(String.serializer())),
                 onReadingsWithSamples.mapKeys { it.key.kanaReading.toKatakana() }),
             radicalDescription,
             "<img src=\"idcGraph-$idcGraphNum.png\">",
             elementsWithName.entries.joinToString("\r\n") { "${it.key} ${it.value}" },
             coreMeaning,
-            JSON.stringify((StringSerializer to StringSerializer).map, sampleTranslations),
-            JSON.stringify((StringSerializer to StringSerializer).map, ankiHackReadings)
+            JSON.stringify(MapSerializer(String.serializer(), String.serializer()), sampleTranslations),
+            JSON.stringify(MapSerializer(String.serializer(), String.serializer()), ankiHackReadings)
         )
     }
 
@@ -66,14 +66,13 @@ data class KanjiNote(
         val IDC_GRAPH_MAPPING =
             listOf("⿰", "⿱", "⿲", "⿳", "⿴", "⿵", "⿶", "⿷", "⿸", "⿹", "⿺", "囗", "品", "品u", "品l", "品r", "⿱1", "⿰4", "⿰5", "⿰1", "⿰2", "⿰3")
 
-        fun from(kanji: KanjiDictEntry, lesson: Int, id: Int): KanjiNote {
+        fun from(kanji: KanjiDictEntry, elements: Elements, lesson: Int, id: Int): KanjiNote {
             val radicalDescription =
                 kanji.radicalVariant?.let { radicalDesc(it) + "(Variante von " + radicalDesc(kanji.radical) + ")" }
                     ?: radicalDesc(kanji.radical)
 
             val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
 
-            val elements = Elements()
             val elementsWithName = mapOf<Char, String>()
 
             val suitableMeanings = kanji.compactMeaning.takeUnless { it.isEmpty() }?.joinToString()
@@ -84,8 +83,8 @@ data class KanjiNote(
 
             return KanjiNote(
                 kanji.kanji,
-                kanji.kunYomi.associateWith { emptyList() }, // FIXME
-                kanji.onYomi.associateWith { emptyList() }, // FIXME
+                kanji.kunYomi.associateWith { emptyList<String>() }, // FIXME
+                kanji.onYomi.associateWith { emptyList<String>() }, // FIXME
                 radicalDescription,
                 idcIndex,
                 elementsWithName,

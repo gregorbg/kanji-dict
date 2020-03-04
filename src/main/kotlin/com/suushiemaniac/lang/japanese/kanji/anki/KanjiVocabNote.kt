@@ -5,9 +5,9 @@ import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhrase
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
-import kotlinx.serialization.internal.StringSerializer
-import kotlinx.serialization.list
-import kotlinx.serialization.map
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 
 data class KanjiVocabNote(
     val vocabItem: ReadingWithSurfaceForm,
@@ -21,18 +21,18 @@ data class KanjiVocabNote(
             vocabItem.surfaceForm,
             vocabItem.asFurigana(RubyFuriganaFormatter),
             mainTranslation,
-            JSON.stringify(StringSerializer.list, additionalTranslations),
-            JSON.stringify(StringSerializer.list.list, ankiPhrases.map(KanjiVocabPhrase::getLiterals)),
+            JSON.stringify(ListSerializer(String.serializer()), additionalTranslations),
+            JSON.stringify(ListSerializer(ListSerializer(String.serializer())), ankiPhrases.map(KanjiVocabPhrase::getLiterals)),
             JSON.stringify(
-                (StringSerializer to StringSerializer).map.list,
+                ListSerializer(MapSerializer(String.serializer(), String.serializer())),
                 ankiPhrases.map(KanjiVocabPhrase::getReadings)
             ),
             JSON.stringify(
-                (StringSerializer to (StringSerializer to StringSerializer).map).map.list,
+                ListSerializer(MapSerializer(String.serializer(), MapSerializer(String.serializer(), String.serializer()))),
                 ankiPhrases.map(KanjiVocabPhrase::getTokenData)
             ),
             JSON.stringify(
-                (StringSerializer to StringSerializer).map.list,
+                ListSerializer(MapSerializer(String.serializer(), String.serializer())),
                 ankiPhrases.map(KanjiVocabPhrase::getAnnotations)
             )
         )

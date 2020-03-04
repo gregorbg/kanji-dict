@@ -4,6 +4,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
+import com.suushiemaniac.lang.japanese.kanji.util.alignReadingsWith
 import com.suushiemaniac.lang.japanese.kanji.util.containsOnlyHiragana
 import com.suushiemaniac.lang.japanese.kanji.util.containsOnlyKatakana
 
@@ -44,6 +45,7 @@ class VocabularyParser(rawContent: String) : NewlineGroupParser<List<VocabularyI
             val parts = it.split("\t")
             val (fullText, reading, transRaw) = parts.take(3)
 
+            val alignedReading = fullText.alignReadingsWith(reading)
             val translations = transRaw.split(",").map(String::trim)
 
             VocabularyItem(alignedReading, translations)
