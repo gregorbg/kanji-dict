@@ -1,5 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.parser
 
+import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
@@ -44,9 +45,19 @@ class VocabularyParser(rawContent: String) : NewlineGroupParser<List<VocabularyI
             val (fullText, reading, transRaw) = parts.take(3)
 
             val translations = transRaw.split(",").map(String::trim)
+
+            VocabularyItem(alignedReading, translations)
+        }
+    }
+}
+
+class SampleSentenceParser(rawContent: String) : NewlineGroupParser<List<SampleSentence>>(rawContent) {
+    override fun getValues(assocLines: List<String>): List<SampleSentence> {
+        return assocLines.mapNotNull {
+            val parts = it.split("\t")
             val optSample = parts.getOrNull(4)
 
-            VocabularyItem(fullText, reading, translations, optSample)
+            optSample?.let(::SampleSentence)
         }
     }
 }

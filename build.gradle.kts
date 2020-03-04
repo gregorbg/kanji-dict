@@ -26,7 +26,7 @@ dependencies {
     implementation("org.jetbrains.exposed:exposed-jdbc:0.21.1")
     implementation("com.mariten:kanatools:1.3.0")
     implementation("com.atilika.kuromoji:kuromoji-ipadic:0.9.0")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.14.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.20.0")
 
     runtimeOnly("com.h2database:h2:1.4.200")
     runtimeOnly("org.xerial:sqlite-jdbc:3.30.1")
