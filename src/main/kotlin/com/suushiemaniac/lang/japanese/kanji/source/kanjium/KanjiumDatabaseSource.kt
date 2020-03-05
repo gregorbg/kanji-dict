@@ -11,7 +11,7 @@ import java.sql.Connection
 
 class KanjiumDatabaseSource(dbPath: String) : KanjiSource {
     init {
-        Database.connect(dbPath, DRIVER)
+        Database.connect("jdbc:sqlite:$dbPath", DRIVER)
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 

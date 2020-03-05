@@ -3,6 +3,7 @@ package com.suushiemaniac.lang.japanese.kanji.anki.model
 import com.atilika.kuromoji.ipadic.Token
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.util.TOKEN_KEYS
 import com.suushiemaniac.lang.japanese.kanji.util.alignReadingsWith
@@ -17,11 +18,11 @@ data class KanjiVocabPhraseToken(
     companion object {
         val LOOKUP_TOKEN_TYPES = setOf("名詞", "動詞", "形容詞")
 
-        fun from(japToken: Token, translationSource: VocabularySource): KanjiVocabPhraseToken {
+        fun from(japToken: Token, translationSource: VocabularySource, kanjiSource: KanjiSource): KanjiVocabPhraseToken {
             val tokenReading = japToken.reading.takeIf { japToken.surface.containsOnlyKatakana() }
                 ?: japToken.reading.toHiragana()
 
-            val matchedReading = japToken.surface.alignReadingsWith(tokenReading)
+            val matchedReading = japToken.surface.alignReadingsWith(tokenReading, kanjiSource)
             val readingHack = VocabularyItem(matchedReading, emptyList())
 
             val tokenData = TOKEN_KEYS.zip(japToken.allFeaturesArray).toMap()

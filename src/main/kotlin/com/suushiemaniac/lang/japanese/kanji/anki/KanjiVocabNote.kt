@@ -7,6 +7,7 @@ import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
 import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -45,9 +46,9 @@ data class KanjiVocabNote(
         listOf(originalKanji.toString())
 
     companion object {
-        fun from(item: VocabularyItem, samplePhrases: List<SampleSentence>, originalKanji: Char, translationSource: VocabularySource): KanjiVocabNote {
+        fun from(item: VocabularyItem, samplePhrases: List<SampleSentence>, originalKanji: Char, translationSource: VocabularySource, kanjiSource: KanjiSource): KanjiVocabNote {
             val ankiPhrases = samplePhrases.map { it.parseTokens() }
-                .map { it.map { japToken -> KanjiVocabPhraseToken.from(japToken, translationSource) } }
+                .map { it.map { japToken -> KanjiVocabPhraseToken.from(japToken, translationSource, kanjiSource) } }
                 .map { KanjiVocabPhrase(it) }
 
             return KanjiVocabNote(

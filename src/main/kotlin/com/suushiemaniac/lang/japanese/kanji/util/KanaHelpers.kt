@@ -1,9 +1,15 @@
 package com.suushiemaniac.lang.japanese.kanji.util
 
+import com.mariten.kanatools.KanaAppraiser
 import com.mariten.kanatools.KanaConverter
 
-fun String.containsOnlyKatakana() = this == this.toKatakana()
-fun String.containsOnlyHiragana() = this == this.toHiragana()
+fun String.containsOnlyKatakana() = this.all(KanaAppraiser::isZenkakuKatakana)
+fun String.containsOnlyHiragana() = this.all(KanaAppraiser::isZenkakuHiragana)
+fun String.containsOnlyAscii() = this.all(KanaAppraiser::isZenkakuAscii)
+fun String.containsOnlyKutoten() = this.all(KanaAppraiser::isZenkakuKutoten)
+fun String.containsOnlyAlphanum() = this.containsOnlyAscii() || this.containsOnlyKutoten()
+
+fun String.isProbablyKanji() = !this.containsOnlyHiragana() && !this.containsOnlyKatakana() && !this.containsOnlyAlphanum()
 
 fun String.toKatakana() = KanaConverter.convertKana(this, KanaConverter.OP_ZEN_HIRA_TO_ZEN_KATA)
 fun String.toHiragana() = KanaConverter.convertKana(this, KanaConverter.OP_ZEN_KATA_TO_ZEN_HIRA)
@@ -35,5 +41,6 @@ fun String.possibleAlternateKatakanaReadings(): List<String> {
     val suffixCandidates = prefixes + this
     val suffixed = suffixCandidates.map { it.dropLast(1).toKatakana() + GLOTTAL_STOP_ZEN_KATAKANA }
 
-    return prefixes + suffixed
+    val computed = prefixes + suffixed + this.toKatakana()
+    return computed.distinct().filter { it != GLOTTAL_STOP_ZEN_KATAKANA.toString() }
 }

@@ -4,6 +4,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
+import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.util.alignReadingsWith
 import com.suushiemaniac.lang.japanese.kanji.util.containsOnlyHiragana
 import com.suushiemaniac.lang.japanese.kanji.util.containsOnlyKatakana
@@ -39,13 +40,13 @@ class KunYomiParser(
             .map(annotationMode::parse)
 }
 
-class VocabularyParser(rawContent: String) : NewlineGroupParser<List<VocabularyItem>>(rawContent) {
+class VocabularyParser(rawContent: String, val kanjiSource: KanjiSource) : NewlineGroupParser<List<VocabularyItem>>(rawContent) {
     override fun getValues(assocLines: List<String>): List<VocabularyItem> {
         return assocLines.map {
             val parts = it.split("\t")
             val (fullText, reading, transRaw) = parts.take(3)
 
-            val alignedReading = fullText.alignReadingsWith(reading)
+            val alignedReading = fullText.alignReadingsWith(reading, kanjiSource)
             val translations = transRaw.split(",").map(String::trim)
 
             VocabularyItem(alignedReading, translations)

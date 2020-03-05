@@ -2,7 +2,14 @@ package com.suushiemaniac.lang.japanese.kanji.util
 
 import com.atilika.kuromoji.ipadic.Token
 import com.atilika.kuromoji.ipadic.Tokenizer
+import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
+import com.suushiemaniac.lang.japanese.kanji.model.Kanji
+import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.model.reading.KanaReading
+import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
+import com.suushiemaniac.lang.japanese.kanji.source.kanjium.KanjiumDatabaseSource
 
 const val SKIP_TOKEN = "_"
 val TOKEN_KEYS = listOf("POS-1", "POS-2", "POS-3", "POS-4", "CONJ-TYPE", "CONJ-FORM", "BASE-FORM", "READ", "PRON")
@@ -11,8 +18,76 @@ private val tokenizer = Tokenizer()
 
 fun String.tokenizeJapanese(): List<Token> = tokenizer.tokenize(this)
 
-fun String.alignReadingsWith(readingsRaw: String): List<ReadingWithSurfaceForm> {
-    return emptyList() // FIXME
+fun String.alignReadingsWith(readingsRaw: String, kanjiSource: KanjiSource): List<ReadingWithSurfaceForm> {
+    val pluckedKanji = this.pluckKanji()
+
+    return transformReadings(pluckedKanji, readingsRaw, kanjiSource)
+}
+
+private tailrec fun String.pluckKanji(accu: List<String> = emptyList()): List<String> {
+    if (this.isEmpty()) {
+        return accu
+    }
+
+    val candidate = this.first().toString()
+
+    if (candidate.isProbablyKanji()) {
+        return this.drop(1).pluckKanji(accu + candidate)
+    }
+
+    val nonKanji = this.takeWhile { !it.toString().isProbablyKanji() }
+    return this.substring(nonKanji.length).pluckKanji(accu + nonKanji)
+}
+
+private tailrec fun transformReadings(
+    segments: List<String>,
+    rawTemplate: String,
+    kanjiSource: KanjiSource,
+    accu: List<ReadingWithSurfaceForm> = emptyList()
+): List<ReadingWithSurfaceForm> {
+    if (segments.isEmpty()) {
+        return accu.takeUnless { rawTemplate.isNotEmpty() }.orEmpty()
+    }
+
+    val next = segments.first()
+    val nextIsKanji = next.isProbablyKanji() && next.length == 1
+
+    val testReadings = if (nextIsKanji) {
+        kanjiSource.get(next.first()).allReadings()
+            .flatMap { it.possibleAlternateKatakanaReadings() }
+            .distinct()
+    } else listOf(next)
+
+    val perfectReading =
+        testReadings.find { rawTemplate.startsWith(it.toKatakana()) || rawTemplate.startsWith(it.toHiragana()) || rawTemplate.startsWith(it) }
+            ?: return emptyList() // FIXME try ALL instead of only first? (-> greedy not good)
+
+    val readingFromTemplate = rawTemplate.take(perfectReading.length)
+
+    val readingModel = if (nextIsKanji) {
+        KanjiReading(next.first(), readingFromTemplate)
+    } else KanaReading(readingFromTemplate)
+
+    return transformReadings(
+        segments.drop(1),
+        rawTemplate.drop(readingModel.reading.length),
+        kanjiSource,
+        accu + readingModel
+    )
+}
+
+private fun Kanji.allReadings(): List<String> {
+    return this.kunYomi.map { it.coreReading } + this.onYomi.map { it.kanaReading }
+}
+
+fun main() {
+    val kanjiSource = KanjiumDatabaseSource("/home/suushie_maniac/sqldocs/kanjium/data/kanjidb.sqlite")
+
+    val fullText = "思"
+    val readingRaw = "おもえら"
+
+    val result = fullText.alignReadingsWith(readingRaw, kanjiSource)
+    println(VocabularyItem(result, emptyList()).asFurigana(RubyFuriganaFormatter))
 }
 
 // https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt
