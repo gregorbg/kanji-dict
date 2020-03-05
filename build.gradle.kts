@@ -1,10 +1,13 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.unbrokendome.gradle.plugins.xjc.XjcExtension
+import org.unbrokendome.gradle.plugins.xjc.XjcGenerate
 
 plugins {
     kotlin("jvm") version "1.3.71"
     kotlin("plugin.serialization") version "1.3.71"
 
     id("com.github.ben-manes.versions") version "0.27.0"
+    id("org.unbroken-dome.xjc") version "1.4.3"
 }
 
 group = "com.suushiemaniac"
@@ -33,10 +36,31 @@ dependencies {
     implementation("it.skrape:skrapeit-core:1.0.0-alpha6")
     implementation("org.jsoup:jsoup:1.12.2")
 
+    implementation("javax.xml.bind:jaxb-api:2.3.1")
+    add("xjcClasspath", "org.jvnet.jaxb2_commons:jaxb2-basics-annotate:1.1.0")
+    implementation("com.sun.xml.bind:jaxb-core:2.3.0")
+    implementation("com.sun.xml.bind:jaxb-impl:2.3.1")
+
     runtimeOnly("com.h2database:h2:1.4.200")
     runtimeOnly("org.xerial:sqlite-jdbc:3.30.1")
 }
 
+sourceSets {
+    main {
+        java {
+            val task = tasks.getByName("xjcGenerate")
+            srcDir(task.outputs)
+        }
+    }
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+
+    //dependsOn("xjcGenerate")
+}
+
+tasks.withType<XjcGenerate> {
+    extension = true
+    extraArgs = listOf("-Xannotate")
 }

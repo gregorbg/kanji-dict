@@ -1,0 +1,1567 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema jaxb:version="2.1" elementFormDefault="qualified"
+           targetNamespace="http://www.wadoku.de/xml/entry"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:jaxb="http://java.sun.com/xml/ns/jaxb"
+           xmlns:xjc="http://java.sun.com/xml/ns/jaxb/xjc"
+           xmlns:wd="http://www.wadoku.de/xml/entry"
+           xmlns:annox="http://annox.dev.java.net"
+           jaxb:extensionBindingPrefixes="xjc annox"
+           xmlns:xsl="http://www.w3.org/2001/XMLSchema">
+
+    <xs:annotation>
+        <xs:appinfo>
+            <jaxb:globalBindings generateIsSetMethod="true">
+                <jaxb:serializable uid="4815162342" />
+                <!--<xjc:superClass name="de.wadoku.entry.EntryBase" /> -->
+                <!--<xjc:simple /><!- - gibt es erst in JAXB 2.1 http://weblogs.java.net/blog/kohsuke/archive/2006/03/why_does_jaxb_p.html -->
+            </jaxb:globalBindings>
+        </xs:appinfo>
+    </xs:annotation>
+
+    <xs:element name="entry" >
+        <xs:annotation>
+            <xs:appinfo>
+                <jaxb:class name="JaxbEntry" />
+                <!-- <jaxb:class name="JaxbEntry" implClass="de.wadoku.entry.Entry" /> -->
+                <!-- <jaxb:class ref="de.wadoku.entry.Entry" /> -->
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="wd:form" maxOccurs="1" minOccurs="1"/>
+                <xs:element ref="wd:etym" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:gramGrp" minOccurs="0"/>
+                <xs:element ref="wd:usg" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:sense" minOccurs="1" maxOccurs="unbounded" />
+                <xs:element ref="wd:expl" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:count" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:ref" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:sref" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:link" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:steinhaus" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:wikide" maxOccurs="1" minOccurs="0"/>
+                <xs:element ref="wd:wikija" maxOccurs="1" minOccurs="0"/>
+                <xs:element ref="wd:ruigos" minOccurs="0" maxOccurs="1"/>
+            </xs:sequence>
+            <xs:attribute name="id" type="xs:long" default="0"/>
+            <!-- // TODO Bei XML-Änderung Version ändern -->
+            <xs:attribute name="version" type="wd:versionEnum" default="1.6">
+                <xs:annotation>
+                    <xs:documentation xml:lang="de">
+                        <h2>Versionierungsformat x.y.z</h2>
+                        <ul>
+                            <li>Majorversion x bei grundlegenden strukturellen Änderungen.</li>
+                            <li>Minorversion y bei inkompatiblen Änderungen.</li>
+                            <li>(optional) Patchversion z bei einfachen Ergänzungen.</li>
+                        </ul>
+                        <h2>Änderungen</h2>
+                        <h3>x.y (planned)</h3>
+                        <ul>
+                            <li>gramGrp-basierte POS-Angaben in DescrType</li>
+                            <li>Flexionsangaben für Hilfsverben</li>
+                            <li>SeasonPart 'ear' (Ähre, 穂), 'Kolbenwatte' (Kolbenwatte, 穂綿), vgl. 蒲 (ガマ)</li>
+                            <li>Entfernen einiger obsoleter Elemente aus bracketType</li>
+                        </ul>
+                        <h3>1.6.2</h3>
+                        <ul>
+                            <li>Setsuzokujoshi</li>
+                        </ul>
+                        <h3>1.6.1</h3>
+                        <ul>
+                            <li>neu: foreign im defType</li>
+                        </ul>
+                        <h3>1.6.0</h3>
+                        <ul>
+                            <li>Entfernung ungenutzter Elemente in bracketType</li>
+                            <li>Entfernung des Attributs wasInBracket</li>
+                            <li>Entfernung des Attributs dicLevel</li>
+                            <li>Entfernung ungenutzter Elemente in trComplexType</li>
+                        </ul>
+                        <h3>1.5.6</h3>
+                        <ul>
+                            <li>abbrevType für Etym</li>
+                            <li>langEnum-Erweiterung</li>
+                        </ul>
+                        <h3>1.5.5</h3>
+                        <ul>
+                            <li>neuer saseru subEntryTypeEnum-Typ</li>
+                        </ul>
+                        <h3>1.5.4</h3>
+                        <ul>
+                            <li>Kakujoshi</li>
+                        </ul>
+                        <h3>1.5.3</h3>
+                        <ul>
+                            <li>katsuyouType, primär für Jodoushi</li>
+                        </ul>
+                        <h3>1.5.2</h3>
+                        <ul>
+                            <li>neuer sg NumerusEnum-Typ</li>
+                        </ul>
+                        <h3>1.5.1</h3>
+                        <ul>
+                            <li>neuer mnf GenusEnum-Typ</li>
+                        </ul>
+                        <h3>1.5</h3>
+                        <ul>
+                            <li>Bereinigung von BracketType</li>
+                            <li>orthIrrEnum -> orthTypeEnum</li>
+                            <li>orth/@irr -> orth/@type</li>
+                            <li>orthTypeEnum: delete 'kanji', add 'mistake', 'true' -> 'irreg'</li>
+                        </ul>
+                        <h3>1.4.1</h3>
+                        <ul>
+                            <li>shiku-Attribut für Keiyoushi</li>
+                            <li>SeasonPart 'bud'</li>
+                        </ul>
+                        <h3>1.4</h3>
+                        <ul>
+                            <li>erweiterte Season-Angaben -> seasonword, @season veraltet</li>
+                            <li>aufgedröseltes Sense-Element</li>
+                            <li>Scientif im Def-Element</li>
+                            <li>Senseid-Attribut im Sense-Element sowie im Ref-Element</li>
+                            <li>Entfernen des verworfenen OrthType contents</li>
+                            <li>Hinzufügen der Ruigos/Ruigo-Elemente</li>
+                        </ul>
+                        <h3>1.3</h3>
+                        <ul>
+                            <li>strukturierte POS-Angaben</li>
+                            <li>pron veraltet, ersetzt durch prons</li>
+                            <li>globales expl element</li>
+                        </ul>
+                        <h3>1.2</h3>
+                        <ul>
+                            <li>Unterstützung für Subsenses und descr-Element.</li>
+                            <li>Attribut wasInBracket für trans[@langdesc='scientific'], ob es in Klammern stand.</li>
+                            <li>Entry-Attribut HE = Haupteintrag</li>
+                            <li>Pron-Attribute altaccent = alternative Akzent-Angabe</li>
+                            <li>tr-Attribute jlpt/genki = Verweis auf Vokabellisten JLPT/Genki</li>
+                            <li>veraltete Text-Elemente in Orth und Pron</li>
+                        </ul>
+                        <h3>1.1</h3>
+                        <ul>
+                            <li>erste Releaseversion.</li>
+                        </ul>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="HE" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>
+                        wenn <code>true</code>, dann Haupteintrag
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="versionEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="1.1"/>
+            <xs:enumeration value="1.2"/>
+            <xs:enumeration value="1.3"/>
+            <xs:enumeration value="1.4"/>
+            <xs:enumeration value="1.5"/>
+            <xs:enumeration value="1.6"/>
+         </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="seasonEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="summer"/>
+            <xs:enumeration value="autumn"/>
+            <xs:enumeration value="spring"/>
+            <xs:enumeration value="winter"/>
+            <xs:enumeration value="newyear"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="seasonPart">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="bud"/>
+            <xs:enumeration value="flower"/>
+            <xs:enumeration value="fruit"/>
+            <xs:enumeration value="leaf"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="usgEnumBasic">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="obsol."/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- POS -->
+    <xs:element name="katsuyou" type="wd:katsuyouType"/>
+    <xs:element name="meishi">
+        <xs:annotation>
+            <xs:documentation>Nomen/名刺</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="suru" type="wd:transitivityEnum"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="doushi">
+        <xs:annotation>
+            <xs:documentation>Verb/動詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="level" type="wd:levelEnum"/>
+            <xs:attribute name="transitivity" type="wd:transitivityEnum"/>
+            <xs:attribute name="godanrow">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="wa"/>
+                        <xs:enumeration value="wa_o">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    アワ行五
+                                    連用形-ウ音便
+                                    5‑st. trans. V. auf &lt;Transcr.: ‑[w]a&gt; mit u‑Onbin = &lt;Transcr.: ‑ō/ūte&gt;
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="ba"/>
+                        <xs:enumeration value="ga"/>
+                        <xs:enumeration value="ka">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    連用形-イ音便
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="ka_i_yu">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    連用形-促音便
+                                    5‑st. intrans. V. auf &lt;Transcr.: ‑ka&gt; &lt;Jap.: 行く&gt; mit Geminaten-Onbin = &lt;Transcr.: ‑tte&gt;
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="ra"/>
+                        <xs:enumeration value="ra_i">
+                            <xs:annotation>
+                                <xs:documentation>
+                                    ラ行五（四）段特別活用
+                                    連用形-イ音便
+                                    5‑st. trans. V. auf &lt;Transcr.: ‑ra&gt;, Sonderform mit Renyō·kei &lt;Transcr.: ‑i&gt;
+                                </xs:documentation>
+                            </xs:annotation>
+                        </xs:enumeration>
+                        <xs:enumeration value="na"/>
+                        <xs:enumeration value="ma"/>
+                        <xs:enumeration value="sa"/>
+                        <xs:enumeration value="ta"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
+            <xs:attribute name="onbin" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="keiyoushi">
+        <xs:annotation>
+            <xs:documentation>i-Adjektiv/ku-Adjektiv/形容詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="ku" type="xs:boolean"/>
+            <xs:attribute name="shiku" type="xs:boolean"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="keiyoudoushi">
+        <xs:annotation>
+            <xs:documentation>na-Adjektiv/Nominaladjektiv/形容動詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="no" type="xs:boolean"/>
+            <xs:attribute name="nari" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>Na.-Adj. mit &lt;Transcr.: nari&gt;</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:simpleType name="levelEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="1i">
+                <xs:annotation>
+                    <xs:documentation>Kami-Ichidan</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="1e">
+                <xs:annotation>
+                    <xs:documentation>Shimo-Ichidan</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="2i">
+                <xs:annotation>
+                    <xs:documentation>Kami-Nidan</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="2e">
+                <xs:annotation>
+                    <xs:documentation>Shimo-Nidan</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="4">
+                <xs:annotation>
+                    <xs:documentation>Yondan</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="5">
+                <xs:annotation>
+                    <xs:documentation>Godan</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="suru">
+                <xs:annotation>
+                    <xs:documentation>sa-Hen</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="kuru">
+                <xs:annotation>
+                    <xs:documentation>ka-Hen</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="ra">
+                <xs:annotation>
+                    <xs:documentation>ra-Hen/ラ変/ラ行変格活用</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="transitivityEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="trans">
+                <xs:annotation>
+                    <xs:documentation>他動詞</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="intrans">
+                <xs:annotation>
+                    <xs:documentation>自動詞</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="both">
+                <xs:annotation>
+                    <xs:documentation>他自動詞</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:element name="fukushi">
+        <xs:annotation>
+            <xs:documentation>Adverb</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:attribute name="ni" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>Adv. mit &lt;Transcr.: ni&gt; und Adn. mit &lt;Transcr.: naru&gt;</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="to" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>Adv. mit &lt;Transcr.: to&gt;</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="taru" type="xs:boolean">
+                <xs:annotation>
+                    <xs:documentation>Adv. mit &lt;Transcr.: to&gt; und Adn. mit &lt;Transcr.: taru&gt;</xs:documentation>
+                </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="suru" type="wd:transitivityEnum"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="prefix">
+        <xs:annotation>
+            <xs:documentation>Präfix/接頭語</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="suffix">
+        <xs:annotation>
+            <xs:documentation>Suffix/接尾語</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="rentaishi">
+        <xs:annotation>
+            <xs:documentation>Adnomen/連体詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="setsuzokushi">
+        <xs:annotation>
+            <xs:documentation>Konjunktion/接続詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="daimeishi">
+        <xs:annotation>
+            <xs:documentation>Pronomen/代名詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="kandoushi">
+        <xs:annotation>
+            <xs:documentation>Interjektion/感動詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="jodoushi">
+        <xs:annotation>
+            <xs:documentation>Hilfsverb/助動詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="wd:katsuyou" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="jokeiyoushi"/>
+    <xs:element name="joshi">
+        <xs:annotation>
+            <xs:documentation>Partikel/助詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="fukujoshi">
+        <xs:annotation>
+            <xs:documentation>Adverbialpartikel/副助詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="kakarijoshi">
+        <xs:annotation>
+            <xs:documentation>Themapartikel = keijoshi/係助詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="kakujoshi">
+        <xs:annotation>
+            <xs:documentation>Kasuspartikel/格助詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="setsuzokujoshi">
+        <xs:annotation>
+            <xs:documentation>Konjunktionalpartikel/接続助詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="shuujoshi">
+        <xs:annotation>
+            <xs:documentation>Satzschlusspartikel/終助詞</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="wordcomponent">
+        <xs:annotation>
+            <xs:documentation>Wortkomponente/造</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="specialcharacter">
+        <xs:annotation>
+            <xs:documentation>Sonderzeichen</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="rengo">
+        <xs:annotation>
+            <xs:documentation>Zusammensetzung/連語</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+    <xs:element name="kanji">
+        <xs:annotation>
+            <xs:documentation>Kanji/漢字</xs:documentation>
+        </xs:annotation>
+        <xs:complexType/>
+    </xs:element>
+
+    <!-- Katsuyou -->
+    <xs:element name="mizenkei" type="xs:string"/>
+    <xs:element name="renyokei" type="xs:string"/>
+    <xs:element name="shushikei" type="xs:string"/>
+    <xs:element name="rentaikei" type="xs:string"/>
+    <xs:element name="kateikei" type="xs:string"/>
+    <xs:element name="izenkei" type="xs:string"/>
+    <xs:element name="meireikei" type="xs:string"/>
+
+    <xs:simpleType name="posEnum">
+        <xs:annotation>
+            <xs:documentation>
+                Part-Of-Speech-Arten
+            </xs:documentation>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="N">
+                <xs:annotation><xs:documentation>Nomen</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="V">
+                <xs:annotation><xs:documentation>Verb</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Adj">
+                <xs:annotation><xs:documentation>Adjektiv</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Adn">
+                <xs:annotation><xs:documentation>Adnomen</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Adv">
+                <xs:annotation><xs:documentation>Adverb</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="BspSatz">
+                <xs:annotation><xs:documentation>Beispielsatz</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Hilfsv">
+                <xs:annotation><xs:documentation>Hilfsverb</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Interj">
+                <xs:annotation><xs:documentation>Interjektion</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Kanji">
+                <xs:annotation><xs:documentation>Einzel-Kanji</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Konj">
+                <xs:annotation><xs:documentation>Konjunktion</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Part">
+                <xs:annotation><xs:documentation>Partikel</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Praef">
+                <xs:annotation><xs:documentation>Präfix</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Pron">
+                <xs:annotation><xs:documentation>Pronomen</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Suff">
+                <xs:annotation><xs:documentation>Suffix</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Zus">
+                <xs:annotation><xs:documentation>Zusammensetzung</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Redensart">
+                <xs:annotation><xs:documentation>Redensart</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Wortkomp">
+                <xs:annotation><xs:documentation>Wortkomposition</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Sonderzeichen">
+                <xs:annotation><xs:documentation>Sonderzeichen</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Themenpart">
+                <xs:annotation><xs:documentation>Themenpartikel</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Sonderform">
+                <xs:annotation><xs:documentation>Sonderform</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="Undef">
+                <xs:annotation><xs:documentation>Undefiniert, für noch nicht erfasste POS-Arten</xs:documentation></xs:annotation>
+            </xs:enumeration>
+
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="genusEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="m" />
+            <xs:enumeration value="f" />
+            <xs:enumeration value="n" />
+            <xs:enumeration value="mn" />
+            <xs:enumeration value="mf" />
+            <xs:enumeration value="nf" />
+            <xs:enumeration value="mnf" >
+                <xs:annotation>
+                    <xs:documentation>
+                        z.B. der/die/das Bookmark
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="numerusEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="pl">
+                <xs:annotation>
+                    <xs:documentation>
+                        <ul>
+                            <li>mit Genus, Pluralform</li>
+                            <li>ohne Genus, Pluraletantum</li>
+                        </ul>
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="sg">
+                <xs:annotation>
+                    <xs:documentation>
+                        <ul>
+                            <li>nur gültig, wenn Genus angegeben ist, Singularetantum (複数なし)</li>
+                        </ul>
+                    </xs:documentation>
+                </xs:annotation>
+
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="langEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ARA"/>
+            <xs:enumeration value="CHI"/>
+            <xs:enumeration value="CZE"/>
+            <xs:enumeration value="DAN"/>
+            <xs:enumeration value="DEU"/>
+            <xs:enumeration value="ENG"/>
+            <xs:enumeration value="EPO"/>
+            <xs:enumeration value="FIN"/>
+            <xs:enumeration value="FRA"/>
+            <xs:enumeration value="GRC"/>
+            <xs:enumeration value="ITA"/>
+            <xs:enumeration value="JPN"/>
+            <xs:enumeration value="KOR"/>
+            <xs:enumeration value="LAT"/>
+            <xs:enumeration value="NLD"/>
+            <xs:enumeration value="NOR"/>
+            <xs:enumeration value="PAL"/>
+            <xs:enumeration value="POR"/>
+            <xs:enumeration value="RUS"/>
+            <xs:enumeration value="SAN"/>
+            <xs:enumeration value="SPA"/>
+            <xs:enumeration value="SWE"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+
+    <xs:simpleType name="pronTypeEnum">
+        <xs:annotation>
+            <xs:appinfo>
+                <annox:annotate>@java.lang.Deprecated</annox:annotate>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="hatsuon">
+                <xs:annotation>
+                    <xs:documentation>
+                        Aussprachehinweise
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="furigana">
+                <xs:annotation>
+                    <xs:documentation>
+                        Furigana/Ruby Notation
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="romaji">
+                <xs:annotation>
+                    <xs:documentation>
+                        Aussprachen in modifizierter Hepburn-Umschrift
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="orthTypeEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="irreg">
+                <xs:annotation>
+                    <xs:documentation>irreguläre Schreibung</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="read">
+                <xs:annotation>
+                    <xs:documentation>irreguläre Lesung</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="long">
+                <xs:annotation>
+                    <xs:documentation>enthält Langzeichen aka Kyuji/Itaiji</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="mistake">
+                <xs:annotation>
+                    <xs:documentation>häufige Falschschreibung</xs:documentation>
+                </xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="subEntryTypeEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="head">
+                <xs:annotation><xs:documentation>Komponentenanfang</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="tail">
+                <xs:annotation><xs:documentation>Komponentenende</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="sa">
+                <xs:annotation><xs:documentation>Ableitung, Nominalisierung mit sa</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="suru">
+                <xs:annotation><xs:documentation>Ableitung mit suru</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="saseru">
+                <xs:annotation><xs:documentation>Ableitung mit saseru</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="shita">
+                <xs:annotation><xs:documentation>Ableitung mit shita</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="shite">
+                <xs:annotation><xs:documentation>Ableitung mit shite</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="teki">
+                <xs:annotation><xs:documentation>Ableitung mit teki</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="to">
+                <xs:annotation><xs:documentation>Ableitung mit to</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="taru">
+                <xs:annotation><xs:documentation>Ableitung mit taru</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="na">
+                <xs:annotation><xs:documentation>Ableitung mit na</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="ni">
+                <xs:annotation><xs:documentation>Ableitung mit ni</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="no">
+                <xs:annotation><xs:documentation>Ableitung mit no</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="da">
+                <xs:annotation><xs:documentation>Ableitung mit da</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="de">
+                <xs:annotation><xs:documentation>Ableitung mit de</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="e">
+                <xs:annotation><xs:documentation>Ableitung mit e</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="o">
+                <xs:annotation><xs:documentation>Ableitung mit Präfix o-</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="kara">
+                <xs:annotation><xs:documentation>Ableitung mit kara</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="garu">
+                <xs:annotation><xs:documentation>Ableitung mit garu</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="ge">
+                <xs:annotation><xs:documentation>Ableitung mit ge</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="ku">
+                <xs:annotation><xs:documentation>Ableitung, Adverb mit ku</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="mi">
+                <xs:annotation><xs:documentation>Ableitung, Nominalisierung mit mi</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="VwBsp">
+                <xs:annotation><xs:documentation>Verwendungsbeispiel</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="WIdiom">
+                <xs:annotation><xs:documentation>W_Idiom</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="XSatz">
+                <xs:annotation><xs:documentation>XSatz</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="ZSprW">
+                <xs:annotation><xs:documentation>Z_Sprichwort</xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="other">
+                <xs:annotation><xs:documentation>andere Ableitung</xs:documentation></xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="refTypeEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="main">
+                <xs:annotation><xs:documentation>
+                    <p>Referenz auf Haupteintrag</p>
+                    <p>reference to parent headword</p>
+                    <p>親項目への参照</p>
+                </xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="syn">
+                <xs:annotation><xs:documentation>
+                    <p>Referenz auf Synonym</p>
+                    <p>reference to synonym</p>
+                    <p>同義語への参照</p>
+                </xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="anto">
+                <xs:annotation><xs:documentation>
+                    <p>Referenz auf Antonym</p>
+                    <p>reference to antonym</p>
+                    <p>反対語への参照</p>
+                </xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="altread">
+                <xs:annotation><xs:documentation>
+                    <p>Referenz auf alternative Lesung</p>
+                    <p>reference to alternate reading</p>
+                    <p>異読への参照</p>
+                </xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="alttranscr">
+                <xs:annotation><xs:documentation>
+                    <b>Referenz auf alternative Katakana-Transkription eines Fremdwortes</b>
+                    <b>reference to alternate katakana transcription of a foreign loanword</b>
+                    <b>外来語の異表記への参照</b>
+                </xs:documentation></xs:annotation>
+            </xs:enumeration>
+            <xs:enumeration value="other">
+                <xs:annotation><xs:documentation>
+                    <p>einfache Referenz</p>
+                    <p>simple reference</p>
+                    <p>単純な参照</p>
+                </xs:documentation></xs:annotation>
+            </xs:enumeration>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="katsuyouType">
+        <xs:sequence>
+            <xs:element ref="wd:mizenkei" minOccurs="0"/>
+            <xs:element ref="wd:renyokei" minOccurs="0"/>
+            <xs:element ref="wd:shushikei" minOccurs="0"/>
+            <xs:element ref="wd:rentaikei" minOccurs="0"/>
+            <xs:element ref="wd:kateikei" minOccurs="0"/>
+            <xs:element ref="wd:izenkei" minOccurs="0"/>
+            <xs:element ref="wd:meireikei" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- TODO cleanup, mostly unused -->
+    <xs:simpleType name="usgTypeEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="geo"/>
+            <xs:enumeration value="time"/>
+            <xs:enumeration value="dom"/>
+            <xs:enumeration value="reg"/>
+            <xs:enumeration value="style"/>
+            <xs:enumeration value="plev"/>
+            <xs:enumeration value="acc"/>
+            <xs:enumeration value="lang"/>
+            <xs:enumeration value="gram"/>
+            <xs:enumeration value="syn"/>
+            <xs:enumeration value="hyper"/>
+            <xs:enumeration value="colloc"/>
+            <xs:enumeration value="comp"/>
+            <xs:enumeration value="obj"/>
+            <xs:enumeration value="subj"/>
+            <xs:enumeration value="verb"/>
+            <xs:enumeration value="hint"/>
+            <xs:enumeration value="scientific"/>
+            <xs:enumeration value="seasonword"/>
+            <xs:enumeration value="familyname"/>
+            <xs:enumeration value="abrev"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="textType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="hasPrecedingSpace" type="xs:boolean"/>
+                <xs:attribute name="hasFollowingSpace" type="xs:boolean"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="devType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string"/>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="transcrType" mixed="true">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:emph" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="refType">
+        <xs:sequence>
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="wd:transcr" maxOccurs="1" minOccurs="0"/>
+            <xs:element ref="wd:jap" maxOccurs="1" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:long" use="optional" default="0"/>
+        <xs:attribute name="senseid" type="xs:long"/>
+        <xs:attribute name="type" type="wd:refTypeEnum"/>
+        <xs:attribute name="subentrytype" type="wd:subEntryTypeEnum"/>
+    </xs:complexType>
+
+    <xs:complexType name="srefType" mixed="true">
+        <xs:attribute name="id" type="xs:int"/>
+        <xs:attribute name="type" type="wd:refTypeEnum"/>
+        <xs:attribute name="index" type="xs:int"/>
+    </xs:complexType>
+
+    <xs:complexType name="usgType" mixed="true">
+        <xs:attribute name="reg" type="xs:string"/>
+        <xs:attribute name="type" type="wd:usgTypeEnum"/>
+    </xs:complexType>
+
+    <xs:complexType name="bracketType">
+        <!-- TODO Entfernen von wd:usg, wd:def, wd:birthdeath, wd:date und ggf. wd:expl -->
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element ref="wd:def" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:expl" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:birthdeath" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:date" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:jap" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:usg" maxOccurs="unbounded" minOccurs="0" />
+        </xs:sequence>
+
+        <xs:attribute name="prior" type="xs:int"/>
+        <xs:attribute name="meta" type="xs:boolean" >
+            <xs:annotation>
+                <xs:documentation>
+                    Beschreibt, ob es sich um eine Klammer mit Metainformationen handelt,
+                    also mit Informationen, die man zur einfachen Beschreibung weglassen kann.
+                    [meta = false] ist default, d.h. normalerweise kann man Klammerinhalte nicht weglassen
+                    [meta = true] bedeutet, dass der Klammerinhalt zur einfachen Darstellung auch weggelassen werden kann
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+
+    <xs:complexType name="explType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="1">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:literal" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:transl" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:iron" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:topic" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:transcr" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:token" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:jap" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:ref" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:foreign" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:title" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:emph" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:specchar" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:famn" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:scientif" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+        <xs:attribute name="options" type="xs:string" use="optional">
+            <xs:annotation>
+                <xs:documentation>
+                    Sammelt zusaetzliche Expl.-angaben, evtl. noch
+                    aufsplitten
+                </xs:documentation>
+            </xs:annotation></xs:attribute>
+    </xs:complexType>
+
+    <xs:complexType name="tokenType" mixed="true">
+        <xs:attribute name="genus" type="wd:genusEnum">
+            <xs:annotation>
+                <xs:documentation>
+                    Genus des Token, wenn Type = N (Nomen)
+                </xs:documentation>
+            </xs:annotation></xs:attribute>
+        <xs:attribute name="type" type="wd:posEnum">
+            <xs:annotation>
+                <xs:documentation>
+                    Typ des Token, bis jetzt nur N = Nomen
+                </xs:documentation>
+            </xs:annotation></xs:attribute>
+        <xs:attribute name="numerus" type="wd:numerusEnum">
+            <xs:annotation>
+                <xs:documentation>
+                    Numerus des Token, leer = Singular, numerusEnum.pl =
+                    Plural
+                </xs:documentation>
+            </xs:annotation></xs:attribute>
+        <xs:attribute name="article" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    Verwendung mit oder ohne Artikel, leer = ja, false =
+                    nein
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="noArticleNecessary" type="xs:boolean">
+            <xs:annotation>
+                <xs:documentation>
+                    kein Artikel notwendig, true = ja, leer = nein
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="baseform" type="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Grundform, welche mit indiziert werden soll
+                </xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+    </xs:complexType>
+
+    <!-- TODO Überprüfen: tr maximal einmal-->
+    <xs:complexType name="transType">
+        <xs:sequence minOccurs="1" maxOccurs="1">
+            <xs:element ref="wd:descr" minOccurs="0" maxOccurs="1"/>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="wd:usg" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:tr" minOccurs="0" maxOccurs="1"/>
+                <xs:element ref="wd:def" minOccurs="0" maxOccurs="unbounded" />
+                <xs:element ref="wd:etym" minOccurs="0" maxOccurs="1" />
+                <xs:element ref="wd:title" minOccurs="0" maxOccurs="1" />
+            </xs:sequence>
+            <xs:element ref="wd:jwd" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="lang" type="xs:string" />
+        <xs:attribute name="langdesc" type="xs:string" />
+    </xs:complexType>
+
+    <xs:complexType name="readingType">
+        <xs:sequence>
+            <xs:element name="hira" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>Lesung in Hiragana</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element name="hatsuon" type="xs:string" minOccurs="1" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>mit Markup versehene Lesung in Hiragana</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="wd:romaji" minOccurs="0" maxOccurs="1">
+                <xs:annotation>
+                    <xs:documentation>optionale Lesung in Romaji</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="wd:accent" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Angabe des Morenakzents</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute name="count" type="xs:int" />
+    </xs:complexType>
+
+    <xs:complexType name="romajiType" mixed="true">
+        <xs:sequence>
+            <xs:element ref="wd:dev" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="pronType" mixed="true">
+        <xs:annotation>
+            <xs:appinfo>
+                <annox:annotate>@java.lang.Deprecated</annox:annotate>
+            </xs:appinfo>
+            <xs:documentation>veraltet, nach Migration auf Schemaversion 1.3 entfernen</xs:documentation>
+        </xs:annotation>
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded" >
+                <!-- deprecated -->
+            </xs:element>
+            <xs:element ref="wd:dev" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="type" type="wd:pronTypeEnum"/>
+        <xs:attribute name="orth" type="xs:integer"/>
+        <xs:attribute name="accent" type="xs:integer"/>
+        <xs:attribute name="altaccent" type="xs:integer"/>
+        <xs:attribute name="count" type="xs:int"/>
+    </xs:complexType>
+
+    <xs:complexType name="rubyType">
+        <xs:sequence minOccurs="0">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:rb"/>
+            <xs:element ref="wd:rt"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="orthType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="midashigo" type="xs:boolean">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Kennzeichnet Element als Midashigo/(Anzeige-)Schlagwort
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="type" type="wd:orthTypeEnum"/>
+                <xs:attribute name="count" type="xs:int"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="formType">
+        <xs:sequence>
+            <xs:element ref="wd:orth" minOccurs="1" maxOccurs="unbounded" />
+            <xs:element ref="wd:pron" minOccurs="0" maxOccurs="unbounded" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <annox:annotate>@java.lang.Deprecated</annox:annotate>
+                    </xs:appinfo>
+                    <xs:documentation>veraltet, nach Migration auf Schemaversion 1.3 entfernen</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="wd:reading" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="abbrevType">
+        <xs:sequence>
+            <xs:element ref="wd:ref"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="etymType">
+        <xs:choice>
+            <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:ref" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:literal" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:emph" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:transl" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:transcr" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:topic" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:foreign" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element ref="wd:impli" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element ref="wd:expli" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element ref="wd:jap" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="wd:title" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:element ref="wd:abbrev"/>
+        </xs:choice>
+        <xs:attribute name="langdesc" type="xs:string"/>
+        <xs:attribute name="origin" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="gramGrpType">
+        <xs:sequence>
+            <xs:element ref="wd:pos" minOccurs="0" maxOccurs="unbounded" >
+                <xs:annotation>
+                    <xs:appinfo>
+                        <annox:annotate>@java.lang.Deprecated</annox:annotate>
+                    </xs:appinfo>
+                    <xs:documentation>veraltet, nach Migration auf Schemaversion 1.3 entfernen</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="wd:meishi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:doushi" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        mehrere pro Eintrag möglich, z.B. 2-st. und 4-st.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element ref="wd:jodoushi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:jokeiyoushi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:joshi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:fukushi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:keiyoushi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:keiyoudoushi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:kandoushi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:prefix" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:suffix" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:rentaishi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:setsuzokushi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:daimeishi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:setsuzokujoshi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:shuujoshi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:kakarijoshi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:kakujoshi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:fukujoshi" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:wordcomponent" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:specialcharacter" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:kanji" minOccurs="0" maxOccurs="1" />
+            <xs:element ref="wd:rengo" minOccurs="0" maxOccurs="1" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <!-- TODO Prüfen ob diese Reihenfolge Probleme macht -->
+    <xs:complexType name="senseType">
+        <xs:sequence>
+            <xs:element ref="wd:descr" minOccurs="0" maxOccurs="1"/>
+            <xs:element ref="wd:accent" minOccurs="0" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>
+                        Morenakzent(e) dieser Bedeutung.
+                        Sollte eine Untermenge aus reading/accent sein.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:choice>
+                <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                    <xs:element ref="wd:sense" minOccurs="1" maxOccurs="unbounded"/>
+                </xs:sequence>
+                <xs:sequence minOccurs="1" maxOccurs="1">
+                    <xs:element ref="wd:etym" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element ref="wd:usg" minOccurs="0" maxOccurs="unbounded" />
+                    <xs:sequence minOccurs="1" maxOccurs="unbounded">
+                        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+                            <xs:element ref="wd:trans" minOccurs="0" maxOccurs="unbounded" />
+                        </xs:sequence>
+                        <xs:element ref="wd:bracket" minOccurs="0" maxOccurs="unbounded" />
+                        <xs:element ref="wd:def" minOccurs="0" maxOccurs="unbounded" />
+                        <xs:element ref="wd:birthdeath" maxOccurs="unbounded" minOccurs="0" />
+                        <xs:element ref="wd:date" maxOccurs="unbounded" minOccurs="0" />
+                        <xs:element ref="wd:expl" maxOccurs="unbounded" minOccurs="0" />
+                    </xs:sequence>
+                    <xs:element ref="wd:ref" minOccurs="0" maxOccurs="unbounded"/>
+                    <xs:element ref="wd:sref" minOccurs="0" maxOccurs="unbounded" />
+                    <xs:element ref="wd:count" minOccurs="0" maxOccurs="unbounded" />
+                    <xs:element ref="wd:seasonword" minOccurs="0" maxOccurs="unbounded" />
+                    <xs:element ref="wd:link" minOccurs="0" maxOccurs="unbounded"/>
+                </xs:sequence>
+            </xs:choice>
+        </xs:sequence>
+        <xs:attribute name="senseid" type="xs:long"/>
+        <xs:attribute name="season" type="wd:seasonEnum">
+            <xs:annotation>
+                <xs:appinfo>
+                    <annox:annotate>@java.lang.Deprecated</annox:annotate>
+                </xs:appinfo>
+                <xs:documentation>veraltet, siehe seasonword</xs:documentation>
+            </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="related" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="linkType" mixed="true">
+        <xs:attribute name="type" type="wd:linkTypeEnum"/>
+        <xs:attribute name="url" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:simpleType name="linkTypeEnum">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="picture"/>
+            <xs:enumeration value="audio"/>
+            <xs:enumeration value="url"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="trComplexType">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:token" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:def" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:expl" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:literal" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:famn" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:emph" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:transl" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:specchar" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:iron" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:topic" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:foreign" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:title" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:jap" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:transcr" maxOccurs="unbounded" minOccurs="0" />
+            <xs:element ref="wd:bracket" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:count" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+
+        <xs:attribute name="prior" type="xs:int"/>
+        <xs:attribute name="jlpt" type="xs:string"/>
+        <xs:attribute name="genki" type="xs:string"/>
+    </xs:complexType>
+
+
+    <xs:complexType name="defType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:literal" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:transl" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:jap" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:iron" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:topic" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:token" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:birthdeath" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:expl" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:transcr" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:foreign" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:title" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:ref" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:emph" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:scientif" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:bracket" minOccurs="0" maxOccurs="unbounded"/><!-- TODO ist so eine Konstruktion korrekt?-->
+        </xs:sequence>
+        <xs:attribute name="type" type="xs:string"/>
+        <xs:attribute name="lang" type="xs:string"/>
+        <xs:attribute name="langdesc" type="xs:string"/>
+    </xs:complexType>
+
+    <xs:complexType name="posComplexType">
+        <xs:annotation>
+            <xs:appinfo>
+                <annox:annotate>@java.lang.Deprecated</annox:annotate>
+            </xs:appinfo>
+        </xs:annotation>
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+            <xs:element ref="wd:text" minOccurs="0"
+                        maxOccurs="unbounded" />
+            <xs:element ref="wd:transcr" maxOccurs="unbounded"
+                        minOccurs="0" />
+            <xs:element ref="wd:expl" maxOccurs="unbounded"
+                        minOccurs="0" />
+        </xs:sequence>
+        <xs:attribute name="type" type="wd:posEnum" use="required" />
+    </xs:complexType>
+
+    <xs:complexType name="rubyPronType" mixed="true">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="wd:ruby"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ironType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+            <xs:element ref="wd:text" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:token" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="literalType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:token" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="titleType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:token" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element ref="wd:emph" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+        <xs:attribute name="orig" type="xs:boolean"/>
+        <xs:attribute name="lang" type="wd:langEnum"/>
+        <xs:attribute name="abbrev" type="xs:boolean"/>
+    </xs:complexType>
+
+    <xs:complexType name="foreignType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:emph" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="expliType">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:foreign" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="famnType">
+        <xs:annotation>
+            <xs:documentation>
+                Markiert einen Familiennamen.
+            </xs:documentation>
+        </xs:annotation>
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="firstname" type="xs:boolean">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Der Familienname ist ein Vorname.
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="ausn" type="xs:boolean">
+                    <xs:annotation>
+                        <xs:documentation>
+                            TBD
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="lang" type="wd:langEnum">
+                    <xs:annotation>
+                        <xs:documentation>
+                            Derzeit nur Kennzeichnung japan. Namen?
+                        </xs:documentation>
+                    </xs:annotation>
+                </xs:attribute>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="emphType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:annotation>
+                    <xs:documentation>
+                        Markiert eine Hervorhebung.
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:simpleType name="translType">
+        <xs:restriction base="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Markiert eine Übersetzung.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="speccharType">
+        <xs:restriction base="xs:string">
+            <xs:annotation>
+                <xs:documentation>
+                    Markiert ein spezielles Zeichen, das Probleme machen könnte.
+                </xs:documentation>
+            </xs:annotation>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="topicType">
+        <xs:restriction base="xs:string"/>
+    </xs:simpleType>
+
+    <xs:simpleType name="priorType">
+        <xs:restriction base="xs:string"/>
+    </xs:simpleType>
+
+    <xs:complexType name="descrType">
+        <xs:sequence minOccurs="1" maxOccurs="unbounded">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:jap" minOccurs="0" maxOccurs="unbounded" />
+            <xs:element ref="wd:transcr" minOccurs="0" maxOccurs="unbounded" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="countType">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:ref" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="form" type="wd:formType" />
+    <xs:element name="etym" type="wd:etymType" />
+    <xs:element name="abbrev" type="wd:abbrevType" />
+    <xs:element name="gramGrp" type="wd:gramGrpType" />
+    <xs:element name="usg" type="wd:usgType" />
+    <xs:element name="sense" type="wd:senseType" />
+    <xs:element name="ref" type="wd:refType" />
+    <xs:element name="sref" type="wd:srefType" />
+    <xs:element name="link" type="wd:linkType"/>
+    <xs:element name="orth" type="wd:orthType"/>
+    <xs:element name="pron" type="wd:pronType"/>
+    <xs:element name="reading" type="wd:readingType"/>
+    <xs:element name="accent" type="xs:string"/>
+    <xs:element name="romaji" type="wd:romajiType"/>
+    <xs:element name="literal" type="wd:literalType"/>
+    <xs:element name="emph" type="wd:emphType"/>
+    <xs:element name="topic" type="wd:topicType"/>
+    <xs:element name="pos" type="wd:posComplexType">
+        <xs:annotation>
+            <xs:documentation>
+                Eigenständiges POS Element am GramGrp
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="trans" type="wd:transType"/>
+    <xs:element name="def" type="wd:defType"/>
+    <xs:element name="count" type="wd:countType"/>
+    <xs:element name="iron" type="wd:ironType"/>
+    <xs:element name="ruby" type="wd:rubyType"/>
+    <xs:element name="dev" type="wd:devType">
+        <xs:annotation>
+            <xs:documentation>
+                Devokalisierter Teil in der Aussprache
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="rb" type="xs:string"/>
+    <xs:element name="rt" type="xs:string"/>
+    <xs:element name="transl" type="wd:translType"/>
+    <xs:element name="token" type="wd:tokenType"/>
+    <xs:element name="tr" type="wd:trComplexType"/>
+    <xs:element name="bracket" type="wd:bracketType"/>
+    <xs:element name="expl" type="wd:explType"/>
+    <xs:element name="famn" type="wd:famnType"/>
+    <xs:element name="specchar" type="wd:speccharType"/>
+    <xs:element name="prior" type="wd:priorType"/>
+    <xs:element name="rubyPron" type="wd:rubyPronType"/>
+    <xs:element name="transcr" type="wd:transcrType"/>
+    <xs:element name="title" type="wd:titleType"/>
+    <xs:element name="deu_gr" type="xs:string"/>
+    <xs:element name="birthdeath" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>
+                Lebensdaten einer Persönlichkeit.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="jap" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>
+                Kapselt japanischen Text.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="wikide" type="xs:string"/>
+    <xs:element name="wikija" type="xs:string"/>
+    <xs:element name="date" type="xs:string">
+        <xs:annotation>
+            <xs:documentation>
+                Datumsangabe, bei Werktiteln usw.
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="descr" type="wd:descrType">
+        <xs:annotation>
+            <xs:documentation>
+                Verwendungsbeschreibung in Bezug auf den POS, bei subsenses
+            </xs:documentation>
+        </xs:annotation>
+    </xs:element>
+    <xs:element name="impli" type="xs:string"/>
+    <xs:element name="expli" type="wd:expliType"/>
+    <xs:element name="text" type="wd:textType"/>
+    <xs:element name="foreign" type="wd:foreignType"/>
+    <xs:element name="steinhaus" type="xs:string"/>
+    <xs:element name="jwd" type="xs:string"/>
+    <xs:element name="scientif" type="wd:scientificType"/>
+    <xs:element name="seasonword" type="wd:seasonType"/>
+
+    <xs:complexType name="scientificType">
+        <xs:sequence minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="wd:text" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="wd:token" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="seasonType">
+        <xs:attribute name="type" type="wd:seasonEnum" use="required"/>
+        <xs:attribute name="part" type="wd:seasonPart"/>
+    </xs:complexType>
+
+    <xs:element name="ruigos" type="wd:ruigosType"/>
+    <xs:element name="ruigo" type="wd:ruigoType"/>
+
+    <xs:complexType name="ruigosType">
+        <xs:sequence>
+            <xs:element ref="wd:ruigo" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="ruigoType">
+        <xsl:attribute name="id" type="xs:long" use="required"/>
+    </xs:complexType>
+</xs:schema>
