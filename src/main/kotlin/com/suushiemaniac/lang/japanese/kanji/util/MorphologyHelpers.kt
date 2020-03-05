@@ -14,3 +14,30 @@ fun String.tokenizeJapanese(): List<Token> = tokenizer.tokenize(this)
 fun String.alignReadingsWith(readingsRaw: String): List<ReadingWithSurfaceForm> {
     return emptyList() // FIXME
 }
+
+// https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt
+val IDC_GRAPH_MAPPING =
+    listOf(
+        "⿰",
+        "⿱",
+        "⿲",
+        "⿳",
+        "⿴",
+        "⿵",
+        "⿶",
+        "⿷",
+        "⿸",
+        "⿹",
+        "⿺",
+        "囗",
+        "品",
+        "品u",
+        "品l",
+        "品r",
+        "⿱1",
+        "⿰4",
+        "⿰5",
+        "⿰1",
+        "⿰2",
+        "⿰3"
+    )

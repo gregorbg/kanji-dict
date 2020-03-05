@@ -2,6 +2,7 @@ package com.suushiemaniac.lang.japanese.kanji.anki
 
 import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
+import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
@@ -9,6 +10,8 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
+import com.suushiemaniac.lang.japanese.kanji.util.IDC_GRAPH_MAPPING
 import com.suushiemaniac.lang.japanese.kanji.util.singleOrAll
 import com.suushiemaniac.lang.japanese.kanji.util.toHiragana
 import com.suushiemaniac.lang.japanese.kanji.util.toKatakana
@@ -62,34 +65,49 @@ data class KanjiNote(
     }
 
     companion object {
-        // https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt
-        val IDC_GRAPH_MAPPING =
-            listOf("⿰", "⿱", "⿲", "⿳", "⿴", "⿵", "⿶", "⿷", "⿸", "⿹", "⿺", "囗", "品", "品u", "品l", "品r", "⿱1", "⿰4", "⿰5", "⿰1", "⿰2", "⿰3")
+        fun from(
+            kanji: KanjiDictEntry,
+            elements: Elements,
+            lesson: Int,
+            id: Int,
+            translationSource: VocabularySource
+        ): KanjiNote {
+            val allSamples = translationSource.getVocabularyItemsFor(kanji)
 
-        fun from(kanji: KanjiDictEntry, elements: Elements, lesson: Int, id: Int): KanjiNote {
+            val kunModelSamples =
+                kanji.kunYomi.associateWith { allSamples.filterForReadings(kanji.kanji.toString(), it.coreReading) }
+            val onModelSamples =
+                kanji.onYomi.associateWith { allSamples.filterForReadings(kanji.kanji.toString(), it.kanaReading) }
+
+            val usedSamples = (kunModelSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
+
             val radicalDescription =
                 kanji.radicalVariant?.let { radicalDesc(it) + "(Variante von " + radicalDesc(kanji.radical) + ")" }
                     ?: radicalDesc(kanji.radical)
 
             val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
 
-            val elementsWithName = mapOf<Char, String>()
+            val elementsWithName = elements.kanjiParts
+                .associateWith { translationSource.lookupWord(it)?.translations.orEmpty().joinToString() }
+                .mapKeys { it.key.first() }
 
             val suitableMeanings = kanji.compactMeaning.takeUnless { it.isEmpty() }?.joinToString()
                 ?: elements.compactMeaning
 
-            val translatedSamples = mapOf<String, String>() // FIXME
-            val readingsForSamples = mapOf<String, ReadingWithSurfaceForm>() // FIXME
+            val translatedSamples = allSamples.associateWith { it.translations.joinToString() }
+                .filterKeys { it in usedSamples }
+            val readingsForSamples = allSamples.associateBy { it.surfaceForm }
+                .filterValues { it in usedSamples }
 
             return KanjiNote(
                 kanji.kanji,
-                kanji.kunYomi.associateWith { emptyList<String>() }, // FIXME
-                kanji.onYomi.associateWith { emptyList<String>() }, // FIXME
+                kunModelSamples.mapValues { it.value.map(VocabularyItem::surfaceForm) },
+                onModelSamples.mapValues { it.value.map(VocabularyItem::surfaceForm) },
                 radicalDescription,
                 idcIndex,
                 elementsWithName,
                 suitableMeanings,
-                translatedSamples,
+                translatedSamples.mapKeys { it.key.surfaceForm },
                 readingsForSamples,
                 lesson,
                 id,
@@ -110,6 +128,13 @@ data class KanjiNote(
                 this <= 4 -> prefix + this.minus(this.div(2)).toString()
                 else -> this.minus(2).toString()
             }
+        }
+
+        private fun List<VocabularyItem>.filterForReadings(
+            kanjiForm: String,
+            readingStr: String
+        ): List<VocabularyItem> {
+            return this.filter { it.readingParts.any { r -> r.surfaceForm == kanjiForm && r.reading == readingStr } }
         }
     }
 }
