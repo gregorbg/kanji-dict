@@ -39,7 +39,7 @@ private tailrec fun String.pluckKanji(accu: List<String> = emptyList()): List<St
     return this.substring(nonKanji.length).pluckKanji(accu + nonKanji)
 }
 
-private tailrec fun transformReadings(
+private fun transformReadings(
     segments: List<String>,
     rawTemplate: String,
     kanjiSource: KanjiSource,
@@ -58,22 +58,29 @@ private tailrec fun transformReadings(
             .distinct()
     } else listOf(next)
 
-    val perfectReading =
-        testReadings.find { rawTemplate.startsWith(it.toKatakana()) || rawTemplate.startsWith(it.toHiragana()) || rawTemplate.startsWith(it) }
-            ?: return emptyList() // FIXME try ALL instead of only first? (-> greedy not good)
+    val adequateReadings =
+        testReadings.filter {
+            rawTemplate.startsWith(it.toKatakana()) ||
+                    rawTemplate.startsWith(it.toHiragana()) ||
+                    rawTemplate.startsWith(it)
+        }
 
-    val readingFromTemplate = rawTemplate.take(perfectReading.length)
+    val subsequentMatches = adequateReadings.map {
+        val readingFromTemplate = rawTemplate.take(it.length)
 
-    val readingModel = if (nextIsKanji) {
-        KanjiReading(next.first(), readingFromTemplate)
-    } else KanaReading(readingFromTemplate)
+        val readingModel = if (nextIsKanji) {
+            KanjiReading(next.first(), readingFromTemplate)
+        } else KanaReading(readingFromTemplate)
 
-    return transformReadings(
-        segments.drop(1),
-        rawTemplate.drop(readingModel.reading.length),
-        kanjiSource,
-        accu + readingModel
-    )
+        transformReadings(
+            segments.drop(1),
+            rawTemplate.drop(readingModel.reading.length),
+            kanjiSource,
+            accu + readingModel
+        )
+    }
+
+    return subsequentMatches.find { it.isNotEmpty() }.orEmpty()
 }
 
 private fun Kanji.allReadings(): List<String> {
@@ -83,7 +90,7 @@ private fun Kanji.allReadings(): List<String> {
 fun main() {
     val kanjiSource = KanjiumDatabaseSource("/home/suushie_maniac/sqldocs/kanjium/data/kanjidb.sqlite")
 
-    val fullText = "思"
+    val fullText = "思えら"
     val readingRaw = "おもえら"
 
     val result = fullText.alignReadingsWith(readingRaw, kanjiSource)
