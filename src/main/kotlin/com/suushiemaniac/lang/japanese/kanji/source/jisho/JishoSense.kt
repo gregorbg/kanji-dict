@@ -13,5 +13,6 @@ data class JishoSense(
     @SerialName("see_also") val seeAlso: List<String>,
     val antonyms: List<String>,
     val source: List<String>,
-    val info: List<String>
+    val info: List<String>,
+    val sentences: List<String> = emptyList()
 )

@@ -11,5 +11,5 @@ data class JishoAPIData(
     val jlpt: List<String>,
     val japanese: List<JishoReading>,
     val senses: List<JishoSense>,
-    val attributions: JishoAttributions
+    val attribution: JishoAttributions
 )

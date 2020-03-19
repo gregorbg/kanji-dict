@@ -53,7 +53,7 @@ private fun transformReadings(
     val nextIsKanji = next.isProbablyKanji() && next.length == 1
 
     val testReadings = if (nextIsKanji) {
-        kanjiSource.get(next.first()).allReadings()
+        kanjiSource[next.first()].allReadings()
             .flatMap { it.possibleAlternateKatakanaReadings() }
             .distinct()
     } else listOf(next)
@@ -84,7 +84,8 @@ private fun transformReadings(
 }
 
 private fun Kanji.allReadings(): List<String> {
-    return this.kunYomi.map { it.coreReading } + this.onYomi.map { it.kanaReading }
+    val rawReadings = this.kunYomi.map { it.coreReading } + this.onYomi.map { it.kanaReading }
+    return rawReadings.filterNot { it.isEmpty() }
 }
 
 fun main() {

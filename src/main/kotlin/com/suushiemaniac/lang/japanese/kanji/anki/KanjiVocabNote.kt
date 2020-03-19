@@ -26,13 +26,21 @@ data class KanjiVocabNote(
             vocabItem.asFurigana(RubyFuriganaFormatter),
             mainTranslation,
             JSON.stringify(ListSerializer(String.serializer()), additionalTranslations),
-            JSON.stringify(ListSerializer(ListSerializer(String.serializer())), ankiPhrases.map(KanjiVocabPhrase::getLiterals)),
+            JSON.stringify(
+                ListSerializer(ListSerializer(String.serializer())),
+                ankiPhrases.map(KanjiVocabPhrase::getLiterals)
+            ),
             JSON.stringify(
                 ListSerializer(MapSerializer(String.serializer(), String.serializer())),
                 ankiPhrases.map(KanjiVocabPhrase::getReadings)
             ),
             JSON.stringify(
-                ListSerializer(MapSerializer(String.serializer(), MapSerializer(String.serializer(), String.serializer()))),
+                ListSerializer(
+                    MapSerializer(
+                        String.serializer(),
+                        MapSerializer(String.serializer(), String.serializer())
+                    )
+                ),
                 ankiPhrases.map(KanjiVocabPhrase::getTokenData)
             ),
             JSON.stringify(
@@ -46,7 +54,13 @@ data class KanjiVocabNote(
         listOf(originalKanji.toString())
 
     companion object {
-        fun from(item: VocabularyItem, samplePhrases: List<SampleSentence>, originalKanji: Char, translationSource: VocabularySource, kanjiSource: KanjiSource): KanjiVocabNote {
+        fun from(
+            item: VocabularyItem,
+            samplePhrases: List<SampleSentence>,
+            originalKanji: Char,
+            translationSource: VocabularySource,
+            kanjiSource: KanjiSource
+        ): KanjiVocabNote {
             val ankiPhrases = samplePhrases.map { it.parseTokens() }
                 .map { it.map { japToken -> KanjiVocabPhraseToken.from(japToken, translationSource, kanjiSource) } }
                 .map { KanjiVocabPhrase(it) }

@@ -15,7 +15,7 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
-    override fun get(kanji: Char): KanjiDictEntry {
+    override operator fun get(kanji: Char): KanjiDictEntry {
         return KANJI_CACHE.getOrPut(kanji) { transaction { KanjiDictDao[kanji.toString()].toModel() } }
     }
 
