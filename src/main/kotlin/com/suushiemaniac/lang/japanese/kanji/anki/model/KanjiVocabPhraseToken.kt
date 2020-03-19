@@ -13,7 +13,7 @@ import com.suushiemaniac.lang.japanese.kanji.util.toHiragana
 data class KanjiVocabPhraseToken(
     private val readingWithSurfaceForm: ReadingWithSurfaceForm,
     val tokenData: Map<String, String>,
-    val annotation: String
+    val annotation: String? = null
 ) : ReadingWithSurfaceForm by readingWithSurfaceForm {
     companion object {
         val LOOKUP_TOKEN_TYPES = setOf("名詞", "動詞", "形容詞")

@@ -1,14 +1,17 @@
 package com.suushiemaniac.lang.japanese.kanji.anki
 
+import com.atilika.kuromoji.ipadic.Token
 import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhrase
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhraseToken
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
 import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.model.reading.KanaReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
+import com.suushiemaniac.lang.japanese.kanji.util.SKIP_TOKEN
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
@@ -62,7 +65,8 @@ data class KanjiVocabNote(
             kanjiSource: KanjiSource
         ): KanjiVocabNote {
             val ankiPhrases = samplePhrases.map { it.parseTokens() }
-                .map { it.map { japToken -> KanjiVocabPhraseToken.from(japToken, translationSource, kanjiSource) } }
+                .map { it.toVocabTokens(translationSource, kanjiSource) }
+                .map { it.maskOriginalWordToken(item) }
                 .map { KanjiVocabPhrase(it) }
 
             return KanjiVocabNote(
@@ -72,6 +76,22 @@ data class KanjiVocabNote(
                 ankiPhrases,
                 originalKanji
             )
+        }
+
+        private fun List<Token>.toVocabTokens(
+            translationSource: VocabularySource,
+            kanjiSource: KanjiSource
+        ): List<KanjiVocabPhraseToken> =
+            map { KanjiVocabPhraseToken.from(it, translationSource, kanjiSource) }
+
+        private fun List<KanjiVocabPhraseToken>.maskOriginalWordToken(item: VocabularyItem): List<KanjiVocabPhraseToken> {
+            return map {
+                it.takeUnless { pt -> pt.surfaceForm == item.surfaceForm } ?: KanjiVocabPhraseToken(
+                    KanaReading(
+                        SKIP_TOKEN
+                    ), emptyMap()
+                )
+            }
         }
     }
 }
