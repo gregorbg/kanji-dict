@@ -10,7 +10,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.KanaReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
-import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
+import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.util.SKIP_TOKEN
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -61,7 +61,7 @@ data class KanjiVocabNote(
             item: VocabularyItem,
             samplePhrases: List<SampleSentence>,
             originalKanji: Char,
-            translationSource: VocabularySource,
+            translationSource: TranslationSource,
             kanjiSource: KanjiSource
         ): KanjiVocabNote {
             val ankiPhrases = samplePhrases.map { it.parseTokens() }
@@ -79,7 +79,7 @@ data class KanjiVocabNote(
         }
 
         private fun List<Token>.toVocabTokens(
-            translationSource: VocabularySource,
+            translationSource: TranslationSource,
             kanjiSource: KanjiSource
         ): List<KanjiVocabPhraseToken> =
             map { KanjiVocabPhraseToken.from(it, translationSource, kanjiSource) }

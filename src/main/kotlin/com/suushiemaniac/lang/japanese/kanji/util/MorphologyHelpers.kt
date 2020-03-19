@@ -53,9 +53,9 @@ private fun transformReadings(
     val nextIsKanji = next.isProbablyKanji() && next.length == 1
 
     val testReadings = if (nextIsKanji) {
-        kanjiSource[next.first()].allReadings()
-            .flatMap { it.possibleAlternateKatakanaReadings() }
-            .distinct()
+        kanjiSource.lookupSymbol(next.first())?.allReadings()
+            ?.flatMap { it.possibleAlternateKatakanaReadings() }
+            ?.distinct().orEmpty()
     } else listOf(next)
 
     val adequateReadings =

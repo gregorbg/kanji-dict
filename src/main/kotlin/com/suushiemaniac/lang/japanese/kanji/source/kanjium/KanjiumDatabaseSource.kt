@@ -1,5 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.source.kanjium
 
+import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.persistence.KanjiDictDao
 import com.suushiemaniac.lang.japanese.kanji.persistence.toModel
@@ -15,8 +16,16 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
-    override operator fun get(kanji: Char): KanjiDictEntry {
+    override fun lookupSymbol(kanji: Char): KanjiDictEntry {
         return KANJI_CACHE.getOrPut(kanji) { transaction { KanjiDictDao[kanji.toString()].toModel() } }
+    }
+
+    override fun fetchAll(): List<Kanji> {
+        val fullFetch = transaction { KanjiDictDao.all() }
+
+        return fullFetch.map {
+            it.toModel().also { m -> KANJI_CACHE[m.kanji] = m }
+        }
     }
 
     companion object {

@@ -10,6 +10,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.util.IDC_GRAPH_MAPPING
 import com.suushiemaniac.lang.japanese.kanji.util.singleOrAll
@@ -70,9 +71,10 @@ data class KanjiNote(
             elements: Elements,
             lesson: Int,
             id: Int,
-            translationSource: VocabularySource
+            translationSource: TranslationSource,
+            vocabSource: VocabularySource
         ): KanjiNote {
-            val allSamples = translationSource.getVocabularyItemsFor(kanji)
+            val allSamples = vocabSource.getVocabularyItemsFor(kanji)
 
             val kunModelSamples =
                 kanji.kunYomi.associateWith { allSamples.filterForReadings(kanji.kanji.toString(), it.coreReading) }

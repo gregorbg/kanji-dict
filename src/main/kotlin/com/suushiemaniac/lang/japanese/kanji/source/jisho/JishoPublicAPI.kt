@@ -3,8 +3,8 @@ package com.suushiemaniac.lang.japanese.kanji.source.jisho
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
+import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
-import com.suushiemaniac.lang.japanese.kanji.source.kanjium.KanjiumDatabaseSource
 import com.suushiemaniac.lang.japanese.kanji.util.alignReadingsWith
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
@@ -13,7 +13,7 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 
-class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource {
+class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, TranslationSource {
     private fun searchURL(keyword: String, page: Int = 1) =
         "$API_URL?keyword=$keyword&page=$page"
 
