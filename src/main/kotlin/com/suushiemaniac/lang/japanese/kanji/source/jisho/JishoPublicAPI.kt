@@ -1,10 +1,12 @@
 package com.suushiemaniac.lang.japanese.kanji.source.jisho
 
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
+import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIData
 import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIResponse
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
+import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.util.alignReadingsWith
@@ -15,7 +17,7 @@ import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 
-class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, TranslationSource {
+class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, TranslationSource, SampleSentenceSource {
     private fun searchURL(keyword: String, page: Int = 1) =
         "$API_URL?keyword=$keyword&page=$page"
 
@@ -42,6 +44,16 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         return current
     }
 
+    override fun lookupWord(raw: String): VocabularyItem? {
+        val result = executePaginatedSearch(raw)
+
+        val suitableItem = result.data.firstOrNull {
+            it.japanese.any { j -> j.word == raw || j.reading == raw }
+        }
+
+        return suitableItem?.toVocabularyItem(raw)
+    }
+
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
         val kanjiLiteral = kanji.kanji.toString()
 
@@ -51,14 +63,12 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         return result.data.mapNotNull { it.toVocabularyItem(kanjiLiteral) }
     }
 
-    override fun lookupWord(raw: String): VocabularyItem? {
-        val result = executePaginatedSearch(raw)
+    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
+        val result = executePaginatedSearch(vocab.surfaceForm)
 
-        val suitableItem = result.data.firstOrNull {
-            it.japanese.any { j -> j.word == raw || j.reading == raw }
-        }
-
-        return suitableItem?.toVocabularyItem(raw)
+        return result.data.filter {
+            it.japanese.any { j -> j.word == vocab.surfaceForm || j.reading == vocab.reading }
+        }.flatMap { it.extractSampleSentences() }
     }
 
     private fun JishoAPIData.toVocabularyItem(origQuery: String): VocabularyItem? {
@@ -71,6 +81,10 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         val translations = this.senses.flatMap { it.englishDefinitions }.distinct()
 
         return VocabularyItem(mappedReading, translations)
+    }
+
+    private fun JishoAPIData.extractSampleSentences(): List<SampleSentence> {
+        return this.senses.flatMap { it.sentences }.map { SampleSentence(it) }
     }
 
     companion object {
