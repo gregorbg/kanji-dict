@@ -1,4 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.source.jisho
+package com.suushiemaniac.lang.japanese.kanji.model.jisho
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

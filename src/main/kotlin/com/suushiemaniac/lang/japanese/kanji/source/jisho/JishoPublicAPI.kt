@@ -2,6 +2,8 @@ package com.suushiemaniac.lang.japanese.kanji.source.jisho
 
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIData
+import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIResponse
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
