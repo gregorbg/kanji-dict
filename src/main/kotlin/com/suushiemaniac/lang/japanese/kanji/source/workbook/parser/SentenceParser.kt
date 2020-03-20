@@ -57,7 +57,7 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
 
             val translations = transRaw.split(",").map(String::trim)
 
-            val optSample = parts.getOrNull(4)
+            val optSample = parts.getOrNull(3)
             val sampleSentence = optSample?.let(::SampleSentence)
 
             VocabularyItem(alignedReading, translations) to sampleSentence

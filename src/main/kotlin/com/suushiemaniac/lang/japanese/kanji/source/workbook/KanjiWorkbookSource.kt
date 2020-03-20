@@ -55,7 +55,7 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
     }
 
     override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
-        return sampleSentenceData[vocab.surfaceForm].orEmpty()
+        return sampleSentenceData[vocab.surfaceForm].orEmpty().distinctBy { it.rawPhrase }
     }
 
     companion object {
