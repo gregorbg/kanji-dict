@@ -5,6 +5,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIData
 import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIResponse
+import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoReading
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
@@ -25,10 +26,12 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         runBlocking { HTTP_CLIENT.get<JishoAPIResponse>(searchURL(keyword, page)) }
 
     private fun executePaginatedSearch(keyword: String): JishoAPIResponse {
-        val rawResponse = accumulateSearch(keyword, 1)
+        return REQUEST_CACHE.getOrPut(keyword) {
+            val rawResponse = accumulateSearch(keyword, 1)
 
-        val cleanData = rawResponse.data.map { it.cleanup() }
-        return rawResponse.copy(data = cleanData)
+            val cleanData = rawResponse.data.map { it.cleanup() }
+            rawResponse.copy(data = cleanData)
+        }
     }
 
     private fun accumulateSearch(keyword: String, page: Int): JishoAPIResponse {
@@ -76,7 +79,7 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
             ?: return null
 
         val mappedReading = suitableReading.word.orEmpty()
-            .alignReadingsWith(suitableReading.reading, kanjiSource)
+            .alignReadingsWith(suitableReading.reading.orEmpty(), kanjiSource)
 
         val translations = this.senses.flatMap { it.englishDefinitions }.distinct()
 
@@ -97,18 +100,38 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
             }
         }
 
+        private val REQUEST_CACHE = mutableMapOf<String, JishoAPIResponse>()
+
         private fun JishoAPIData.cleanup(): JishoAPIData {
             val rawReadings = this.japanese
-            val cleanReadings = rawReadings.mapIndexed { i, rd ->
-                if (rd.word == null) {
-                    val lastWord = rawReadings.take(i).findLast { it.word != null }
 
-                    rd.copy(word = lastWord?.word)
-                } else
-                    rd
+            val cleanReadings = rawReadings.mapIndexed { i, rd ->
+                rd.cleanup(rawReadings.take(i))
             }
 
             return this.copy(japanese = cleanReadings)
+        }
+
+        private fun JishoReading.cleanup(history: List<JishoReading>): JishoReading {
+            if (history.isEmpty()) {
+                return this
+            }
+
+            if (word == null) {
+                val lastWord = history.findLast { it.word != null }
+                    ?.word ?: error("Word sense broken")
+
+                return copy(word = lastWord).cleanup(history)
+            }
+
+            if (reading == null) {
+                val lastReading = history.findLast { it.reading != null }
+                    ?.reading ?: error("Reading sense broken")
+
+                return copy(reading = lastReading).cleanup(history)
+            }
+
+            return this
         }
     }
 }

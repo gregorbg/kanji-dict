@@ -54,7 +54,7 @@ data class KanjiNote(
                 onReadingsWithSamples.mapKeys { it.key.kanaReading.toKatakana() }),
             radicalDescription,
             "<img src=\"idcGraph-$idcGraphNum.png\">",
-            elementsWithName.entries.joinToString("\r\n") { "${it.key} ${it.value}" },
+            elementsWithName.entries.joinToString("<br/>") { "${it.key} ${it.value}" },
             coreMeaning,
             JSON.stringify(MapSerializer(String.serializer(), String.serializer()), sampleTranslations),
             JSON.stringify(MapSerializer(String.serializer(), String.serializer()), ankiHackReadings)

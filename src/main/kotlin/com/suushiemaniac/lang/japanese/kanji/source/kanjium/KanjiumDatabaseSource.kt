@@ -1,7 +1,9 @@
 package com.suushiemaniac.lang.japanese.kanji.source.kanjium
 
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
+import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
+import com.suushiemaniac.lang.japanese.kanji.persistence.ElementsDao
 import com.suushiemaniac.lang.japanese.kanji.persistence.KanjiDictDao
 import com.suushiemaniac.lang.japanese.kanji.persistence.toModel
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
@@ -26,6 +28,10 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource {
         return fullFetch.map {
             it.toModel().also { m -> KANJI_CACHE[m.kanji] = m }
         }
+    }
+
+    fun getElementsFor(kanji: Kanji): Elements? {
+        return transaction { ElementsDao.findById(kanji.kanji.toString())?.toModel() }
     }
 
     companion object {

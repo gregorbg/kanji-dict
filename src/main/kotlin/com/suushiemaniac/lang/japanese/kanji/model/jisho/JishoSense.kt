@@ -1,8 +1,8 @@
 package com.suushiemaniac.lang.japanese.kanji.model.jisho
 
-import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoLink
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonElement
 
 @Serializable
 data class JishoSense(
@@ -13,7 +13,7 @@ data class JishoSense(
     val restrictions: List<String>,
     @SerialName("see_also") val seeAlso: List<String>,
     val antonyms: List<String>,
-    val source: List<String>,
+    val source: JsonElement,
     val info: List<String>,
     val sentences: List<String> = emptyList()
 )

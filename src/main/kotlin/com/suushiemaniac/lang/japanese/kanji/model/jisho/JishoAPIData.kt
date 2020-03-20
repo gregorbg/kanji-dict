@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class JishoAPIData(
     val slug: String,
-    @SerialName("is_common") val isCommon: Boolean,
+    @SerialName("is_common") val isCommon: Boolean = false,
     val tags: List<String>,
     val jlpt: List<String>,
     val japanese: List<JishoReading>,

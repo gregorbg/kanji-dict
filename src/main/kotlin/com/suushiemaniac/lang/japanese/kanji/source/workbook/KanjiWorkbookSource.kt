@@ -85,7 +85,7 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
 
         const val ALIGNMENT_SEPARATOR = "."
 
-        val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1", "intermediate_2")
+        val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1")
         val SYMBOL_COUNTS by lazy { RESOURCE_NAMES.indices.map { KanjiWorkbookSource(it).fetchAll().size } }
 
         val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
