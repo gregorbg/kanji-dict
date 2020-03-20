@@ -7,7 +7,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.KanaReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
-import com.suushiemaniac.lang.japanese.kanji.util.containsOnlyHiragana
+import com.suushiemaniac.lang.japanese.kanji.util.containsOnlyHiraganaOrAnnotations
 import com.suushiemaniac.lang.japanese.kanji.util.containsOnlyKatakana
 import com.suushiemaniac.lang.japanese.kanji.util.pluckKanji
 
@@ -35,11 +35,11 @@ class OnYomiParser(rawContent: String) : NewlineGroupParser<List<OnYomi>>(rawCon
 
 class KunYomiParser(
     rawContent: String,
-    val annotationMode: KunYomiAnnotationMode = KunYomiAnnotationMode.BracketKunYomiParser
+    val kunYomiParser: KunYomiAnnotationMode = KunYomiAnnotationMode.BracketKunYomiParser
 ) : NewlineGroupParser<List<KunYomi>>(rawContent) {
     override fun getValues(assocLines: List<String>) =
-        assocLines.filter { it.containsOnlyHiragana() }
-            .map(annotationMode::parse)
+        assocLines.filter { it.containsOnlyHiraganaOrAnnotations(kunYomiParser) }
+            .map(kunYomiParser::parse)
 }
 
 class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentSequence: String) : NewlineGroupParser<List<Pair<VocabularyItem, SampleSentence?>>>(rawContent) {

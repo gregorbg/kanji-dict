@@ -2,12 +2,14 @@ package com.suushiemaniac.lang.japanese.kanji.util
 
 import com.mariten.kanatools.KanaAppraiser
 import com.mariten.kanatools.KanaConverter
+import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
 
 fun String.containsOnlyKatakana() = this.all(KanaAppraiser::isZenkakuKatakana)
 fun String.containsOnlyHiragana() = this.all(KanaAppraiser::isZenkakuHiragana)
 fun String.containsOnlyAscii() = this.all(KanaAppraiser::isZenkakuAscii)
 fun String.containsOnlyKutoten() = this.all(KanaAppraiser::isZenkakuKutoten)
 fun String.containsOnlyAlphanum() = this.containsOnlyAscii() || this.containsOnlyKutoten()
+fun String.containsOnlyHiraganaOrAnnotations(parser: KunYomiAnnotationMode) = this.all { KanaAppraiser.isZenkakuHiragana(it) || it in parser.annotationSymbols }
 
 fun String.isProbablyKanji() = !this.containsOnlyHiragana() && !this.containsOnlyKatakana() && !this.containsOnlyAlphanum()
 
