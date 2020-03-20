@@ -1,4 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.parser
+package com.suushiemaniac.lang.japanese.kanji.source.workbook.parser
 
 import com.suushiemaniac.lang.japanese.kanji.util.allTo
 import com.suushiemaniac.lang.japanese.kanji.util.toStringifiedChars

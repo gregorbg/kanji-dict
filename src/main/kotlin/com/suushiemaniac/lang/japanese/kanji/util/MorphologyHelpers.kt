@@ -24,7 +24,7 @@ fun String.alignReadingsWith(readingsRaw: String, kanjiSource: KanjiSource): Lis
     return transformReadings(pluckedKanji, readingsRaw, kanjiSource)
 }
 
-private tailrec fun String.pluckKanji(accu: List<String> = emptyList()): List<String> {
+tailrec fun String.pluckKanji(accu: List<String> = emptyList()): List<String> {
     if (this.isEmpty()) {
         return accu
     }

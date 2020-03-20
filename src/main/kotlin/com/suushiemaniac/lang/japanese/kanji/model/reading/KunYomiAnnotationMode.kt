@@ -1,4 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.parser
+package com.suushiemaniac.lang.japanese.kanji.model.reading
 
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
 

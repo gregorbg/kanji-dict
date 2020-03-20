@@ -4,10 +4,9 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.*
-import com.suushiemaniac.lang.japanese.kanji.parser.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
 import com.suushiemaniac.lang.japanese.kanji.util.japaneseSymbolsToASCII
 import com.suushiemaniac.lang.japanese.kanji.util.splitAndTrim
-import com.suushiemaniac.lang.japanese.kanji.util.toStringifiedChars
 
 fun KanjiDictDao.toModel(): KanjiDictEntry {
     val fullOn = this.onyomi?.splitAndTrim(KANJI_DICT_ONYOMI_SEP).orEmpty().parseOn()
