@@ -5,31 +5,34 @@ import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.SimpleKanji
+import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
-import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.KunYomiParser
-import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.OnYomiParser
-import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.VocabularyWithSampleSentenceParser
+import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.*
 
 data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource, SampleSentenceSource {
     private val lessonsContent = loadFile(bookNum, LESSONS_FILE_TAG)
     private val readingsContent = loadFile(bookNum, READINGS_FILE_TAG)
     private val samplesContent = loadFile(bookNum, SAMPLES_FILE_TAG)
 
-    val onYomiParser = OnYomiParser(readingsContent)
-    val kunYomiParser = KunYomiParser(readingsContent, KUNYOMI_PARSER)
-    val vocabularyParser = VocabularyWithSampleSentenceParser(samplesContent, ALIGNMENT_SEPARATOR)
+    private val onYomiParser = OnYomiParser(readingsContent)
+    private val kunYomiParser = KunYomiParser(readingsContent, KUNYOMI_PARSER)
+    private val vocabularyParser = VocabularyWithSampleSentenceParser(samplesContent, ALIGNMENT_SEPARATOR)
+    private val lessonsParser = LessonsParser(lessonsContent)
+    private val idParser = NumericalIndexParser(lessonsContent)
 
-    val onYomiData by lazy { onYomiParser.getAssociations() }
-    val kunYomiData by lazy { kunYomiParser.getAssociations() }
-    val vocabularyAndSentenceData by lazy { vocabularyParser.getAssociations() }
+    private val onYomiData by lazy { onYomiParser.getAssociations() }
+    private val kunYomiData by lazy { kunYomiParser.getAssociations() }
+    private val vocabularyAndSentenceData by lazy { vocabularyParser.getAssociations() }
+    private val lessonsData by lazy { lessonsParser.getAssociations() }
+    private val idData by lazy { idParser.getAssociations() }
 
-    val vocabularyData by lazy {
+    private val vocabularyData by lazy {
         vocabularyAndSentenceData.mapValues { it.value.map(Pair<VocabularyItem, SampleSentence?>::first) }
     }
 
-    val sampleSentenceData by lazy {
+    private val sampleSentenceData by lazy {
         vocabularyAndSentenceData.values.flatten().groupBy { it.first.surfaceForm }
             .mapValues { it.value.mapNotNull(Pair<VocabularyItem, SampleSentence?>::second) }
     }
@@ -46,8 +49,7 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
     }
 
     override fun fetchAll(): List<Kanji> {
-        val allKeys = onYomiData.keys + kunYomiData.keys
-        return allKeys.mapNotNull { lookupSymbol(it.first()) }
+        return idData.keys.mapNotNull { lookupSymbol(it.first()) }
     }
 
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
@@ -56,6 +58,22 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
 
     override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
         return sampleSentenceData[vocab.surfaceForm].orEmpty().distinctBy { it.rawPhrase }
+    }
+
+    fun getMetadata(kanji: Kanji): WorkbookMetadata? {
+        val lesson = lessonsData[kanji.kanji.toString()] ?: -1
+        val id = idData[kanji.kanji.toString()] ?: -1
+
+        if (lesson >= 0 && id >= 0) {
+            val idOffset = SYMBOL_COUNTS.take(bookNum).sum()
+            val actualId = idOffset + id
+
+            val bookKey = RESOURCE_NAMES[bookNum]
+
+            return WorkbookMetadata(actualId, lesson, bookKey)
+        }
+
+        return null
     }
 
     companion object {
@@ -68,10 +86,11 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
         const val ALIGNMENT_SEPARATOR = "."
 
         val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1", "intermediate_2")
+        val SYMBOL_COUNTS by lazy { RESOURCE_NAMES.indices.map { KanjiWorkbookSource(it).fetchAll().size } }
 
         val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
 
-        fun loadFile(bookNum: Int, fileTag: String): String {
+        private fun loadFile(bookNum: Int, fileTag: String): String {
             val resourceBookName = RESOURCE_NAMES[bookNum]
             val resourcePath = "/$RESOURCE_PACKAGE/$resourceBookName/$fileTag.txt"
 

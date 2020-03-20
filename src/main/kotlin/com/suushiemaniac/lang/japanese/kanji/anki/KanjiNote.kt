@@ -71,7 +71,7 @@ data class KanjiNote(
             elements: Elements,
             lesson: Int,
             id: Int,
-            translationSource: TranslationSource,
+            elementsTranslationSource: TranslationSource,
             vocabSource: VocabularySource
         ): KanjiNote {
             val allSamples = vocabSource.getVocabularyItemsFor(kanji)
@@ -90,7 +90,7 @@ data class KanjiNote(
             val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
 
             val elementsWithName = elements.kanjiParts
-                .associateWith { translationSource.lookupWord(it)?.translations.orEmpty().joinToString() }
+                .associateWith { elementsTranslationSource.lookupWord(it)?.translations.orEmpty().joinToString() }
                 .mapKeys { it.key.first() }
 
             val suitableMeanings = kanji.compactMeaning.takeUnless { it.isEmpty() }?.joinToString()
