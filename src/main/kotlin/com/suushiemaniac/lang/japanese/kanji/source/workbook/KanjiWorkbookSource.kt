@@ -3,7 +3,7 @@ package com.suushiemaniac.lang.japanese.kanji.source.workbook
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.SimpleKanji
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource

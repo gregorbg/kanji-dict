@@ -5,5 +5,8 @@ interface ReadingWithSurfaceForm {
 
     val surfaceForm: String
 
+    val normalizedReading: String
+        get() = this.reading
+
     fun asFurigana(formatter: FuriganaFormatter) = formatter.format(this)
 }

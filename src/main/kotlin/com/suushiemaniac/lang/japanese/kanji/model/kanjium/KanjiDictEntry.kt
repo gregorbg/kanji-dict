@@ -3,8 +3,8 @@ package com.suushiemaniac.lang.japanese.kanji.model.kanjium
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KanjiMinistryList
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KanjiType
-import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
-import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
 import kotlinx.serialization.Serializable
 
 @Serializable

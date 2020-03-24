@@ -1,4 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration
+package com.suushiemaniac.lang.japanese.kanji.model.reading.type
 
 import kotlinx.serialization.Serializable
 

@@ -1,6 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration
 
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
 import com.suushiemaniac.lang.japanese.kanji.util.words
 
 enum class KanjiMinistryList {

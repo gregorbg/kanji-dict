@@ -1,6 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.model.reading
-
-import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
+package com.suushiemaniac.lang.japanese.kanji.model.reading.type
 
 sealed class KunYomiAnnotationMode {
     abstract fun parse(raw: String): KunYomi
@@ -17,7 +15,9 @@ sealed class KunYomiAnnotationMode {
                 ?: error("KunYomi annotation parsing: $raw did not match the bracket expression!")
 
             val (core, okuri) = matchedGroups.drop(1)
-            return KunYomi(core, okuri.takeUnless { it.isEmpty() })
+            return KunYomi(
+                core,
+                okuri.takeUnless { it.isEmpty() })
         }
     }
 
@@ -27,7 +27,10 @@ sealed class KunYomiAnnotationMode {
 
         override fun parse(raw: String): KunYomi {
             val okuriganaSplits = raw.split(separator)
-            return KunYomi(okuriganaSplits.first(), okuriganaSplits.getOrNull(1))
+            return KunYomi(
+                okuriganaSplits.first(),
+                okuriganaSplits.getOrNull(1)
+            )
         }
     }
 }

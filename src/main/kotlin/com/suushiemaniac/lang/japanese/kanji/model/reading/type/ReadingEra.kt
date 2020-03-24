@@ -1,4 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration
+package com.suushiemaniac.lang.japanese.kanji.model.reading.type
 
 enum class ReadingEra(val symbol: Char) {
     GO('呉'),

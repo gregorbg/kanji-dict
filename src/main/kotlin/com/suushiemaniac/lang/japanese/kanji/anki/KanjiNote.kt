@@ -6,9 +6,8 @@ import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
-import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KunYomi
-import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.OnYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
@@ -36,13 +35,7 @@ data class KanjiNote(
     val jlpt: Int?
 ) : AnkiDeckNote {
     override fun getCSVFacts(): List<String> {
-        val ankiHackReadings = sampleReadings.mapValues { it.value.asFurigana(RubyFuriganaFormatter) }
-            .mapValues {
-                it.value.replace(
-                    RubyFuriganaFormatter.format(KanjiReading(kanjiSymbol, it.key)),
-                    " $kanjiSymbol "
-                ).trim()
-            }
+        val ankiFormatReadings = sampleReadings.mapValues { it.value.asFurigana(RubyFuriganaFormatter) }
 
         return listOf(
             kanjiSymbol.toString(),
@@ -57,7 +50,7 @@ data class KanjiNote(
             elementsWithName.entries.joinToString("<br/>") { "${it.key} ${it.value}" },
             coreMeaning,
             JSON.stringify(MapSerializer(String.serializer(), String.serializer()), sampleTranslations),
-            JSON.stringify(MapSerializer(String.serializer(), String.serializer()), ankiHackReadings)
+            JSON.stringify(MapSerializer(String.serializer(), String.serializer()), ankiFormatReadings)
         )
     }
 
@@ -77,9 +70,9 @@ data class KanjiNote(
             val allSamples = vocabSource.getVocabularyItemsFor(kanji)
 
             val kunModelSamples =
-                kanji.kunYomi.associateWith { allSamples.filterForReadings(kanji.kanji.toString(), it.coreReading) }
+                kanji.kunYomi.associateWith { allSamples.filterForReadings(it.coreReading) }
             val onModelSamples =
-                kanji.onYomi.associateWith { allSamples.filterForReadings(kanji.kanji.toString(), it.kanaReading) }
+                kanji.onYomi.associateWith { allSamples.filterForReadings(it.kanaReading) }
 
             val usedSamples = (kunModelSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
 
@@ -132,11 +125,8 @@ data class KanjiNote(
             }
         }
 
-        private fun List<VocabularyItem>.filterForReadings(
-            kanjiForm: String,
-            readingStr: String
-        ): List<VocabularyItem> {
-            return this.filter { it.readingParts.any { r -> r.surfaceForm == kanjiForm && r.reading == readingStr } }
+        private fun List<VocabularyItem>.filterForReadings(baseReading: String): List<VocabularyItem> {
+            return this.filter { it.readingParts.any { r -> r.normalizedReading == baseReading } }
         }
     }
 }

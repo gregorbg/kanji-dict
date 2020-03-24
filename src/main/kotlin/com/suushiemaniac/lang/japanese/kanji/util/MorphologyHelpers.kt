@@ -52,14 +52,14 @@ private fun transformReadings(
     val next = segments.first()
     val nextIsKanji = next.isProbablyKanji() && next.length == 1
 
-    val testReadings = if (nextIsKanji) {
+    val readingVariations = if (nextIsKanji) {
         kanjiSource.lookupSymbol(next.first())?.allReadings()
-            ?.flatMap { it.possibleAlternateKatakanaReadings() }
-            ?.distinct().orEmpty()
-    } else listOf(next)
+            ?.associateWith { it.possibleAlternateKatakanaReadings() }
+            ?.invertMultiMap().orEmpty()
+    } else mapOf(next to next)
 
     val adequateReadings =
-        testReadings.filter {
+        readingVariations.keys.filter {
             rawTemplate.startsWith(it.toKatakana()) ||
                     rawTemplate.startsWith(it.toHiragana()) ||
                     rawTemplate.startsWith(it)
@@ -69,7 +69,8 @@ private fun transformReadings(
         val readingFromTemplate = rawTemplate.take(it.length)
 
         val readingModel = if (nextIsKanji) {
-            KanjiReading(next.first(), readingFromTemplate)
+            val baseReading = readingVariations[readingFromTemplate]?.takeUnless { _ -> it == readingFromTemplate }
+            KanjiReading(next.first(), readingFromTemplate, baseReading)
         } else KanaReading(readingFromTemplate)
 
         transformReadings(

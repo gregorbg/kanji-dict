@@ -4,7 +4,10 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.*
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.ReadingEra
 import com.suushiemaniac.lang.japanese.kanji.util.japaneseSymbolsToASCII
 import com.suushiemaniac.lang.japanese.kanji.util.splitAndTrim
 
@@ -49,7 +52,10 @@ private fun List<String>.parseOn(backingReadings: List<OnYomi> = emptyList()): L
         val epoch = fakeParse.okurigana?.first()?.let(ReadingEra.Companion::parseSymbol)
         val indexEpoch = epoch ?: helperIndex[fakeParse.coreReading]
 
-        OnYomi(fakeParse.coreReading, indexEpoch)
+        OnYomi(
+            fakeParse.coreReading,
+            indexEpoch
+        )
     }
 }
 

@@ -2,7 +2,7 @@ package com.suushiemaniac.lang.japanese.kanji.util
 
 import com.mariten.kanatools.KanaAppraiser
 import com.mariten.kanatools.KanaConverter
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
 
 fun String.containsOnlyKatakana() = this.all(KanaAppraiser::isZenkakuKatakana)
 fun String.containsOnlyHiragana() = this.all(KanaAppraiser::isZenkakuHiragana)
@@ -15,6 +15,10 @@ fun String.isProbablyKanji() = !this.containsOnlyHiragana() && !this.containsOnl
 
 fun String.toKatakana() = KanaConverter.convertKana(this, KanaConverter.OP_ZEN_HIRA_TO_ZEN_KATA)
 fun String.toHiragana() = KanaConverter.convertKana(this, KanaConverter.OP_ZEN_KATA_TO_ZEN_HIRA)
+
+fun String.toKatakanaNoAccents() =
+    KanaConverter.convertKana(this.toHankakuKatakana(), KanaConverter.OP_HAN_KATA_TO_ZEN_KATA or KanaConverter.OP_KEEP_DIACRITIC_MARKS_APART)
+        .filterNot { it in DIACRITIC_MARKS }.toKatakana()
 
 private fun String.toHankakuKatakana() =
     KanaConverter.convertKana(this.toKatakana(), KanaConverter.OP_ZEN_KATA_TO_HAN_KATA)

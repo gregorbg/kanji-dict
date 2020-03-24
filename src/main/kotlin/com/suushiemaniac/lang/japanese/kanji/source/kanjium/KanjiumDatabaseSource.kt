@@ -7,7 +7,7 @@ import com.suushiemaniac.lang.japanese.kanji.persistence.ElementsDao
 import com.suushiemaniac.lang.japanese.kanji.persistence.KanjiDictDao
 import com.suushiemaniac.lang.japanese.kanji.persistence.toModel
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
@@ -18,8 +18,9 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
-    override fun lookupSymbol(kanji: Char): KanjiDictEntry {
-        return KANJI_CACHE.getOrPut(kanji) { transaction { KanjiDictDao[kanji.toString()].toModel() } }
+    override fun lookupSymbol(kanji: Char): KanjiDictEntry? {
+        val lookup = KANJI_CACHE[kanji] ?: transaction { KanjiDictDao.findById(kanji.toString())?.toModel() }
+        return lookup?.also { KANJI_CACHE[kanji] = it }
     }
 
     override fun fetchAll(): List<Kanji> {
