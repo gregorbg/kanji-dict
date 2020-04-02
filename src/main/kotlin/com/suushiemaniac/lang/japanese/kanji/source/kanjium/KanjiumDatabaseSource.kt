@@ -24,10 +24,10 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource {
     }
 
     override fun fetchAll(): List<Kanji> {
-        val fullFetch = transaction { KanjiDictDao.all() }
+        val fullFetch = transaction { KanjiDictDao.all().map { it.toModel() } }
 
         return fullFetch.map {
-            it.toModel().also { m -> KANJI_CACHE[m.kanji] = m }
+            it.also { m -> KANJI_CACHE[m.kanji] = m }
         }
     }
 

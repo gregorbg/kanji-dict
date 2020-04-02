@@ -7,3 +7,9 @@ fun Iterable<String>.singleOrAll() = singleOrNull() ?: joinToString()
 
 fun <K, V> Map<K, Iterable<V>>.invertMultiMap() =
     entries.flatMap { it.value allTo it.key }.toMap()
+
+fun <T, V> Iterable<T>.associateWithNotNull(mapping: (T) -> V?): Map<T, V> {
+    return mapNotNull { t -> mapping(t)?.let { t to it } }.toMap()
+}
+
+fun <T> Collection<T>.unlessEmpty() = takeUnless { it.isEmpty() }

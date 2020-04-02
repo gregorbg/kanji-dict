@@ -1,5 +1,7 @@
 package com.suushiemaniac.lang.japanese.kanji.anki.model
 
+import com.suushiemaniac.lang.japanese.kanji.util.associateWithNotNull
+
 data class KanjiVocabPhrase(val phraseSegments: List<KanjiVocabPhraseToken>) {
     fun getLiterals() = phraseSegments.map { it.surfaceForm }
     fun getReadings() = keyedIfExisting { it.reading.takeIf { r -> r != it.surfaceForm } }
@@ -7,6 +9,6 @@ data class KanjiVocabPhrase(val phraseSegments: List<KanjiVocabPhraseToken>) {
     fun getAnnotations() = keyedIfExisting { it.annotation }
 
     private fun <T> keyedIfExisting(mapping: (KanjiVocabPhraseToken) -> T?): Map<String, T> {
-        return phraseSegments.mapNotNull { t -> mapping(t)?.let { t.surfaceForm to it } }.toMap()
+        return phraseSegments.associateWithNotNull(mapping).mapKeys { it.key.surfaceForm }
     }
 }

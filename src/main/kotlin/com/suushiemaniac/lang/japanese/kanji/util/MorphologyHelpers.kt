@@ -53,9 +53,10 @@ private fun transformReadings(
     val nextIsKanji = next.isProbablyKanji() && next.length == 1
 
     val readingVariations = if (nextIsKanji) {
-        kanjiSource.lookupSymbol(next.first())?.allReadings()
-            ?.associateWith { it.possibleAlternateKatakanaReadings() }
-            ?.invertMultiMap().orEmpty()
+        kanjiSource.lookupSymbol(next.first())?.allReadings()?.let { rs ->
+            rs.associateWith { it.possibleAlternateKatakanaReadings() - (rs - it) }
+                .invertMultiMap()
+        }.orEmpty()
     } else mapOf(next to next)
 
     val adequateReadings =

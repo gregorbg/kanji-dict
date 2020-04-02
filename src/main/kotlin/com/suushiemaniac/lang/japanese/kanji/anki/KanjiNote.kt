@@ -11,10 +11,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
-import com.suushiemaniac.lang.japanese.kanji.util.IDC_GRAPH_MAPPING
-import com.suushiemaniac.lang.japanese.kanji.util.singleOrAll
-import com.suushiemaniac.lang.japanese.kanji.util.toHiragana
-import com.suushiemaniac.lang.japanese.kanji.util.toKatakana
+import com.suushiemaniac.lang.japanese.kanji.util.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
@@ -23,6 +20,7 @@ data class KanjiNote(
     val kanjiSymbol: Char,
     val kunReadingsWithSamples: Map<KunYomi, List<String>>,
     val onReadingsWithSamples: Map<OnYomi, List<String>>,
+    val rendakuReadingExceptions: Map<VocabularyItem, String>,
     val radicalDescription: String,
     val idcGraphNum: Int,
     val elementsWithName: Map<Char, String>,
@@ -45,6 +43,9 @@ data class KanjiNote(
             JSON.stringify(
                 MapSerializer(String.serializer(), ListSerializer(String.serializer())),
                 onReadingsWithSamples.mapKeys { it.key.kanaReading.toKatakana() }),
+            JSON.stringify(
+                MapSerializer(String.serializer(), String.serializer()),
+                rendakuReadingExceptions.mapKeys { it.key.surfaceForm }),
             radicalDescription,
             "<img src=\"idcGraph-$idcGraphNum.png\">",
             elementsWithName.entries.joinToString("<br/>") { "${it.key} ${it.value}" },
@@ -75,6 +76,14 @@ data class KanjiNote(
                 kanji.onYomi.associateWith { allSamples.filterForReadings(it.kanaReading) }
 
             val usedSamples = (kunModelSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
+            val readingPerVocabItem = (kunModelSamples + onModelSamples).invertMultiMap()
+
+            val rendakuExceptions = usedSamples.associateWithNotNull {
+                val relevantReading = it.readingParts.firstOrNull { r -> r.surfaceForm == kanji.kanji.toString() }
+                    ?: return@associateWithNotNull null
+
+                relevantReading.reading.takeIf { r -> r != readingPerVocabItem[it]?.standardisedReading }
+            }
 
             val radicalDescription =
                 kanji.radicalVariant?.let { radicalDesc(it) + "(Variante von " + radicalDesc(kanji.radical) + ")" }
@@ -86,7 +95,7 @@ data class KanjiNote(
                 .associateWith { elementsTranslationSource.lookupWord(it)?.translations.orEmpty().joinToString() }
                 .mapKeys { it.key.first() }
 
-            val suitableMeanings = kanji.compactMeaning.takeUnless { it.isEmpty() }?.joinToString()
+            val suitableMeanings = kanji.compactMeaning.unlessEmpty()?.joinToString()
                 ?: elements.compactMeaning
 
             val translatedSamples = allSamples.associateWith { it.translations.joinToString() }
@@ -98,6 +107,7 @@ data class KanjiNote(
                 kanji.kanji,
                 kunModelSamples.mapValues { it.value.map(VocabularyItem::surfaceForm) },
                 onModelSamples.mapValues { it.value.map(VocabularyItem::surfaceForm) },
+                rendakuExceptions,
                 radicalDescription,
                 idcIndex,
                 elementsWithName,
