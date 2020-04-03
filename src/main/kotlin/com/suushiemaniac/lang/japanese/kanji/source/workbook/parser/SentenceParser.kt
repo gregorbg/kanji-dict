@@ -61,7 +61,7 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
             }
 
             val sampleSentence = parts.getOrNull(3)?.let(::SampleSentence)
-            VocabularyItem(alignedReading, transRaw.words) to sampleSentence
+            VocabularyItem(alignedReading, transRaw.commaTokens) to sampleSentence
         }
     }
 

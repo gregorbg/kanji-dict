@@ -11,7 +11,7 @@ object AnkiExporter {
 
     fun makeCSV(cards: List<AnkiDeckNote>): String {
         val csvLines = cards.map {
-            val csvLineContent = it.getCSVFacts() + it.getTags()
+            val csvLineContent = it.getCSVFacts() + it.getTags().joinToString(" ")
             csvLineContent.joinToString(CSV_SEPARATOR)
         }
 

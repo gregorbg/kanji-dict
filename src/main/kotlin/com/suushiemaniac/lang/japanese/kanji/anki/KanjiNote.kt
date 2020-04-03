@@ -71,22 +71,21 @@ data class KanjiNote(
             val allSamples = vocabSource.getVocabularyItemsFor(kanji)
 
             val kunModelSamples =
-                kanji.kunYomi.associateWith { allSamples.filterForReadings(it.coreReading) }
+                kanji.kunYomi.associateWith { allSamples.filterForReadings(it.standardisedReading) }
             val onModelSamples =
-                kanji.onYomi.associateWith { allSamples.filterForReadings(it.kanaReading) }
+                kanji.onYomi.associateWith { allSamples.filterForReadings(it.standardisedReading) }
 
             val usedSamples = (kunModelSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
-            val readingPerVocabItem = (kunModelSamples + onModelSamples).invertMultiMap()
 
             val rendakuExceptions = usedSamples.associateWithNotNull {
                 val relevantReading = it.readingParts.firstOrNull { r -> r.surfaceForm == kanji.kanji.toString() }
                     ?: return@associateWithNotNull null
 
-                relevantReading.reading.takeIf { r -> r != readingPerVocabItem[it]?.standardisedReading }
+                relevantReading.takeIf { r -> r.reading != r.normalizedReading }?.reading
             }
 
             val radicalDescription =
-                kanji.radicalVariant?.let { radicalDesc(it) + "(Variante von " + radicalDesc(kanji.radical) + ")" }
+                kanji.radicalVariant?.let { radicalDesc(it) + " (Variante von " + radicalDesc(kanji.radical) + ")" }
                     ?: radicalDesc(kanji.radical)
 
             val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
