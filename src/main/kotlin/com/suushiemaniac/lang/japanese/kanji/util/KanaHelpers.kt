@@ -13,7 +13,7 @@ fun String.containsOnlyHiraganaOrAnnotations(parser: KunYomiAnnotationMode) = th
 
 fun String.isProbablyKanji(): Boolean {
     val heuristicsKanji = !this.containsOnlyHiragana() && !this.containsOnlyKatakana() && !this.containsOnlyAlphanum()
-    return heuristicsKanji || this == REPETITION_MARK_KUTOTEN.toString()
+    return heuristicsKanji || this == REPETITION_MARK_KUTOTEN.toString() || this == COUNTER_MARK_KUTOTEN.toString()
 }
 
 fun String.toKatakana() = KanaConverter.convertKana(this, KanaConverter.OP_ZEN_HIRA_TO_ZEN_KATA)
@@ -45,6 +45,7 @@ val ZENKAKU_DIACRITIC_MARKS = HANKAKU_DIACRITIC_MARKS.map { it.toString().toZenk
 
 const val GLOTTAL_STOP_ZEN_KATAKANA = 'ッ'
 const val REPETITION_MARK_KUTOTEN = '々'
+const val COUNTER_MARK_KUTOTEN = 'ヶ'
 
 fun String.possibleAlternateKatakanaReadings(): List<String> {
     val prefixes = this.first().katakanaDiacriticVariants()

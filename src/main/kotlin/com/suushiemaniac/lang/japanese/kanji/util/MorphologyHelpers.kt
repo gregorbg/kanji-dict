@@ -90,16 +90,6 @@ private fun Kanji.allReadings(): List<String> {
     return rawReadings.filterNot { it.isEmpty() }
 }
 
-fun main() {
-    val kanjiSource = KanjiumDatabaseSource("/home/suushie_maniac/sqldocs/kanjium/data/kanjidb.sqlite")
-
-    val fullText = "思えら"
-    val readingRaw = "おもえら"
-
-    val result = fullText.alignReadingsWith(readingRaw, kanjiSource)
-    println(VocabularyItem(result, emptyList()).asFurigana(RubyFuriganaFormatter))
-}
-
 // https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt
 val IDC_GRAPH_MAPPING =
     listOf(
