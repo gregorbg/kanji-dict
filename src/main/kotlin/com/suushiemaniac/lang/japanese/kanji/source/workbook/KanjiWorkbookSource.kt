@@ -33,7 +33,7 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
     }
 
     private val sampleSentenceData by lazy {
-        vocabularyAndSentenceData.values.flatten().groupBy { it.first.surfaceForm }
+        vocabularyAndSentenceData.values.flatten().groupBy { it.first.withoutTranslations() }
             .mapValues { it.value.mapNotNull(Pair<VocabularyItem, SampleSentence?>::second) }
     }
 
@@ -57,7 +57,7 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
     }
 
     override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
-        return sampleSentenceData[vocab.surfaceForm].orEmpty().distinctBy { it.rawPhrase }
+        return sampleSentenceData[vocab.withoutTranslations()].orEmpty().distinctBy { it.rawPhrase }
     }
 
     fun getMetadata(kanji: Kanji): WorkbookMetadata? {

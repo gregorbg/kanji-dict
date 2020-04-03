@@ -106,20 +106,20 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
             val rawReadings = this.japanese
 
             val cleanReadings = rawReadings.mapIndexed { i, rd ->
-                rd.cleanup(rawReadings.take(i))
+                rd.cleanup(rawReadings.take(i), this.slug)
             }
 
             return this.copy(japanese = cleanReadings)
         }
 
-        private fun JishoReading.cleanup(history: List<JishoReading>): JishoReading {
+        private fun JishoReading.cleanup(history: List<JishoReading>, backupWord: String? = null): JishoReading {
             if (history.isEmpty()) {
                 return this
             }
 
             if (word == null) {
                 val lastWord = history.findLast { it.word != null }
-                    ?.word ?: error("Word sense broken")
+                    ?.word ?: backupWord ?: error("Word sense broken")
 
                 return copy(word = lastWord).cleanup(history)
             }

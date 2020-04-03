@@ -9,6 +9,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
 import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.util.*
@@ -63,8 +64,7 @@ data class KanjiNote(
         fun from(
             kanji: KanjiDictEntry,
             elements: Elements,
-            lesson: Int,
-            id: Int,
+            metadata: WorkbookMetadata,
             elementsTranslationSource: TranslationSource,
             vocabSource: VocabularySource
         ): KanjiNote {
@@ -121,8 +121,8 @@ data class KanjiNote(
                 suitableMeanings,
                 translatedSamples.mapKeys { it.key.surfaceForm },
                 readingsForSamples,
-                lesson,
-                id,
+                metadata.lesson + 1,
+                metadata.id + 1,
                 kanji.kanken?.toKankenDescription(),
                 kanji.jlpt
             )

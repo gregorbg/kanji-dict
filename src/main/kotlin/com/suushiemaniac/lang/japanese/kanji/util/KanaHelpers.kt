@@ -4,7 +4,7 @@ import com.mariten.kanatools.KanaAppraiser
 import com.mariten.kanatools.KanaConverter
 import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
 
-fun String.containsOnlyKatakana() = this.all(KanaAppraiser::isZenkakuKatakana)
+fun String.containsOnlyKatakana() = this.all { KanaAppraiser.isZenkakuKatakana(it) || it == LENGTHENING_MARK_KUTOTEN }
 fun String.containsOnlyHiragana() = this.all(KanaAppraiser::isZenkakuHiragana)
 fun String.containsOnlyAscii() = this.all(KanaAppraiser::isZenkakuAscii)
 fun String.containsOnlyKutoten() = this.all(KanaAppraiser::isZenkakuKutoten)
@@ -46,6 +46,7 @@ val ZENKAKU_DIACRITIC_MARKS = HANKAKU_DIACRITIC_MARKS.map { it.toString().toZenk
 const val GLOTTAL_STOP_ZEN_KATAKANA = 'ッ'
 const val REPETITION_MARK_KUTOTEN = '々'
 const val COUNTER_MARK_KUTOTEN = 'ヶ'
+const val LENGTHENING_MARK_KUTOTEN = 'ー'
 
 fun String.possibleAlternateKatakanaReadings(): List<String> {
     val prefixes = this.first().katakanaDiacriticVariants()
