@@ -67,11 +67,21 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
 
     companion object {
         const val RENDAKU_ANNOTATION_SYMBOL = '*'
+        const val RENDAKU_EXCEPTIONAL_READING_SYMBOL = '/'
 
-        private fun String.cleanRendakuAnnotations() =
-            this.trimStart(RENDAKU_ANNOTATION_SYMBOL).split(RENDAKU_ANNOTATION_SYMBOL).first()
+        private fun String.cleanRendakuAnnotations(): String {
+            if (RENDAKU_EXCEPTIONAL_READING_SYMBOL in this) {
+                return this.split(RENDAKU_EXCEPTIONAL_READING_SYMBOL).first()
+            }
+
+            return this.trimStart(RENDAKU_ANNOTATION_SYMBOL).split(RENDAKU_ANNOTATION_SYMBOL).first()
+        }
 
         private fun String.normalizeRendakuAnnotations(): String? {
+            if (RENDAKU_EXCEPTIONAL_READING_SYMBOL in this) {
+                return this.split(RENDAKU_EXCEPTIONAL_READING_SYMBOL).last()
+            }
+
             if (this.startsWith(RENDAKU_ANNOTATION_SYMBOL)) {
                 val cleaned = this.drop(1).take(1).toKatakanaNoAccents().toHiragana() + this.drop(2)
                 return cleaned.normalizeRendakuAnnotations() ?: cleaned

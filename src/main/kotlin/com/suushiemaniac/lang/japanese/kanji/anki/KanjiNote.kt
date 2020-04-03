@@ -70,12 +70,20 @@ data class KanjiNote(
         ): KanjiNote {
             val allSamples = vocabSource.getVocabularyItemsFor(kanji)
 
-            val kunModelSamples =
+            val kunModelRawSamples =
                 kanji.kunYomi.associateWith { allSamples.filterForReadings(it.standardisedReading) }
             val onModelSamples =
                 kanji.onYomi.associateWith { allSamples.filterForReadings(it.standardisedReading) }
 
+            val usedRawSamples = (kunModelRawSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
+            val remainingSamples = allSamples - usedRawSamples
+
+            val kunModelExtendedSamples = kanji.kunYomi.associateWithNotNull { remainingSamples.filterForPrefixReadings(it.standardisedReading).unlessEmpty() }
+            val kunModelSamples = kunModelRawSamples.mergeMultiMap(kunModelExtendedSamples)
+
             val usedSamples = (kunModelSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
+
+            require(allSamples.size == usedSamples.size) { "Missing samples: " + (allSamples - usedSamples).map { it.surfaceForm } }
 
             val rendakuExceptions = usedSamples.associateWithNotNull {
                 val relevantReading = it.readingParts.firstOrNull { r -> r.surfaceForm == kanji.kanji.toString() }
@@ -136,6 +144,10 @@ data class KanjiNote(
 
         private fun List<VocabularyItem>.filterForReadings(baseReading: String): List<VocabularyItem> {
             return this.filter { it.readingParts.any { r -> r.normalizedReading == baseReading } }
+        }
+
+        private fun List<VocabularyItem>.filterForPrefixReadings(baseReading: String): List<VocabularyItem> {
+            return this.filter { it.readingParts.any { r -> r.normalizedReading.startsWith(baseReading) } }
         }
     }
 }
