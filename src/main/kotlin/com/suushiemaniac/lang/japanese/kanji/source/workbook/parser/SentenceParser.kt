@@ -1,12 +1,13 @@
 package com.suushiemaniac.lang.japanese.kanji.source.workbook.parser
 
-import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
-import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KanaReading
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanaToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanjiToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
 import com.suushiemaniac.lang.japanese.kanji.util.*
 
 abstract class NewlineGroupParser<T>(rawContent: String) : FileParser<T>(rawContent) {
@@ -25,24 +26,24 @@ abstract class NewlineGroupParser<T>(rawContent: String) : FileParser<T>(rawCont
     abstract fun getValues(assocLines: List<String>): T
 }
 
-class OnYomiParser(rawContent: String) : NewlineGroupParser<List<OnYomi>>(rawContent) {
+class OnYomiParser(rawContent: String) : NewlineGroupParser<List<KanjiOnYomi>>(rawContent) {
     override fun getValues(assocLines: List<String>) =
         assocLines.filter { it.containsOnlyKatakana() }
-            .map { OnYomi(it) }
+            .map { KanjiOnYomi(it) }
 }
 
 class KunYomiParser(
     rawContent: String,
     val kunYomiParser: KunYomiAnnotationMode = KunYomiAnnotationMode.BracketKunYomiParser
-) : NewlineGroupParser<List<KunYomi>>(rawContent) {
+) : NewlineGroupParser<List<KanjiKunYomi>>(rawContent) {
     override fun getValues(assocLines: List<String>) =
         assocLines.filter { it.containsOnlyHiraganaOrAnnotations(kunYomiParser) }
             .map(kunYomiParser::parse)
 }
 
 class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentSequence: String) :
-    NewlineGroupParser<List<Pair<VocabularyItem, SampleSentence?>>>(rawContent) {
-    override fun getValues(assocLines: List<String>): List<Pair<VocabularyItem, SampleSentence?>> {
+    NewlineGroupParser<List<Triple<VocabularyItem, VocabTranslation, SampleSentence?>>>(rawContent) {
+    override fun getValues(assocLines: List<String>): List<Triple<VocabularyItem, VocabTranslation, SampleSentence?>> {
         return assocLines.map {
             val parts = it.split("\t")
             val (fullText, reading, transRaw) = parts.take(3)
@@ -56,12 +57,19 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
                 val cleanReading = p.second.cleanRendakuAnnotations()
                 val baseReading = p.second.normalizeRendakuAnnotations()
 
-                if (p.first == cleanReading) KanaReading(p.first) else
-                    KanjiReading(p.first.first(), cleanReading, baseReading)
+                if (p.first == cleanReading) KanaToken(p.first) else
+                    KanjiToken(p.first.single(), cleanReading, baseReading)
             }
 
-            val sampleSentence = parts.getOrNull(3)?.let(::SampleSentence)
-            VocabularyItem(alignedReading, transRaw.commaTokens) to sampleSentence
+            val vocabModifiers = alignedReading.guessVocabModifiers()
+            val vocabItem = VocabularyItem(alignedReading, vocabModifiers)
+
+            val translationStrings = transRaw.commaTokens
+            val translation = VocabTranslation(translationStrings.first(), translationStrings.drop(1))
+
+            val sampleSentence = parts.getOrNull(3)?.let(SampleSentence.Companion::parse)
+
+            Triple(vocabItem, translation, sampleSentence)
         }
     }
 

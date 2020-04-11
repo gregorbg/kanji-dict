@@ -1,5 +1,7 @@
 package com.suushiemaniac.lang.japanese.kanji.model.reading
 
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+
 interface FuriganaFormatter {
-    fun format(reading: ReadingWithSurfaceForm): String
+    fun format(token: TokenWithSurfaceForm): String
 }

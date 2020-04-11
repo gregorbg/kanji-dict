@@ -1,8 +1,8 @@
-package com.suushiemaniac.lang.japanese.kanji.model.reading.type
+package com.suushiemaniac.lang.japanese.kanji.model.reading.annotation
 
 import com.suushiemaniac.lang.japanese.kanji.util.toHiragana
 
-interface KanjiAnnotation {
+interface KanjiReadingAnnotation {
     val reading: String
 
     val standardisedReading: String

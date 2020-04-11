@@ -1,11 +1,15 @@
-package com.suushiemaniac.lang.japanese.kanji.persistence
+package com.suushiemaniac.lang.japanese.kanji.source.kanjium.persistence
 
 import org.jetbrains.exposed.dao.id.IdTable
 
 object KanjiDictTable : IdTable<String>("kanjidict") {
     override val id = text("kanji").entityId()
-    val radical = reference("radical", RadicalTable)
-    val radvar = reference("radvar", RadVarTable).nullable()
+    val radical = reference("radical",
+        RadicalTable
+    )
+    val radvar = reference("radvar",
+        RadVarTable
+    ).nullable()
     val phonetic = text("phonetic").nullable()
     val idc = text("idc")
     val type = text("type").nullable()
@@ -33,7 +37,9 @@ abstract class RadicalBaseTable(name: String, idName: String) : IdTable<String>(
 }
 
 object ElementsTable : IdTable<String>("elements") {
-    override val id = reference("kanji", KanjiDictTable) // TODO does this work?
+    override val id = reference("kanji",
+        KanjiDictTable
+    ) // TODO does this work?
     val strokes = integer("strokes")
     val grade = integer("grade")
     val idc = text("idc")
@@ -47,5 +53,7 @@ object ElementsTable : IdTable<String>("elements") {
 object RadicalTable : RadicalBaseTable("radicals", "radical")
 
 object RadVarTable : RadicalBaseTable("radvars", "radvar") {
-    val parentRef = reference("radical", RadicalTable)
+    val parentRef = reference("radical",
+        RadicalTable
+    )
 }

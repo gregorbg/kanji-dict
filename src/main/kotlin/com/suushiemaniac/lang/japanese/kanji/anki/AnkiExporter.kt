@@ -4,7 +4,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
 object AnkiExporter {
-    const val CSV_SEPARATOR = "\t"
+    const val CSV_SEPARATOR = AnkiDeckNote.CSV_SEPARATOR
     const val CSV_NEWLINE = "\n"
 
     val JSON = Json(JsonConfiguration.Stable)

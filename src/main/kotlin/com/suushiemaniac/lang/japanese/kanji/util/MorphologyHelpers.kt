@@ -2,26 +2,25 @@ package com.suushiemaniac.lang.japanese.kanji.util
 
 import com.atilika.kuromoji.ipadic.Token
 import com.atilika.kuromoji.ipadic.Tokenizer
-import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
-import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KanaReading
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KanjiReading
-import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanaToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanjiToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTagModifier
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
-import com.suushiemaniac.lang.japanese.kanji.source.kanjium.KanjiumDatabaseSource
 
-const val SKIP_TOKEN = "_"
+const val UNSPECIFIED_SKIP_TOKEN = "*"
 val TOKEN_KEYS = listOf("POS-1", "POS-2", "POS-3", "POS-4", "CONJ-TYPE", "CONJ-FORM", "BASE-FORM", "READ", "PRON")
 
 private val tokenizer = Tokenizer()
 
 fun String.tokenizeJapanese(): List<Token> = tokenizer.tokenize(this)
 
-fun String.alignReadingsWith(readingsRaw: String, kanjiSource: KanjiSource): List<ReadingWithSurfaceForm> {
+fun String.alignReadingsWith(readingsRaw: String, kanjiSource: KanjiSource): List<ReadingToken> {
     val pluckedKanji = this.pluckKanji()
 
-    return transformReadings(pluckedKanji, readingsRaw, kanjiSource)
+    return zipReadings(pluckedKanji, readingsRaw, kanjiSource)
 }
 
 tailrec fun String.pluckKanji(accu: List<String> = emptyList()): List<String> {
@@ -39,12 +38,12 @@ tailrec fun String.pluckKanji(accu: List<String> = emptyList()): List<String> {
     return this.substring(nonKanji.length).pluckKanji(accu + nonKanji)
 }
 
-private fun transformReadings(
+private fun zipReadings(
     segments: List<String>,
     rawTemplate: String,
     kanjiSource: KanjiSource,
-    accu: List<ReadingWithSurfaceForm> = emptyList()
-): List<ReadingWithSurfaceForm> {
+    accu: List<ReadingToken> = emptyList()
+): List<ReadingToken> {
     if (segments.isEmpty()) {
         return accu.takeUnless { rawTemplate.isNotEmpty() }.orEmpty()
     }
@@ -71,10 +70,10 @@ private fun transformReadings(
 
         val readingModel = if (nextIsKanji) {
             val baseReading = readingVariations[readingFromTemplate]?.takeUnless { _ -> it == readingFromTemplate }
-            KanjiReading(next.first(), readingFromTemplate, baseReading)
-        } else KanaReading(readingFromTemplate)
+            KanjiToken(next.first(), readingFromTemplate, baseReading)
+        } else KanaToken(readingFromTemplate)
 
-        transformReadings(
+        zipReadings(
             segments.drop(1),
             rawTemplate.drop(readingModel.reading.length),
             kanjiSource,
@@ -86,8 +85,20 @@ private fun transformReadings(
 }
 
 private fun Kanji.allReadings(): List<String> {
-    val rawReadings = this.kunYomi.map { it.coreReading } + this.onYomi.map { it.kanaReading }
-    return rawReadings.filterNot { it.isEmpty() }
+    val combinedReadings = this.kunYomi + this.onYomi
+    return combinedReadings.map { it.standardisedReading }.filterNot { it.isEmpty() }
+}
+
+fun List<TokenWithSurfaceForm>.guessVocabModifiers(): List<VocabTagModifier> {
+    if (this.size >= 2) {
+        val (secondToLast, last) = this.takeLast(2)
+
+        if (last is KanaToken && secondToLast is KanjiToken) {
+            return VocabTagModifier.fromKana(last.kana)?.singletonList().orEmpty()
+        }
+    }
+
+    return emptyList()
 }
 
 // https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt

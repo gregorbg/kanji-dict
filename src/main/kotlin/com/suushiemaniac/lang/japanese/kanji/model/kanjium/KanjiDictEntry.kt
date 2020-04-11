@@ -3,8 +3,8 @@ package com.suushiemaniac.lang.japanese.kanji.model.kanjium
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KanjiMinistryList
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.KanjiType
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -15,10 +15,10 @@ data class KanjiDictEntry(
     val phoneticCarrier: Char?,
     val idc: String,
     val type: KanjiType?,
-    val regularOnYomi: List<OnYomi>,
-    val regularKunYomi: List<KunYomi>,
-    override val onYomi: List<OnYomi>,
-    override val kunYomi: List<KunYomi>,
+    val regularOnYomi: List<KanjiOnYomi>,
+    val regularKunYomi: List<KanjiKunYomi>,
+    override val onYomi: List<KanjiOnYomi>,
+    override val kunYomi: List<KanjiKunYomi>,
     val nanori: List<String>,
     val strokes: Int,
     val list: KanjiMinistryList,

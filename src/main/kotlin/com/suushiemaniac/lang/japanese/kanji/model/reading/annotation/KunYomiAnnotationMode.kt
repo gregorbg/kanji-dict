@@ -1,7 +1,7 @@
-package com.suushiemaniac.lang.japanese.kanji.model.reading.type
+package com.suushiemaniac.lang.japanese.kanji.model.reading.annotation
 
 sealed class KunYomiAnnotationMode {
-    abstract fun parse(raw: String): KunYomi
+    abstract fun parse(raw: String): KanjiKunYomi
 
     abstract val annotationSymbols: List<Char>
 
@@ -10,12 +10,13 @@ sealed class KunYomiAnnotationMode {
 
         override val annotationSymbols = listOf('(', ')')
 
-        override fun parse(raw: String): KunYomi {
+        override fun parse(raw: String): KanjiKunYomi {
             val matchedGroups = BRACKET_PATTERN.find(raw)?.groupValues
-                ?: error("KunYomi annotation parsing: $raw did not match the bracket expression!")
+                ?: error("KanjiKunYomi annotation parsing: $raw did not match the bracket expression!")
 
             val (core, okuri) = matchedGroups.drop(1)
-            return KunYomi(
+
+            return KanjiKunYomi(
                 core,
                 okuri.takeUnless { it.isEmpty() })
         }
@@ -25,9 +26,10 @@ sealed class KunYomiAnnotationMode {
         override val annotationSymbols: List<Char>
             get() = separator.toList()
 
-        override fun parse(raw: String): KunYomi {
+        override fun parse(raw: String): KanjiKunYomi {
             val okuriganaSplits = raw.split(separator)
-            return KunYomi(
+
+            return KanjiKunYomi(
                 okuriganaSplits.first(),
                 okuriganaSplits.getOrNull(1)
             )

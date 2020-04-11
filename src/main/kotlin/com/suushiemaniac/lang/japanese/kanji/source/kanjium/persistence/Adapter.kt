@@ -1,13 +1,13 @@
-package com.suushiemaniac.lang.japanese.kanji.persistence
+package com.suushiemaniac.lang.japanese.kanji.source.kanjium.persistence
 
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.enumeration.*
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.ReadingEra
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.SinoReadingEra
 import com.suushiemaniac.lang.japanese.kanji.util.japaneseSymbolsToASCII
 import com.suushiemaniac.lang.japanese.kanji.util.splitAndTrim
 
@@ -42,24 +42,24 @@ fun KanjiDictDao.toModel(): KanjiDictEntry {
 
 private fun List<String>.normalizeAllSymbols() = map { it.japaneseSymbolsToASCII() }
 
-private fun List<String>.parseOn(backingReadings: List<OnYomi> = emptyList()): List<OnYomi> {
+private fun List<String>.parseOn(backingReadings: List<KanjiOnYomi> = emptyList()): List<KanjiOnYomi> {
     val helperIndex = backingReadings.associateWith { it.historic }
         .mapKeys { it.key.kanaReading }
 
     return normalizeAllSymbols().map {
         val fakeParse = KunYomiAnnotationMode.BracketKunYomiParser.parse(it)
 
-        val epoch = fakeParse.okurigana?.first()?.let(ReadingEra.Companion::parseSymbol)
+        val epoch = fakeParse.okurigana?.first()?.let(SinoReadingEra.Companion::parseSymbol)
         val indexEpoch = epoch ?: helperIndex[fakeParse.coreReading]
 
-        OnYomi(
+        KanjiOnYomi(
             fakeParse.coreReading,
             indexEpoch
         )
     }
 }
 
-private fun List<String>.parseKun(): List<KunYomi> {
+private fun List<String>.parseKun(): List<KanjiKunYomi> {
     return normalizeAllSymbols().map { KunYomiAnnotationMode.BracketKunYomiParser.parse(it) }
 }
 

@@ -1,23 +1,21 @@
 package com.suushiemaniac.lang.japanese.kanji.anki
 
-import com.atilika.kuromoji.ipadic.Token
 import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhrase
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhraseToken
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
-import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
-import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
-import com.suushiemaniac.lang.japanese.kanji.model.reading.KanaReading
-import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
-import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologyToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
-import com.suushiemaniac.lang.japanese.kanji.util.SKIP_TOKEN
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
 data class KanjiVocabNote(
-    val vocabItem: ReadingWithSurfaceForm,
+    val vocabItem: TokenWithSurfaceForm,
     val mainTranslation: String,
     val additionalTranslations: List<String>,
     val ankiPhrases: List<KanjiVocabPhrase>,
@@ -57,40 +55,37 @@ data class KanjiVocabNote(
         listOf(originalKanji.toString())
 
     companion object {
+        const val SKIP_TOKEN_LITERAL = "_"
+        val SKIP_TOKEN = MorphologyToken(SKIP_TOKEN_LITERAL, SKIP_TOKEN_LITERAL, emptyMap())
+
         fun from(
             item: VocabularyItem,
+            translation: VocabTranslation,
             samplePhrases: List<SampleSentence>,
             originalKanji: Char,
-            translationSource: TranslationSource,
-            kanjiSource: KanjiSource
+            translationSource: TranslationSource
         ): KanjiVocabNote {
-            val ankiPhrases = samplePhrases.map { it.parseTokens() }
-                .map { it.toVocabTokens(translationSource, kanjiSource) }
+            val ankiPhrases = samplePhrases
+                .map { it.toVocabTokens(translationSource) }
                 .map { it.maskOriginalWordToken(item) }
                 .map { KanjiVocabPhrase(it) }
 
             return KanjiVocabNote(
                 item,
-                item.translations.first(),
-                item.translations.drop(1),
+                translation.mainTranslation,
+                translation.otherTranslations,
                 ankiPhrases,
                 originalKanji
             )
         }
 
-        private fun List<Token>.toVocabTokens(
-            translationSource: TranslationSource,
-            kanjiSource: KanjiSource
-        ): List<KanjiVocabPhraseToken> =
-            map { KanjiVocabPhraseToken.from(it, translationSource, kanjiSource) }
+        private fun SampleSentence.toVocabTokens(translationSource: TranslationSource): List<KanjiVocabPhraseToken> =
+            this.tokens.map { KanjiVocabPhraseToken.from(it, translationSource) }
 
         private fun List<KanjiVocabPhraseToken>.maskOriginalWordToken(item: VocabularyItem): List<KanjiVocabPhraseToken> {
             return map {
-                it.takeUnless { pt -> pt.surfaceForm == item.surfaceForm } ?: KanjiVocabPhraseToken(
-                    KanaReading(
-                        SKIP_TOKEN
-                    ), emptyMap()
-                )
+                it.takeUnless { pt -> pt.surfaceForm == item.surfaceForm }
+                    ?: KanjiVocabPhraseToken(SKIP_TOKEN)
             }
         }
     }

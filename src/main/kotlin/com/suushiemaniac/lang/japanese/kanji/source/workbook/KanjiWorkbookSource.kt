@@ -1,17 +1,20 @@
 package com.suushiemaniac.lang.japanese.kanji.source.workbook
 
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
-import com.suushiemaniac.lang.japanese.kanji.model.SampleSentence
-import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.SimpleKanji
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
-import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
+import com.suushiemaniac.lang.japanese.kanji.source.KanjiProgressionSource
 import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
+import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.*
 
-data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource, SampleSentenceSource {
+data class KanjiWorkbookSource(val bookNum: Int) : KanjiProgressionSource, VocabularySource, SampleSentenceSource, TranslationSource {
     private val lessonsContent = loadFile(bookNum, LESSONS_FILE_TAG)
     private val readingsContent = loadFile(bookNum, READINGS_FILE_TAG)
     private val samplesContent = loadFile(bookNum, SAMPLES_FILE_TAG)
@@ -29,12 +32,20 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
     private val idData by lazy { idParser.getAssociations() }
 
     private val vocabularyData by lazy {
-        vocabularyAndSentenceData.mapValues { it.value.map(Pair<VocabularyItem, SampleSentence?>::first) }
+        vocabularyAndSentenceData.mapValues { it.value.map(Triple<VocabularyItem, VocabTranslation, SampleSentence?>::first) }
+    }
+
+    private val vocabularySupplementData by lazy {
+        vocabularyAndSentenceData.values.flatten().groupBy { it.first }
+    }
+
+    private val translationData by lazy {
+        vocabularySupplementData.mapValues { it.value.map(Triple<VocabularyItem, VocabTranslation, SampleSentence?>::second) }
+            .mapKeys { it.key.surfaceForm }
     }
 
     private val sampleSentenceData by lazy {
-        vocabularyAndSentenceData.values.flatten().groupBy { it.first.withoutTranslations() }
-            .mapValues { it.value.mapNotNull(Pair<VocabularyItem, SampleSentence?>::second) }
+        vocabularySupplementData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, VocabTranslation, SampleSentence?>::third) }
     }
 
     override fun lookupSymbol(kanji: Char): Kanji? {
@@ -57,7 +68,11 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiSource, VocabularySource
     }
 
     override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
-        return sampleSentenceData[vocab.withoutTranslations()].orEmpty().distinctBy { it.rawPhrase }
+        return sampleSentenceData[vocab].orEmpty().distinctBy { it.surfaceForm }
+    }
+
+    override fun getTranslationFor(token: TokenWithSurfaceForm): VocabTranslation? {
+        return translationData[token.surfaceForm]?.singleOrNull()
     }
 
     fun getMetadata(kanji: Kanji): WorkbookMetadata? {

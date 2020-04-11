@@ -2,13 +2,14 @@ package com.suushiemaniac.lang.japanese.kanji.anki
 
 import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
-import com.suushiemaniac.lang.japanese.kanji.model.VocabularyItem
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.OnYomi
-import com.suushiemaniac.lang.japanese.kanji.model.reading.ReadingWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanjiToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
@@ -19,15 +20,15 @@ import kotlinx.serialization.builtins.serializer
 
 data class KanjiNote(
     val kanjiSymbol: Char,
-    val kunReadingsWithSamples: Map<KunYomi, List<String>>,
-    val onReadingsWithSamples: Map<OnYomi, List<String>>,
+    val kunReadingsWithSamples: Map<KanjiKunYomi, List<String>>,
+    val onReadingsWithSamples: Map<KanjiOnYomi, List<String>>,
     val rendakuReadingExceptions: Map<VocabularyItem, String>,
     val radicalDescription: String,
     val idcGraphNum: Int,
     val elementsWithName: Map<Char, String>,
     val coreMeaning: String,
     val sampleTranslations: Map<String, String>,
-    val sampleReadings: Map<String, ReadingWithSurfaceForm>,
+    val sampleReadings: Map<String, TokenWithSurfaceForm>,
     val lesson: Int,
     val id: Int,
     val kanken: String?,
@@ -64,9 +65,10 @@ data class KanjiNote(
         fun from(
             kanji: KanjiDictEntry,
             elements: Elements,
-            metadata: WorkbookMetadata,
             elementsTranslationSource: TranslationSource,
-            vocabSource: VocabularySource
+            metadata: WorkbookMetadata,
+            vocabSource: VocabularySource,
+            vocabTranslationSource: TranslationSource
         ): KanjiNote {
             val allSamples = vocabSource.getVocabularyItemsFor(kanji)
 
@@ -78,7 +80,10 @@ data class KanjiNote(
             val usedRawSamples = (kunModelRawSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
             val remainingSamples = allSamples - usedRawSamples
 
-            val kunModelExtendedSamples = kanji.kunYomi.associateWithNotNull { remainingSamples.filterForPrefixReadings(it.standardisedReading).unlessEmpty() }
+            val kunModelExtendedSamples = kanji.kunYomi.associateWithNotNull {
+                remainingSamples.filterForPrefixReadings(it.standardisedReading).unlessEmpty()
+            }
+
             val kunModelSamples = kunModelRawSamples.mergeMultiMap(kunModelExtendedSamples)
 
             val usedSamples = (kunModelSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
@@ -86,10 +91,8 @@ data class KanjiNote(
             require(allSamples.size == usedSamples.size) { "Missing samples: " + (allSamples - usedSamples).map { it.surfaceForm } }
 
             val rendakuExceptions = usedSamples.associateWithNotNull {
-                val relevantReading = it.readingParts.firstOrNull { r -> r.surfaceForm == kanji.kanji.toString() }
-                    ?: return@associateWithNotNull null
-
-                relevantReading.takeIf { r -> r.reading != r.normalizedReading }?.reading
+                it.tokens.firstOrNull { r -> r.surfaceForm == kanji.kanji.toString() }
+                    ?.takeIf { r -> r.reading != r.normalizedReading }?.reading
             }
 
             val radicalDescription =
@@ -99,14 +102,17 @@ data class KanjiNote(
             val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
 
             val elementsWithName = elements.kanjiParts
-                .associateWith { elementsTranslationSource.lookupWord(it)?.translations.orEmpty().joinToString() }
-                .mapKeys { it.key.first() }
+                .map { KanjiToken(it.first(), it) }
+                .associateWith { elementsTranslationSource.getTranslationFor(it)?.mainTranslation.orEmpty() }
+                .mapKeys { it.key.kanji }
 
             val suitableMeanings = kanji.compactMeaning.unlessEmpty()?.joinToString()
                 ?: elements.compactMeaning
 
-            val translatedSamples = allSamples.associateWith { it.translations.joinToString() }
+            val translatedSamples = allSamples
+                .associateWith { vocabTranslationSource.getTranslationFor(it)?.mainTranslation.orEmpty() }
                 .filterKeys { it in usedSamples }
+
             val readingsForSamples = allSamples.associateBy { it.surfaceForm }
                 .filterValues { it in usedSamples }
 
@@ -143,11 +149,11 @@ data class KanjiNote(
         }
 
         private fun List<VocabularyItem>.filterForReadings(baseReading: String): List<VocabularyItem> {
-            return this.filter { it.readingParts.any { r -> r.normalizedReading == baseReading } }
+            return this.filter { it.tokens.any { r -> r.normalizedReading == baseReading } }
         }
 
         private fun List<VocabularyItem>.filterForPrefixReadings(baseReading: String): List<VocabularyItem> {
-            return this.filter { it.readingParts.any { r -> r.normalizedReading.startsWith(baseReading) } }
+            return this.filter { it.tokens.any { r -> r.normalizedReading.startsWith(baseReading) } }
         }
     }
 }

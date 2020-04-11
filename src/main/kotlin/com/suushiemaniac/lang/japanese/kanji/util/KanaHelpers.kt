@@ -2,7 +2,7 @@ package com.suushiemaniac.lang.japanese.kanji.util
 
 import com.mariten.kanatools.KanaAppraiser
 import com.mariten.kanatools.KanaConverter
-import com.suushiemaniac.lang.japanese.kanji.model.reading.type.KunYomiAnnotationMode
+import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
 
 fun String.containsOnlyKatakana() = this.all { KanaAppraiser.isZenkakuKatakana(it) || it == LENGTHENING_MARK_KUTOTEN }
 fun String.containsOnlyHiragana() = this.all(KanaAppraiser::isZenkakuHiragana)

@@ -1,4 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.persistence
+package com.suushiemaniac.lang.japanese.kanji.source.kanjium.persistence
 
 import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.dao.id.EntityID
@@ -33,11 +33,15 @@ abstract class RadicalBaseDao(id: EntityID<String>, table: RadicalBaseTable) : E
     val notes by table.notes
 }
 
-class RadicalDao(id: EntityID<String>) : RadicalBaseDao(id, RadicalTable) {
+class RadicalDao(id: EntityID<String>) : RadicalBaseDao(id,
+    RadicalTable
+) {
     companion object : EntityClass<String, RadicalBaseDao>(RadicalTable)
 }
 
-class RadVarDao(id: EntityID<String>) : RadicalBaseDao(id, RadVarTable) {
+class RadVarDao(id: EntityID<String>) : RadicalBaseDao(id,
+    RadVarTable
+) {
     val parentRef by RadicalDao referencedOn RadVarTable.parentRef
 
     companion object : EntityClass<String, RadicalBaseDao>(RadVarTable)
