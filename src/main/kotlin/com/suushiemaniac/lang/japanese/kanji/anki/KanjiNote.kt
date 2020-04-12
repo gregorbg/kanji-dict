@@ -72,20 +72,23 @@ data class KanjiNote(
         ): KanjiNote {
             val allSamples = vocabSource.getVocabularyItemsFor(kanji)
 
+            val ankiKunYomi = kanji.regularKunYomi.groupBy { it.standardisedReading }
+                .mapValues { it.value.map(KanjiKunYomi::okurigana) }
+                .mapKeys { KanjiKunYomi(it.key) }
+
             val kunModelRawSamples =
-                kanji.kunYomi.associateWith { allSamples.filterForReadings(it.standardisedReading) }
+                ankiKunYomi.mapValues { allSamples.filterForReadings(it.key.standardisedReading) }
             val onModelSamples =
-                kanji.onYomi.associateWith { allSamples.filterForReadings(it.standardisedReading) }
+                kanji.regularOnYomi.associateWith { allSamples.filterForReadings(it.standardisedReading) }
 
             val usedRawSamples = (kunModelRawSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
             val remainingSamples = allSamples - usedRawSamples
 
-            val kunModelExtendedSamples = kanji.kunYomi.associateWithNotNull {
-                remainingSamples.filterForPrefixReadings(it.standardisedReading).unlessEmpty()
+            val kunModelExtendedSamples = ankiKunYomi.mapValuesNotNull {
+                remainingSamples.filterForPrefixReadings(it.key.standardisedReading).unlessEmpty()
             }
 
             val kunModelSamples = kunModelRawSamples.mergeMultiMap(kunModelExtendedSamples)
-
             val usedSamples = (kunModelSamples.values.flatten() + onModelSamples.values.flatten()).toSet()
 
             require(allSamples.size == usedSamples.size) { "Missing samples: " + (allSamples - usedSamples).map { it.surfaceForm } }
@@ -102,7 +105,7 @@ data class KanjiNote(
             val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
 
             val elementsWithName = elements.kanjiParts
-                .map { KanjiToken(it.first(), it) }
+                .map { KanjiToken(it.first(), it) } // FIXME hack
                 .associateWith { elementsTranslationSource.getTranslationFor(it)?.mainTranslation.orEmpty() }
                 .mapKeys { it.key.kanji }
 

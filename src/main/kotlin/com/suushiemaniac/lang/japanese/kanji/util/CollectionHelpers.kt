@@ -15,6 +15,10 @@ fun <T, V> Iterable<T>.associateWithNotNull(mapping: (T) -> V?): Map<T, V> {
     return mapNotNull { t -> mapping(t)?.let { t to it } }.toMap()
 }
 
+fun <K, V1, V2> Map<K, V1>.mapValuesNotNull(mapping: (Map.Entry<K, V1>) -> V2?): Map<K, V2> {
+    return mapNotNull { t -> mapping(t)?.let { t.key to it } }.toMap()
+}
+
 fun <T> Collection<T>.unlessEmpty() = takeUnless { it.isEmpty() }
 fun <T> List<T>.unlessEmpty() = takeUnless { it.isEmpty() }
 

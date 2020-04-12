@@ -63,6 +63,10 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiProgressionSource, Vocab
         return idData.keys.mapNotNull { lookupSymbol(it.first()) }
     }
 
+    override fun getOrderingIndexFor(kanji: Kanji): Int {
+        return getMetadata(kanji)?.id ?: -1
+    }
+
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
         return vocabularyData[kanji.kanji.toString()].orEmpty()
     }
@@ -92,7 +96,7 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiProgressionSource, Vocab
     }
 
     companion object {
-        const val RESOURCE_PACKAGE = "15kanji_workbook"
+        private const val RESOURCE_PACKAGE = "15kanji_workbook"
 
         const val LESSONS_FILE_TAG = "lessons"
         const val READINGS_FILE_TAG = "readings"
