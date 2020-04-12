@@ -10,3 +10,5 @@ fun String.splitAndTrim(delimiter: String) = split(delimiter).map(String::trim)
 
 val String.words get() = splitAndTrim(" ")
 val String.commaTokens get() = splitAndTrim(",")
+
+const val EMPTY_STRING = ""

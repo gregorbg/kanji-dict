@@ -8,13 +8,13 @@ data class MorphologyToken(
     override val surfaceForm: String,
     override val reading: String,
     val morphology: MorphologicalData? = null
-) : TokenWithSurfaceForm {
-    fun toAlignedReadings(kanjiSource: KanjiSource): CompositeReadingTokens<AlignedReadingToken> {
+) : TokenWithSurfaceForm, ReadingTokenProvider {
+    override fun toAlignedReadings(kanjiSource: KanjiSource): CompositeReadingTokens<AlignedReadingToken> {
         val aligned = this.surfaceForm.alignReadingsWith(this.reading, kanjiSource)
         return ConvertedReadingTokens(aligned)
     }
 
-    fun toReadings(): CompositeReadingTokens<ReadingToken> {
+    override fun toReadings(): CompositeReadingTokens<ReadingToken> {
         val aligned = this.surfaceForm.alignReadingsWith(this.reading)
         return ConvertedReadingTokens(aligned)
     }

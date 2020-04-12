@@ -23,7 +23,10 @@ fun String.pluckKanji(): List<String> {
     }
 }
 
-private tailrec fun String.pluckKanjiGroups(considerNumbersAsKanji: Boolean, accu: List<String> = emptyList()): List<String> {
+private tailrec fun String.pluckKanjiGroups(
+    considerNumbersAsKanji: Boolean,
+    accu: List<String> = emptyList()
+): List<String> {
     if (this.isEmpty()) {
         return accu
     }
@@ -110,11 +113,11 @@ private fun zipReadings(
 
     if (next.isProbablyKanji(true)) {
         if (remaining.isEmpty()) {
-            val readingModel = CompoundKanjiToken(next, rawTemplate)
+            val readingModel = if (next.all(Char::isDigit)) KanaToken(next) else CompoundKanjiToken(next, rawTemplate)
 
             return zipReadings(
                 remaining,
-                rawTemplate.drop(readingModel.reading.length),
+                EMPTY_STRING,
                 accu + readingModel
             )
         } else {

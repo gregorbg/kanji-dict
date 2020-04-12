@@ -1,12 +1,10 @@
 package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.NewsListResponse
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.CompositeReadingTokens
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.source.TextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
-import com.suushiemaniac.lang.japanese.kanji.util.ConvertedReadingTokens
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JsonFeature
@@ -82,9 +80,7 @@ object NewsWeb : TextSource {
             }
         }
 
-        val parsed = SampleSentence.parse(fullText)
-        val readingTokens = parsed.tokens.flatMap { it.toReadings().tokens }
-
-        return ConvertedReadingTokens(readingTokens)
+        val fullTextNonBlank = fullText.filterNot { it.isWhitespace() }
+        return SampleSentence.parse(fullTextNonBlank).toReadings()
     }
 }
