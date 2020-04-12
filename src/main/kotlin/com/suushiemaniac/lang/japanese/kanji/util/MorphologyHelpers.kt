@@ -7,31 +7,35 @@ import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 
 fun String.alignReadingsWith(readingsRaw: String, kanjiSource: KanjiSource): List<AlignedReadingToken> {
     val pluckedKanji = this.pluckKanji()
-
     return zipReadingsExact(pluckedKanji, readingsRaw, kanjiSource)
 }
 
+fun String.alignReadingsWith(readingsRaw: String): List<ReadingToken> {
+    val pluckedKanjiGroups = this.pluckKanjiGroups(true)
+    return zipReadings(pluckedKanjiGroups, readingsRaw)
+}
+
 fun String.pluckKanji(): List<String> {
-    val pluckedGroups = this.pluckKanjiGroups()
+    val pluckedGroups = this.pluckKanjiGroups(false)
 
     return pluckedGroups.flatMap {
-        if (it.first().toString().isProbablyKanji()) it.toStringifiedChars() else it.singletonList()
+        if (it.first().toString().isProbablyKanji(false)) it.toStringifiedChars() else it.singletonList()
     }
 }
 
-tailrec fun String.pluckKanjiGroups(accu: List<String> = emptyList()): List<String> {
+private tailrec fun String.pluckKanjiGroups(considerNumbersAsKanji: Boolean, accu: List<String> = emptyList()): List<String> {
     if (this.isEmpty()) {
         return accu
     }
 
-    val kanjiGroup = this.takeWhile { it.toString().isProbablyKanji() }
+    val kanjiGroup = this.takeWhile { it.toString().isProbablyKanji(considerNumbersAsKanji) }
 
     if (kanjiGroup.isNotEmpty()) {
-        return this.drop(kanjiGroup.length).pluckKanjiGroups(accu + kanjiGroup)
+        return this.drop(kanjiGroup.length).pluckKanjiGroups(considerNumbersAsKanji, accu + kanjiGroup)
     }
 
-    val nonKanji = this.takeWhile { !it.toString().isProbablyKanji() }
-    return this.drop(nonKanji.length).pluckKanjiGroups(accu + nonKanji)
+    val nonKanji = this.takeWhile { !it.toString().isProbablyKanji(considerNumbersAsKanji) }
+    return this.drop(nonKanji.length).pluckKanjiGroups(considerNumbersAsKanji, accu + nonKanji)
 }
 
 private fun zipReadingsExact(
@@ -45,43 +49,105 @@ private fun zipReadingsExact(
     }
 
     val next = segments.first()
-    val nextIsKanji = next.length == 1 && next.isProbablyKanji()
+    val nextIsKanji = next.length == 1 && next.isProbablyKanji(false)
 
     if (nextIsKanji) {
-        val readingVariations = kanjiSource.lookupSymbol(next.first())?.allReadings()?.let { rs ->
-            rs.associateWith { it.possibleAlternateKatakanaReadings() - (rs - it) }.invertMultiMap()
-        }.orEmpty()
+        val possibleReadings = kanjiSource.lookupSymbol(next.first())?.allReadings()
+            ?: return emptyList()
 
-        val adequateReadings =
-            readingVariations.keys.filter {
-                rawTemplate.startsWith(it.toKatakana()) ||
-                        rawTemplate.startsWith(it.toHiragana()) ||
-                        rawTemplate.startsWith(it)
+        for (possibleReading in possibleReadings) {
+            val theoreticalVariations = possibleReading.possibleAlternateKatakanaReadings()
+            val readingVariations = theoreticalVariations - (possibleReadings - possibleReading)
+
+            for (readingVariation in readingVariations) {
+                if (rawTemplate.startsWith(readingVariation)
+                    || rawTemplate.startsWith(readingVariation.toHiragana())
+                    || rawTemplate.startsWith(readingVariation.toKatakana())
+                ) {
+                    val readingFromTemplate = rawTemplate.take(readingVariation.length)
+
+                    val baseReading = possibleReading.takeUnless { readingVariation == readingFromTemplate }
+                    val readingModel = KanjiToken(next.first(), readingFromTemplate, baseReading)
+
+                    val continuedAlignment = zipReadingsExact(
+                        segments.drop(1),
+                        rawTemplate.drop(readingModel.reading.length),
+                        kanjiSource,
+                        accu + readingModel
+                    )
+
+                    if (continuedAlignment.isNotEmpty()) {
+                        return continuedAlignment
+                    }
+                }
             }
-
-        val subsequentMatches = adequateReadings.asSequence().map {
-            val readingFromTemplate = rawTemplate.take(it.length)
-
-            val baseReading = readingVariations[readingFromTemplate]?.takeUnless { _ -> it == readingFromTemplate }
-            val readingModel = KanjiToken(next.first(), readingFromTemplate, baseReading)
-
-            zipReadingsExact(
-                segments.drop(1),
-                rawTemplate.drop(readingModel.reading.length),
-                kanjiSource,
-                accu + readingModel
-            )
         }
 
-        return subsequentMatches.find { it.isNotEmpty() }.orEmpty()
+        return emptyList()
     } else {
-        val readingFromTemplate = rawTemplate.take(next.length)
-        val readingModel = KanaToken(readingFromTemplate)
+        val readingModel = KanaToken(next)
 
         return zipReadingsExact(
             segments.drop(1),
             rawTemplate.drop(readingModel.reading.length),
             kanjiSource,
+            accu + readingModel
+        )
+    }
+}
+
+private fun zipReadings(
+    segments: List<String>,
+    rawTemplate: String,
+    accu: List<ReadingToken> = emptyList()
+): List<ReadingToken> {
+    if (segments.isEmpty()) {
+        return if (rawTemplate.isEmpty()) accu else emptyList()
+    }
+
+    val next = segments.first()
+    val remaining = segments.drop(1)
+
+    if (next.isProbablyKanji(true)) {
+        if (remaining.isEmpty()) {
+            val readingModel = CompoundKanjiToken(next, rawTemplate)
+
+            return zipReadings(
+                remaining,
+                rawTemplate.drop(readingModel.reading.length),
+                accu + readingModel
+            )
+        } else {
+            val afterNext = remaining.first()
+            val afterNextKanaStart = afterNext.first()
+
+            val kanaOccurrences = rawTemplate.mapIndexed { i, c -> i to c }
+                .filter { it.second == afterNextKanaStart }
+                .map { it.first }
+
+            for (occurrence in kanaOccurrences) {
+                val readingFromTemplate = rawTemplate.take(occurrence)
+                val readingModel = CompoundKanjiToken(next, readingFromTemplate)
+
+                val continuedAlignment = zipReadings(
+                    remaining,
+                    rawTemplate.drop(readingModel.reading.length),
+                    accu + readingModel
+                )
+
+                if (continuedAlignment.isNotEmpty()) {
+                    return continuedAlignment
+                }
+            }
+
+            return emptyList()
+        }
+    } else {
+        val readingModel = KanaToken(next)
+
+        return zipReadings(
+            remaining,
+            rawTemplate.drop(readingModel.reading.length),
             accu + readingModel
         )
     }

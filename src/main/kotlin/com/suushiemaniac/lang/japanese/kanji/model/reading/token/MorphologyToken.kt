@@ -3,7 +3,6 @@ package com.suushiemaniac.lang.japanese.kanji.model.reading.token
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.util.ConvertedReadingTokens
 import com.suushiemaniac.lang.japanese.kanji.util.alignReadingsWith
-import com.suushiemaniac.lang.japanese.kanji.util.pluckKanjiGroups
 
 data class MorphologyToken(
     override val surfaceForm: String,
@@ -16,8 +15,7 @@ data class MorphologyToken(
     }
 
     fun toReadings(): CompositeReadingTokens<ReadingToken> {
-        //val plucked = this.surfaceForm.pluckKanjiGroups()
-
-        return ConvertedReadingTokens(listOf(CompoundKanjiToken(this.surfaceForm, this.reading))) // FIXME
+        val aligned = this.surfaceForm.alignReadingsWith(this.reading)
+        return ConvertedReadingTokens(aligned)
     }
 }
