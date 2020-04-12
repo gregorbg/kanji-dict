@@ -4,6 +4,7 @@ import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhrase
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhraseToken
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologicalData
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologyToken
@@ -56,7 +57,7 @@ data class KanjiVocabNote(
 
     companion object {
         const val SKIP_TOKEN_LITERAL = "_"
-        val SKIP_TOKEN = MorphologyToken(SKIP_TOKEN_LITERAL, SKIP_TOKEN_LITERAL, emptyMap())
+        val SKIP_TOKEN = MorphologyToken(SKIP_TOKEN_LITERAL, SKIP_TOKEN_LITERAL)
 
         fun from(
             item: VocabularyItem,

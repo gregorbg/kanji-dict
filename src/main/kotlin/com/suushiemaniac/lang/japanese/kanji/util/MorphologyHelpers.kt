@@ -10,13 +10,6 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfac
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTagModifier
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 
-const val UNSPECIFIED_SKIP_TOKEN = "*"
-val TOKEN_KEYS = listOf("POS-1", "POS-2", "POS-3", "POS-4", "CONJ-TYPE", "CONJ-FORM", "BASE-FORM", "READ", "PRON")
-
-private val tokenizer = Tokenizer()
-
-fun String.tokenizeJapanese(): List<Token> = tokenizer.tokenize(this)
-
 fun String.alignReadingsWith(readingsRaw: String, kanjiSource: KanjiSource): List<ReadingToken> {
     val pluckedKanji = this.pluckKanji()
 
