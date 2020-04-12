@@ -1,12 +1,12 @@
 package com.suushiemaniac.lang.japanese.kanji.model.vocabulary
 
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.CompositeTokens
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.AlignedReadingToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.CompositeReadingTokens
 
 data class VocabularyItem(
-    override val tokens: List<ReadingToken>,
+    override val tokens: List<AlignedReadingToken>,
     val modifiers: List<VocabTagModifier> = NO_MODIFIERS
-) : CompositeTokens<ReadingToken> {
+) : CompositeReadingTokens<AlignedReadingToken> {
     companion object {
         private val NO_MODIFIERS = emptyList<VocabTagModifier>()
     }

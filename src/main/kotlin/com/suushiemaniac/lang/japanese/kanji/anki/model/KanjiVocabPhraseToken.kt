@@ -6,7 +6,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfac
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 
 data class KanjiVocabPhraseToken(
-    private val token: MorphologyToken,
+    val token: MorphologyToken,
     val annotation: String? = null
 ) : TokenWithSurfaceForm by token {
     val tokenData: MorphologicalData?

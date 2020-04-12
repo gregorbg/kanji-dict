@@ -1,10 +1,12 @@
 package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.NewsListResponse
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.CompositeReadingTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.source.TextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
+import com.suushiemaniac.lang.japanese.kanji.util.ConvertedReadingTokens
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JsonFeature
@@ -57,7 +59,7 @@ object NewsWeb : TextSource {
         return ALL_ARTICLES.channel.item.mapTo(mutableSetOf()) { it.id }
     }
 
-    override fun getText(id: String): TokenWithSurfaceForm {
+    override fun getText(id: String): ReadingToken {
         val linkSuffix = ALL_ARTICLES.channel.item.find { it.id == id }
             ?.link ?: error("Invalid NHK news ID: $id")
 
@@ -80,6 +82,9 @@ object NewsWeb : TextSource {
             }
         }
 
-        return SampleSentence.parse(fullText)
+        val parsed = SampleSentence.parse(fullText)
+        val readingTokens = parsed.tokens.flatMap { it.toReadings().tokens }
+
+        return ConvertedReadingTokens(readingTokens)
     }
 }

@@ -1,7 +1,10 @@
 package com.suushiemaniac.lang.japanese.kanji.model.reading.token
 
-data class KanjiToken(val kanji: Char, override val reading: String, val rendakuBaseForm: String? = null) :
-    ReadingToken {
+data class KanjiToken(
+    val kanji: Char,
+    override val reading: String,
+    val rendakuBaseForm: String? = null
+) : AlignedReadingToken {
     override val surfaceForm: String
         get() = kanji.toString()
 

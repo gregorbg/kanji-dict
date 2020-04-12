@@ -4,7 +4,11 @@ import com.suushiemaniac.lang.japanese.kanji.util.associateWithNotNull
 
 data class KanjiVocabPhrase(val phraseSegments: List<KanjiVocabPhraseToken>) {
     fun getLiterals() = phraseSegments.map { it.surfaceForm }
-    fun getReadings() = keyedIfExisting { it.takeIf { _ -> it.reading != it.surfaceForm }?.asFurigana(RubyFuriganaFormatter) }
+
+    fun getReadings() = keyedIfExisting {
+        it.takeIf { _ -> it.reading != it.surfaceForm }?.token?.toReadings()?.asFurigana(RubyFuriganaFormatter)
+    }
+
     fun getTokenData() = keyedIfExisting { it.tokenData?.exportData() }
     fun getAnnotations() = keyedIfExisting { it.annotation }
 

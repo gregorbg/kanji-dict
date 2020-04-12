@@ -13,7 +13,7 @@ fun DocElement.parseRuby() =
 fun String.parseRuby() =
     Jsoup.parseBodyFragment(this).body().parseRubyRecursive()
 
-fun Node.parseRubyRecursive(): TokenWithSurfaceForm {
+fun Node.parseRubyRecursive(): ReadingToken {
     if (this is TextNode) {
         return KanaToken(text().orEmpty().trim())
     }
@@ -25,13 +25,13 @@ fun Node.parseRubyRecursive(): TokenWithSurfaceForm {
         return if (surface.length == 1) {
             KanjiToken(surface.first(), reading)
         } else {
-            MorphologyToken(surface, reading)
+            CompoundKanjiToken(surface, reading)
         }
     }
 
-    val parsedTokens = childNodes().map { it.parseRubyRecursive() }
+    val parsedTokens = childNodes()
+        .filterNot { it is TextNode && it.isBlank }
+        .map { it.parseRubyRecursive() }
 
-    return object : CompositeTokens<TokenWithSurfaceForm> {
-        override val tokens = parsedTokens
-    }
+    return ConvertedReadingTokens(parsedTokens)
 }

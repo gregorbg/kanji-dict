@@ -7,6 +7,7 @@ import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologyToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
@@ -15,7 +16,7 @@ import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 
 data class KanjiVocabNote(
-    val vocabItem: TokenWithSurfaceForm,
+    val vocabItem: ReadingToken,
     val mainTranslation: String,
     val additionalTranslations: List<String>,
     val ankiPhrases: List<KanjiVocabPhrase>,
