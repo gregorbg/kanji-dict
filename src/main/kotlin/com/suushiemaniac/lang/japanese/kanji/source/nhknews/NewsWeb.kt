@@ -1,6 +1,7 @@
 package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.NewsListResponse
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.source.TextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
@@ -9,6 +10,11 @@ import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
 import io.ktor.client.request.get
+import it.skrape.core.fetcher.Mode
+import it.skrape.core.htmlDocument
+import it.skrape.extract
+import it.skrape.selects.html5.p
+import it.skrape.skrape
 import kotlinx.coroutines.runBlocking
 
 object NewsWeb : TextSource {
@@ -51,7 +57,29 @@ object NewsWeb : TextSource {
         return ALL_ARTICLES.channel.item.mapTo(mutableSetOf()) { it.id }
     }
 
-    override fun getText(id: String): List<SampleSentence> {
-        TODO("Not yet implemented")
+    override fun getText(id: String): TokenWithSurfaceForm {
+        val linkSuffix = ALL_ARTICLES.channel.item.find { it.id == id }
+            ?.link ?: error("Invalid NHK news ID: $id")
+
+        val fullText = skrape {
+            url = "https://www3.nhk.or.jp/news/$linkSuffix"
+            mode = Mode.DOM
+
+            extract {
+                htmlDocument {
+                    p {
+                        withClass = "content--summary"
+
+                        findFirst { text }
+                    } + p {
+                        withClass = "content--summary-more"
+
+                        findFirst { text }
+                    }
+                }
+            }
+        }
+
+        return SampleSentence.parse(fullText)
     }
 }

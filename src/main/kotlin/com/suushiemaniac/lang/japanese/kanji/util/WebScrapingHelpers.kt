@@ -19,8 +19,8 @@ fun Node.parseRubyRecursive(): TokenWithSurfaceForm {
     }
 
     if (this is Element && this.tagName() == "ruby") {
-        val surface = ownText().orEmpty().trim()
-        val reading = selectFirst("rt")?.ownText().orEmpty().trim()
+        val surface = childNode(0).parseRubyRecursive().surfaceForm
+        val reading = selectFirst("rt")?.parseRubyRecursive()?.reading.orEmpty()
 
         return if (surface.length == 1) {
             KanjiToken(surface.first(), reading)
