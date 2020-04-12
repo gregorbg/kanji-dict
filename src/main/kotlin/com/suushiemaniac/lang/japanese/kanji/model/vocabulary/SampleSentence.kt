@@ -15,7 +15,7 @@ data class SampleSentence(override val tokens: List<MorphologyToken>) : Composit
 
             val intTokens = extTokens.map {
                 val morphData = MorphologicalData.from(it)
-                MorphologyToken(it.reading.toHiragana(), it.surface, morphData)
+                MorphologyToken(it.surface, it.reading.toHiragana(), morphData)
             }
 
             return SampleSentence(intTokens)

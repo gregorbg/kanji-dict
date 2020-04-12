@@ -4,7 +4,6 @@ import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhrase
 import com.suushiemaniac.lang.japanese.kanji.anki.model.KanjiVocabPhraseToken
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologicalData
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologyToken

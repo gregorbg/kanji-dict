@@ -30,6 +30,8 @@ dependencies {
     implementation("io.ktor:ktor-client-core:1.3.2")
     implementation("io.ktor:ktor-client-apache:1.3.2")
     implementation("io.ktor:ktor-client-serialization-jvm:1.3.2")
+    implementation("it.skrape:skrapeit-core:1.0.0-alpha6")
+    implementation("org.jsoup:jsoup:1.12.2")
 
     runtimeOnly("com.h2database:h2:1.4.200")
     runtimeOnly("org.xerial:sqlite-jdbc:3.30.1")
