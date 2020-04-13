@@ -2,10 +2,10 @@ package com.suushiemaniac.lang.japanese.kanji.model.vocabulary
 
 import com.atilika.kuromoji.ipadic.Tokenizer
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.*
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeMorphologyTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeWordLevelTokens
 import com.suushiemaniac.lang.japanese.kanji.util.toHiragana
 
-data class SampleSentence(override val tokens: List<MorphologyToken>) : CompositeMorphologyTokens {
+data class SampleSentence(override val tokens: List<MorphologyToken>) : CompositeWordLevelTokens<MorphologyToken> {
     companion object {
         private val TOKENIZER = Tokenizer()
 
@@ -17,7 +17,9 @@ data class SampleSentence(override val tokens: List<MorphologyToken>) : Composit
                 MorphologyToken(it.surface, it.reading.toHiragana(), morphData)
             }
 
-            return SampleSentence(intTokens)
+            return SampleSentence(intTokens).also {
+                require(it.surfaceForm == raw) { "Sample sentence parse unsuccessful!" }
+            }
         }
     }
 }

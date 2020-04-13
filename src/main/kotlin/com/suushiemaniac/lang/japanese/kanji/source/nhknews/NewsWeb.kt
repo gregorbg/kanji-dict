@@ -1,9 +1,8 @@
 package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.NewsListResponse
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Text
-import com.suushiemaniac.lang.japanese.kanji.source.TextSource
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.MorphologyText
+import com.suushiemaniac.lang.japanese.kanji.source.ComplexTextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
@@ -17,7 +16,7 @@ import it.skrape.selects.html5.p
 import it.skrape.skrape
 import kotlinx.coroutines.runBlocking
 
-object NewsWeb : TextSource {
+object NewsWeb : ComplexTextSource<MorphologyText> {
     private val HTTP_CLIENT = HttpClient(Apache) {
         install(TrimNHKWhitespaceFeature)
         install(JsonFeature) {
@@ -57,7 +56,7 @@ object NewsWeb : TextSource {
         return ALL_ARTICLES.channel.item.mapTo(mutableSetOf()) { it.id }
     }
 
-    override fun getText(id: String): Text {
+    override fun getText(id: String): MorphologyText {
         val linkSuffix = ALL_ARTICLES.channel.item.find { it.id == id }
             ?.link ?: error("Invalid NHK news ID: $id")
 
@@ -81,6 +80,6 @@ object NewsWeb : TextSource {
         }
 
         val fullTextNonBlank = fullText.filterNot { it.isWhitespace() }
-        return Text.parse(fullTextNonBlank)
+        return MorphologyText.parse(fullTextNonBlank)
     }
 }

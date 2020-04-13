@@ -8,7 +8,6 @@ import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologyToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import kotlinx.serialization.builtins.ListSerializer

@@ -2,6 +2,9 @@ package com.suushiemaniac.lang.japanese.kanji.util
 
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.*
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeWordLevelTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeReadingTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTagModifier
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 
@@ -172,6 +175,24 @@ fun List<TokenWithSurfaceForm>.guessVocabModifiers(): List<VocabTagModifier> {
 
     return emptyList()
 }
+
+fun TokenWithSurfaceForm.unwrap() =
+    if (this is CompositeTokens<*>) this.tokens else this.singletonList()
+
+fun ReadingToken.unwrap() =
+    if (this is CompositeReadingTokens<*>) this.tokens else this.singletonList()
+
+fun WordLevelToken.unwrap() =
+    if (this is CompositeWordLevelTokens<*>) this.tokens else this.singletonList()
+
+fun TokenWithSurfaceForm.flatten(): List<TokenWithSurfaceForm> =
+    if (this is CompositeTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
+
+fun ReadingToken.flatten(): List<ReadingToken> =
+    if (this is CompositeReadingTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
+
+fun WordLevelToken.flatten(): List<WordLevelToken> =
+    if (this is CompositeWordLevelTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
 
 // https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt
 val IDC_GRAPH_MAPPING =

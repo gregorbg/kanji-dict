@@ -1,7 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.util
 
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.*
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeReadingTokens
 import it.skrape.selects.DocElement
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -36,7 +35,7 @@ private fun Node.parseRubyRecursive(): ReadingToken {
 
     val cleanedTokens = parsedTokens
         .filter { it.surfaceForm.isNotBlank() }
-        .flatMap { if (it is CompositeReadingTokens<*>) it.tokens else it.singletonList() }
+        //.flatMap { it.unwrap() }
 
     return ConvertedReadingTokens(cleanedTokens)
 }

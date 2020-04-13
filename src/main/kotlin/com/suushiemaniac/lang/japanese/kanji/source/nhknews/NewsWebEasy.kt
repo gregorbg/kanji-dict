@@ -2,10 +2,12 @@ package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.easy.EasyNewsListItem
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.easy.TopNewsListItem
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Text
-import com.suushiemaniac.lang.japanese.kanji.source.TextSource
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.MorphologyText
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.ReadingText
+import com.suushiemaniac.lang.japanese.kanji.source.ComplexTextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
 import com.suushiemaniac.lang.japanese.kanji.util.parseRuby
+import com.suushiemaniac.lang.japanese.kanji.util.unwrap
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JsonFeature
@@ -17,7 +19,7 @@ import it.skrape.selects.html5.div
 import it.skrape.skrape
 import kotlinx.coroutines.runBlocking
 
-object NewsWebEasy : TextSource {
+object NewsWebEasy : ComplexTextSource<ReadingText> {
     private val HTTP_CLIENT = HttpClient(Apache) {
         install(TrimNHKWhitespaceFeature)
         install(JsonFeature) {
@@ -41,7 +43,7 @@ object NewsWebEasy : TextSource {
         return flatArticles.mapTo(mutableSetOf()) { it.newsId }
     }
 
-    override fun getText(id: String): Text {
+    override fun getText(id: String): ReadingText {
         val readingToken = skrape {
             url = "https://www3.nhk.or.jp/news/easy/$id/$id.html"
 
@@ -56,7 +58,6 @@ object NewsWebEasy : TextSource {
             }
         }
 
-        // FIXME we loose alignment information here
-        return Text.parse(readingToken.surfaceForm)
+        return ReadingText.fromTokens(readingToken.unwrap())
     }
 }
