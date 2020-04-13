@@ -14,6 +14,9 @@ class KanjiTest(val sentences: List<ReadingToken>, val read: List<Kanji>, val wr
     val writeSymbols
         get() = write.map { it.kanji }
 
+    private val allSymbols
+        get() = readSymbols + writeSymbols
+
     fun renderIndividual(solution: Boolean = false): String {
         val sentenceItems = generateSentenceItems(solution)
         val body = renderEnumeration(sentenceItems)
@@ -44,6 +47,8 @@ class KanjiTest(val sentences: List<ReadingToken>, val read: List<Kanji>, val wr
                     is CompoundKanjiToken -> when {
                         solution xor it.manyKanji.all(writeSymbols::contains) -> makeWriteAnnotation(it)
                         solution xor it.manyKanji.all(readSymbols::contains) -> makeReadAnnotation(it)
+                        solution xor allSymbols.intersect(it.manyKanji.asIterable())
+                            .isNotEmpty() -> makePartialReadAnnotation(it)
                         else -> makeRubyAnnotation(it)
                     }
                     is KanjiToken -> when {
@@ -55,6 +60,14 @@ class KanjiTest(val sentences: List<ReadingToken>, val read: List<Kanji>, val wr
                 }
             }.replace("}\\", "}~\\")
         }
+    }
+
+    fun makePartialReadAnnotation(token: CompoundKanjiToken): String {
+        val symbolParts = token.manyKanji.map {
+            if (it in allSymbols) "\\kasen{${it}}" else it.toString()
+        }
+
+        return symbolParts.joinToString("")
     }
 
     companion object {

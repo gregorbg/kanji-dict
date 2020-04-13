@@ -35,7 +35,7 @@ data class ReadingText(override val sentences: List<CompositeReadingTokens<Readi
             }
 
             val decomposed = cleanTokens.decompose(SENTENCE_DELIMITER) { it.surfaceForm }
-            val sentences = decomposed.map { ConvertedReadingTokens(it) }
+            val sentences = decomposed.map { ConvertedReadingTokens(it + DELIMITER_TOKEN) }
 
             return ReadingText(sentences)
         }

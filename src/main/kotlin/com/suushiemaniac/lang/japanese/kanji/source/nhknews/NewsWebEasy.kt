@@ -2,7 +2,6 @@ package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.easy.EasyNewsListItem
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.easy.TopNewsListItem
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.MorphologyText
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.ReadingText
 import com.suushiemaniac.lang.japanese.kanji.source.ComplexTextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature

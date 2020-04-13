@@ -85,9 +85,10 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         val id = idData[kanji.kanji.toString()] ?: -1
 
         if (lesson >= 0 && id >= 0) {
-            val idOffset = SYMBOL_COUNTS.take(bookNum).sum()
-            val actualId = idOffset + id
+            val idOffset = ORDERED_SYMBOLS.map { it.size }
+                .take(bookNum).sum()
 
+            val actualId = idOffset + id
             val bookKey = RESOURCE_NAMES[bookNum]
 
             return WorkbookMetadata(actualId, lesson, bookKey)
@@ -107,13 +108,12 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
 
         private val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1")
 
-        private val WORKBOOK_SOURCES = RESOURCE_NAMES.indices.map { lazy { KanjiWorkbookSource(it) } }
+        val ALL_WORKBOOKS = RESOURCE_NAMES.indices.map { lazy { KanjiWorkbookSource(it) } }
+        val ORDERED_SYMBOLS = ALL_WORKBOOKS.asSequence().map { it.value.fetchAll() }
 
-        val BEGINNER_JOU by WORKBOOK_SOURCES[0]
-        val BEGINNER_GE by WORKBOOK_SOURCES[1]
-        val INTERMEDIATE_JOU by WORKBOOK_SOURCES[2]
-
-        private val SYMBOL_COUNTS = WORKBOOK_SOURCES.asSequence().map { it.value.fetchAll().size }
+        val BEGINNER_JOU by ALL_WORKBOOKS[0]
+        val BEGINNER_GE by ALL_WORKBOOKS[1]
+        val INTERMEDIATE_JOU by ALL_WORKBOOKS[2]
 
         private val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
 

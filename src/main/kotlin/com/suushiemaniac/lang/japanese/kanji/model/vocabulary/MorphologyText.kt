@@ -22,7 +22,7 @@ data class MorphologyText(override val sentences: List<SampleSentence>) :
 
         fun fromTokens(tokens: List<MorphologyToken>): MorphologyText {
             val decomposed = tokens.decompose(SENTENCE_DELIMITER) { it.surfaceForm }
-            val sentences = decomposed.map { SampleSentence(it) }
+            val sentences = decomposed.map { SampleSentence(it + DELIMITER_TOKEN) }
 
             return MorphologyText(sentences)
         }
