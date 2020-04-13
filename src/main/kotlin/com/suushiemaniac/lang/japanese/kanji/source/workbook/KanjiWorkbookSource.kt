@@ -14,7 +14,8 @@ import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.*
 
-data class KanjiWorkbookSource(val bookNum: Int) : KanjiProgressionSource, VocabularySource, SampleSentenceSource, TranslationSource {
+class KanjiWorkbookSource private constructor(val bookNum: Int) :
+    KanjiProgressionSource, VocabularySource, SampleSentenceSource, TranslationSource {
     private val lessonsContent = loadFile(bookNum, LESSONS_FILE_TAG)
     private val readingsContent = loadFile(bookNum, READINGS_FILE_TAG)
     private val samplesContent = loadFile(bookNum, SAMPLES_FILE_TAG)
@@ -98,16 +99,23 @@ data class KanjiWorkbookSource(val bookNum: Int) : KanjiProgressionSource, Vocab
     companion object {
         private const val RESOURCE_PACKAGE = "15kanji_workbook"
 
-        const val LESSONS_FILE_TAG = "lessons"
-        const val READINGS_FILE_TAG = "readings"
-        const val SAMPLES_FILE_TAG = "samples"
+        private const val LESSONS_FILE_TAG = "lessons"
+        private const val READINGS_FILE_TAG = "readings"
+        private const val SAMPLES_FILE_TAG = "samples"
 
-        const val ALIGNMENT_SEPARATOR = "."
+        private const val ALIGNMENT_SEPARATOR = "."
 
-        val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1")
-        val SYMBOL_COUNTS by lazy { RESOURCE_NAMES.indices.map { KanjiWorkbookSource(it).fetchAll().size } }
+        private val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1")
 
-        val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
+        private val WORKBOOK_SOURCES = RESOURCE_NAMES.indices.map { lazy { KanjiWorkbookSource(it) } }
+
+        val BEGINNER_JOU by WORKBOOK_SOURCES[0]
+        val BEGINNER_GE by WORKBOOK_SOURCES[1]
+        val INTERMEDIATE_JOU by WORKBOOK_SOURCES[2]
+
+        private val SYMBOL_COUNTS = WORKBOOK_SOURCES.asSequence().map { it.value.fetchAll().size }
+
+        private val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
 
         private fun loadFile(bookNum: Int, fileTag: String): String {
             val resourceBookName = RESOURCE_NAMES[bookNum]

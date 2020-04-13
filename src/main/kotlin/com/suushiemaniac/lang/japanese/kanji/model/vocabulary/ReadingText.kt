@@ -14,7 +14,9 @@ data class ReadingText(override val sentences: List<CompositeReadingTokens<Readi
         val DELIMITER_TOKEN = KanaToken(SENTENCE_DELIMITER)
 
         fun parse(raw: String): ReadingText {
-            val fullTokens = SampleSentence.parse(raw).toReadings().tokens
+            val intermediateSentence = SampleSentence.parse(raw)
+            val fullTokens = intermediateSentence.toReadings().tokens
+
             return fromTokens(fullTokens)
         }
 
