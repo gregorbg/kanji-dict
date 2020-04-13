@@ -1,7 +1,7 @@
 package com.suushiemaniac.lang.japanese.kanji.model.vocabulary
 
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.AlignedReadingToken
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.CompositeReadingTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeReadingTokens
 
 data class VocabularyItem(
     override val tokens: List<AlignedReadingToken>,

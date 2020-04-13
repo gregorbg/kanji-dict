@@ -23,3 +23,27 @@ fun <T> Collection<T>.unlessEmpty() = takeUnless { it.isEmpty() }
 fun <T> List<T>.unlessEmpty() = takeUnless { it.isEmpty() }
 
 fun <T> T.singletonList() = listOf(this)
+
+fun <T> Iterable<Iterable<T>>.interlace(glue: T) =
+    this.reduce { acc, iter -> acc + glue + iter }
+
+fun <S, T> Iterable<T>.decompose(delimiter: S, mapping: (T) -> S) = decomposeRecursive(delimiter, mapping, emptyList())
+
+fun <T> Iterable<T>.decompose(delimiter: T) = decompose(delimiter) { it }
+
+private tailrec fun <S, T> Iterable<T>.decomposeRecursive(
+    delimiter: S,
+    mapping: (T) -> S,
+    accu: List<List<T>>
+): List<List<T>> {
+    if (this.none()) {
+        return accu
+    }
+
+    val nextChunk = this.takeWhile { mapping(it) != delimiter }
+    val remaining = this.drop(nextChunk.size + 1) // +1 for the delimiter itself
+
+    val newAccu = accu.toMutableList().apply { add(nextChunk) }
+
+    return remaining.decomposeRecursive(delimiter, mapping, newAccu)
+}

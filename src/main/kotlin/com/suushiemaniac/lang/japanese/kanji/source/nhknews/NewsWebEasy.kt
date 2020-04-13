@@ -2,7 +2,7 @@ package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.easy.EasyNewsListItem
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.easy.TopNewsListItem
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Text
 import com.suushiemaniac.lang.japanese.kanji.source.TextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
 import com.suushiemaniac.lang.japanese.kanji.util.parseRuby
@@ -41,8 +41,8 @@ object NewsWebEasy : TextSource {
         return flatArticles.mapTo(mutableSetOf()) { it.newsId }
     }
 
-    override fun getText(id: String): ReadingToken {
-        return skrape {
+    override fun getText(id: String): Text {
+        val readingToken = skrape {
             url = "https://www3.nhk.or.jp/news/easy/$id/$id.html"
 
             extract {
@@ -50,12 +50,13 @@ object NewsWebEasy : TextSource {
                     div {
                         withClass = "article-main__body"
 
-                        findFirst {
-                            parseRuby()
-                        }
+                        findFirst { parseRuby() }
                     }
                 }
             }
         }
+
+        // FIXME we loose alignment information here
+        return Text.parse(readingToken.surfaceForm)
     }
 }

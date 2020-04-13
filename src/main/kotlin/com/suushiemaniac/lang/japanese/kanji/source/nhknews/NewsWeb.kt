@@ -1,8 +1,8 @@
 package com.suushiemaniac.lang.japanese.kanji.source.nhknews
 
 import com.suushiemaniac.lang.japanese.kanji.model.nhknews.NewsListResponse
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Text
 import com.suushiemaniac.lang.japanese.kanji.source.TextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
 import io.ktor.client.HttpClient
@@ -57,7 +57,7 @@ object NewsWeb : TextSource {
         return ALL_ARTICLES.channel.item.mapTo(mutableSetOf()) { it.id }
     }
 
-    override fun getText(id: String): ReadingToken {
+    override fun getText(id: String): Text {
         val linkSuffix = ALL_ARTICLES.channel.item.find { it.id == id }
             ?.link ?: error("Invalid NHK news ID: $id")
 
@@ -81,6 +81,6 @@ object NewsWeb : TextSource {
         }
 
         val fullTextNonBlank = fullText.filterNot { it.isWhitespace() }
-        return SampleSentence.parse(fullTextNonBlank).toReadings()
+        return Text.parse(fullTextNonBlank)
     }
 }

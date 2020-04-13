@@ -61,6 +61,7 @@ const val GLOTTAL_STOP_ZEN_KATAKANA = 'ッ'
 const val REPETITION_MARK_KUTOTEN = '々'
 const val COUNTER_MARK_KUTOTEN = 'ヶ'
 const val LENGTHENING_MARK_KUTOTEN = 'ー'
+const val FULLSTOP_KUTOTEN = '。'
 
 fun String.possibleAlternateKatakanaReadings(): List<String> {
     val prefixes = this.first().katakanaDiacriticVariants()

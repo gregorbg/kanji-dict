@@ -1,5 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.reading.token
 
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeReadingTokens
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 
 interface ReadingTokenProvider {
