@@ -6,22 +6,28 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KunYomiAnn
 
 fun String.containsOnlyKatakana() = this.all { KanaAppraiser.isZenkakuKatakana(it) || it == LENGTHENING_MARK_KUTOTEN }
 fun String.containsOnlyHiragana() = this.all(KanaAppraiser::isZenkakuHiragana)
+// ASCII and Kutoten are fully distinct!
 fun String.containsOnlyAscii() = this.all(KanaAppraiser::isZenkakuAscii)
-fun String.containsOnlySymbols() = this.containsOnlyAscii() && !this.any(KanaAppraiser::isZenkakuNumber)
 fun String.containsOnlyKutoten() = this.all(KanaAppraiser::isZenkakuKutoten)
-fun String.containsOnlyAlphanum() = this.containsOnlyAscii() || this.containsOnlyKutoten()
+fun String.containsOnlyLetters() = this.all(KanaAppraiser::isZenkakuLetter)
+fun String.containsOnlyNumbers() = this.all(KanaAppraiser::isZenkakuNumber)
+fun String.containsOnlySymbols() =
+    this.containsOnlyAscii() && !this.any(KanaAppraiser::isZenkakuNumber) && !this.any(KanaAppraiser::isZenkakuLetter)
+
 fun String.containsOnlyHiraganaOrAnnotations(parser: KunYomiAnnotationMode) =
     this.all { KanaAppraiser.isZenkakuHiragana(it) || it in parser.annotationSymbols }
 
-fun String.isProbablyKanji(considerNumbersAsKanji: Boolean = false): Boolean {
+fun String.isProbablyKanji(considerAlphanumAsKanji: Boolean = false): Boolean {
     return this == REPETITION_MARK_KUTOTEN.toString()
             || this == COUNTER_MARK_KUTOTEN.toString()
-            || this.isHeuristicsKanji(considerNumbersAsKanji)
+            || this.isHeuristicsKanji(considerAlphanumAsKanji)
 }
 
-private fun String.isHeuristicsKanji(considerNumbersAsKanji: Boolean): Boolean {
-    val numeralsHack = if (considerNumbersAsKanji) this.toZenkakuAscii().containsOnlySymbols() else this.toZenkakuAscii().containsOnlyAscii()
-    return !numeralsHack && !this.containsOnlyHiragana() && !this.containsOnlyKatakana()
+private fun String.isHeuristicsKanji(considerAlphanumAsKanji: Boolean): Boolean {
+    val numeralsHack =
+        if (considerAlphanumAsKanji) this.toZenkakuAscii().containsOnlySymbols() else this.toZenkakuAscii()
+            .containsOnlyAscii()
+    return !numeralsHack && !this.containsOnlyHiragana() && !this.containsOnlyKatakana() && !this.containsOnlyKutoten()
 }
 
 fun String.toKatakana() = KanaConverter.convertKana(this, KanaConverter.OP_ZEN_HIRA_TO_ZEN_KATA)

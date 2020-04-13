@@ -12,6 +12,7 @@ import io.ktor.client.request.get
 import it.skrape.core.fetcher.Mode
 import it.skrape.core.htmlDocument
 import it.skrape.extract
+import it.skrape.selects.DocElement
 import it.skrape.selects.html5.p
 import it.skrape.skrape
 import kotlinx.coroutines.runBlocking
@@ -66,15 +67,11 @@ object NewsWeb : ComplexTextSource<MorphologyText> {
 
             extract {
                 htmlDocument {
-                    p {
-                        withClass = "content--summary"
-
-                        findFirst { text }
-                    } + p {
-                        withClass = "content--summary-more"
-
-                        findFirst { text }
-                    }
+                    findFirst("p.content--summary").text +
+                            findFirstOrNull("p.content--summary-more")?.text.orEmpty() +
+                            document.select("content--detail-more div.body-text")
+                                .map { DocElement(it) }
+                                .joinToString("") { text }
                 }
             }
         }

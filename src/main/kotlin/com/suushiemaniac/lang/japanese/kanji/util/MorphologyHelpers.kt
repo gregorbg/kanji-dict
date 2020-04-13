@@ -27,21 +27,21 @@ fun String.pluckKanji(): List<String> {
 }
 
 private tailrec fun String.pluckKanjiGroups(
-    considerNumbersAsKanji: Boolean,
+    considerAlphanumAsKanji: Boolean,
     accu: List<String> = emptyList()
 ): List<String> {
     if (this.isEmpty()) {
         return accu
     }
 
-    val kanjiGroup = this.takeWhile { it.toString().isProbablyKanji(considerNumbersAsKanji) }
+    val kanjiGroup = this.takeWhile { it.toString().isProbablyKanji(considerAlphanumAsKanji) }
 
     if (kanjiGroup.isNotEmpty()) {
-        return this.drop(kanjiGroup.length).pluckKanjiGroups(considerNumbersAsKanji, accu + kanjiGroup)
+        return this.drop(kanjiGroup.length).pluckKanjiGroups(considerAlphanumAsKanji, accu + kanjiGroup)
     }
 
-    val nonKanji = this.takeWhile { !it.toString().isProbablyKanji(considerNumbersAsKanji) }
-    return this.drop(nonKanji.length).pluckKanjiGroups(considerNumbersAsKanji, accu + nonKanji)
+    val nonKanji = this.takeWhile { !it.toString().isProbablyKanji(considerAlphanumAsKanji) }
+    return this.drop(nonKanji.length).pluckKanjiGroups(considerAlphanumAsKanji, accu + nonKanji)
 }
 
 private fun zipReadingsExact(
