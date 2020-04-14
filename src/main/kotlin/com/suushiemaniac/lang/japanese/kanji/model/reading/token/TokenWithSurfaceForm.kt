@@ -4,4 +4,6 @@ interface TokenWithSurfaceForm {
     val surfaceForm: String
 
     val reading: String
+
+    fun asSymbols(): SymbolToken
 }

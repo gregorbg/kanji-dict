@@ -1,11 +1,11 @@
 package com.suushiemaniac.lang.japanese.kanji.model.vocabulary
 
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.*
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeReadingTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeSymbolTokens
 import com.suushiemaniac.lang.japanese.kanji.util.*
 
-data class ReadingText(override val sentences: List<CompositeReadingTokens<ReadingToken>>) :
-    CompositeReadingTokens<ReadingToken>, ComplexText<ReadingToken, CompositeReadingTokens<ReadingToken>> {
+data class ReadingText(override val sentences: List<CompositeSymbolTokens<SymbolToken>>) :
+    CompositeSymbolTokens<SymbolToken>, ComplexText<SymbolToken, CompositeSymbolTokens<SymbolToken>> {
 
     override val delimiterToken = DELIMITER_TOKEN
 
@@ -15,13 +15,13 @@ data class ReadingText(override val sentences: List<CompositeReadingTokens<Readi
 
         fun parse(raw: String): ReadingText {
             val intermediateSentence = SampleSentence.parse(raw)
-            val fullTokens = intermediateSentence.toReadings().tokens
+            val fullTokens = intermediateSentence.asSymbols().tokens
 
             return fromTokens(fullTokens)
         }
 
-        fun fromTokens(tokens: List<ReadingToken>): ReadingText {
-            val flatTokens = ConvertedReadingTokens(tokens).flatten()
+        fun fromTokens(tokens: List<SymbolToken>): ReadingText {
+            val flatTokens = ConvertedSymbolTokens(tokens).flatten()
 
             val cleanTokens = flatTokens.flatMap {
                 if (it is KanaToken) {
@@ -35,7 +35,7 @@ data class ReadingText(override val sentences: List<CompositeReadingTokens<Readi
             }
 
             val decomposed = cleanTokens.decompose(SENTENCE_DELIMITER) { it.surfaceForm }
-            val sentences = decomposed.map { ConvertedReadingTokens(it + DELIMITER_TOKEN) }
+            val sentences = decomposed.map { ConvertedSymbolTokens(it + DELIMITER_TOKEN) }
 
             return ReadingText(sentences)
         }

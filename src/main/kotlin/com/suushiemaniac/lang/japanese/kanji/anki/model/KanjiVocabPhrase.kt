@@ -6,7 +6,7 @@ data class KanjiVocabPhrase(val phraseSegments: List<KanjiVocabPhraseToken>) {
     fun getLiterals() = phraseSegments.map { it.surfaceForm }
 
     fun getReadings() = keyedIfExisting {
-        it.takeIf { _ -> it.reading != it.surfaceForm }?.token?.toReadings()?.asFurigana(RubyFuriganaFormatter)
+        it.takeIf { _ -> it.reading != it.surfaceForm }?.token?.asSymbols()?.asFurigana(RubyFuriganaFormatter)
     }
 
     fun getTokenData() = keyedIfExisting { it.tokenData?.exportData() }

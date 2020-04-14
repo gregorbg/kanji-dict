@@ -3,11 +3,11 @@ package com.suushiemaniac.lang.japanese.kanji.latex
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.CompoundKanjiToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanjiToken
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.SymbolToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.util.flatten
 
-class KanjiTest(val sentences: List<ReadingToken>, val read: List<Kanji>, val write: List<Kanji>) {
+class KanjiTest(val sentences: List<SymbolToken>, val read: List<Kanji>, val write: List<Kanji>) {
     val readSymbols
         get() = read.map { it.kanji }
 

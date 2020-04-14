@@ -3,17 +3,17 @@ package com.suushiemaniac.lang.japanese.kanji.util
 import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.*
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeWordLevelTokens
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeReadingTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeSymbolTokens
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTagModifier
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 
-fun String.alignReadingsWith(readingsRaw: String, kanjiSource: KanjiSource): List<AlignedReadingToken> {
+fun String.alignSymbolsWith(readingsRaw: String, kanjiSource: KanjiSource): List<AlignedSymbolToken> {
     val pluckedKanji = this.pluckKanji()
     return zipReadingsExact(pluckedKanji, readingsRaw, kanjiSource)
 }
 
-fun String.alignReadingsWith(readingsRaw: String): List<ReadingToken> {
+fun String.alignSymbolsWith(readingsRaw: String): List<SymbolToken> {
     val pluckedKanjiGroups = this.pluckKanjiGroups(true)
     return zipReadings(pluckedKanjiGroups, readingsRaw)
 }
@@ -48,8 +48,8 @@ private fun zipReadingsExact(
     segments: List<String>,
     rawTemplate: String,
     kanjiSource: KanjiSource,
-    accu: List<AlignedReadingToken> = emptyList()
-): List<AlignedReadingToken> {
+    accu: List<AlignedSymbolToken> = emptyList()
+): List<AlignedSymbolToken> {
     if (segments.isEmpty()) {
         return if (rawTemplate.isEmpty()) accu else emptyList()
     }
@@ -105,8 +105,8 @@ private fun zipReadingsExact(
 private fun zipReadings(
     segments: List<String>,
     rawTemplate: String,
-    accu: List<ReadingToken> = emptyList()
-): List<ReadingToken> {
+    accu: List<SymbolToken> = emptyList()
+): List<SymbolToken> {
     if (segments.isEmpty()) {
         return if (rawTemplate.isEmpty()) accu else emptyList()
     }
@@ -179,8 +179,8 @@ fun List<TokenWithSurfaceForm>.guessVocabModifiers(): List<VocabTagModifier> {
 fun TokenWithSurfaceForm.unwrap() =
     if (this is CompositeTokens<*>) this.tokens else this.singletonList()
 
-fun ReadingToken.unwrap() =
-    if (this is CompositeReadingTokens<*>) this.tokens else this.singletonList()
+fun SymbolToken.unwrap() =
+    if (this is CompositeSymbolTokens<*>) this.tokens else this.singletonList()
 
 fun WordLevelToken.unwrap() =
     if (this is CompositeWordLevelTokens<*>) this.tokens else this.singletonList()
@@ -188,8 +188,8 @@ fun WordLevelToken.unwrap() =
 fun TokenWithSurfaceForm.flatten(): List<TokenWithSurfaceForm> =
     if (this is CompositeTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
 
-fun ReadingToken.flatten(): List<ReadingToken> =
-    if (this is CompositeReadingTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
+fun SymbolToken.flatten(): List<SymbolToken> =
+    if (this is CompositeSymbolTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
 
 fun WordLevelToken.flatten(): List<WordLevelToken> =
     if (this is CompositeWordLevelTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()

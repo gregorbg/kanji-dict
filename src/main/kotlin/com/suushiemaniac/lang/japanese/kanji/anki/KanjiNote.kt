@@ -9,7 +9,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
 import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanjiToken
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.ReadingToken
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.SymbolToken
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
@@ -28,7 +28,7 @@ data class KanjiNote(
     val elementsWithName: Map<Char, String>,
     val coreMeaning: String,
     val sampleTranslations: Map<String, String>,
-    val sampleReadings: Map<String, ReadingToken>,
+    val sampleReadings: Map<String, SymbolToken>,
     val lesson: Int,
     val id: Int,
     val kanken: String?,

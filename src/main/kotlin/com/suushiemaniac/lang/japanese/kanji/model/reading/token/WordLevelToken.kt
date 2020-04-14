@@ -1,10 +1,12 @@
 package com.suushiemaniac.lang.japanese.kanji.model.reading.token
 
-import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeReadingTokens
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeSymbolTokens
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 
 interface WordLevelToken : TokenWithSurfaceForm {
-    fun toAlignedReadings(kanjiSource: KanjiSource): CompositeReadingTokens<AlignedReadingToken>
+    fun toAlignedSymbols(kanjiSource: KanjiSource): CompositeSymbolTokens<out AlignedSymbolToken>
 
-    fun toReadings(): CompositeReadingTokens<ReadingToken>
+    fun toSymbols(): CompositeSymbolTokens<out SymbolToken>
+
+    override fun asSymbols() = toSymbols()
 }

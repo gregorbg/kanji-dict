@@ -1,6 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.reading.token
 
-data class KanaToken(val kana: String) : AlignedReadingToken {
+data class KanaToken(val kana: String) : AlignedSymbolToken {
     override val reading: String
         get() = kana
 

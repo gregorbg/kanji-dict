@@ -12,7 +12,7 @@ import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
-import com.suushiemaniac.lang.japanese.kanji.util.alignReadingsWith
+import com.suushiemaniac.lang.japanese.kanji.util.alignSymbolsWith
 import com.suushiemaniac.lang.japanese.kanji.util.guessVocabModifiers
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
@@ -83,7 +83,7 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
             ?: return null
 
         val mappedReading = suitableReading.word.orEmpty()
-            .alignReadingsWith(suitableReading.reading.orEmpty(), kanjiSource)
+            .alignSymbolsWith(suitableReading.reading.orEmpty(), kanjiSource)
 
         val guessedModifiers = mappedReading.guessVocabModifiers()
 

@@ -4,7 +4,7 @@ data class KanjiToken(
     val kanji: Char,
     override val reading: String,
     val rendakuBaseForm: String? = null
-) : AlignedReadingToken {
+) : AlignedSymbolToken {
     override val surfaceForm: String
         get() = kanji.toString()
 

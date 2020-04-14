@@ -13,7 +13,7 @@ fun DocElement.parseRuby() =
 fun String.parseRuby() =
     Jsoup.parseBodyFragment(this).body().parseRubyRecursive()
 
-private fun Node.parseRubyRecursive(): ReadingToken {
+private fun Node.parseRubyRecursive(): SymbolToken {
     if (this is TextNode) {
         return KanaToken(text().orEmpty().trim())
     }
@@ -37,5 +37,5 @@ private fun Node.parseRubyRecursive(): ReadingToken {
         .filter { it.surfaceForm.isNotBlank() }
         //.flatMap { it.unwrap() }
 
-    return ConvertedReadingTokens(cleanedTokens)
+    return ConvertedSymbolTokens(cleanedTokens)
 }
