@@ -7,7 +7,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIData
 import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoAPIResponse
 import com.suushiemaniac.lang.japanese.kanji.model.jisho.JishoReading
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Translation
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
@@ -51,7 +51,7 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         return current
     }
 
-    override fun getTranslationFor(token: TokenWithSurfaceForm): VocabTranslation? {
+    override fun getTranslationFor(token: TokenWithSurfaceForm): Translation? {
         val result = executePaginatedSearch(token.surfaceForm)
 
         val suitableItem = result.data.firstOrNull {
@@ -93,11 +93,11 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         )
     }
 
-    private fun JishoAPIData.extractTranslations(): VocabTranslation? {
+    private fun JishoAPIData.extractTranslations(): Translation? {
         val mainTranslationsGuess = this.senses.mapNotNull { it.englishDefinitions.firstOrNull() }.distinct()
         val additionalTranslations = this.senses.flatMap { it.englishDefinitions.drop(1) }.distinct()
 
-        return VocabTranslation(
+        return Translation(
             mainTranslationsGuess.joinToString(),
             additionalTranslations
         )

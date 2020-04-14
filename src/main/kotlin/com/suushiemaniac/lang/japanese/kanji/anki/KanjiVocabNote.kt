@@ -8,7 +8,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologyToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.SymbolToken
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Translation
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
@@ -60,7 +60,7 @@ data class KanjiVocabNote(
 
         fun from(
             item: VocabularyItem,
-            translation: VocabTranslation,
+            translation: Translation,
             samplePhrases: List<SampleSentence>,
             originalKanji: Char,
             translationSource: TranslationSource

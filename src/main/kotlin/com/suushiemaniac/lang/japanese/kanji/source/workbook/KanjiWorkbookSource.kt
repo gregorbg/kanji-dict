@@ -5,7 +5,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Translation
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.SimpleKanji
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiProgressionSource
@@ -33,7 +33,7 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
     private val idData by lazy { idParser.getAssociations() }
 
     private val vocabularyData by lazy {
-        vocabularyAndSentenceData.mapValues { it.value.map(Triple<VocabularyItem, VocabTranslation, SampleSentence?>::first) }
+        vocabularyAndSentenceData.mapValues { it.value.map(Triple<VocabularyItem, Translation, SampleSentence?>::first) }
     }
 
     private val vocabularySupplementData by lazy {
@@ -41,12 +41,12 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
     }
 
     private val translationData by lazy {
-        vocabularySupplementData.mapValues { it.value.map(Triple<VocabularyItem, VocabTranslation, SampleSentence?>::second) }
+        vocabularySupplementData.mapValues { it.value.map(Triple<VocabularyItem, Translation, SampleSentence?>::second) }
             .mapKeys { it.key.surfaceForm }
     }
 
     private val sampleSentenceData by lazy {
-        vocabularySupplementData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, VocabTranslation, SampleSentence?>::third) }
+        vocabularySupplementData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, Translation, SampleSentence?>::third) }
     }
 
     override fun lookupSymbol(kanji: Char): Kanji? {
@@ -76,7 +76,7 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         return sampleSentenceData[vocab].orEmpty().distinctBy { it.surfaceForm }
     }
 
-    override fun getTranslationFor(token: TokenWithSurfaceForm): VocabTranslation? {
+    override fun getTranslationFor(token: TokenWithSurfaceForm): Translation? {
         return translationData[token.surfaceForm]?.singleOrNull()
     }
 

@@ -7,7 +7,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiOnYom
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanaToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanjiToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
-import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTranslation
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Translation
 import com.suushiemaniac.lang.japanese.kanji.util.*
 
 abstract class NewlineGroupParser<T>(rawContent: String) : FileParser<T>(rawContent) {
@@ -42,8 +42,8 @@ class KunYomiParser(
 }
 
 class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentSequence: String) :
-    NewlineGroupParser<List<Triple<VocabularyItem, VocabTranslation, SampleSentence?>>>(rawContent) {
-    override fun getValues(assocLines: List<String>): List<Triple<VocabularyItem, VocabTranslation, SampleSentence?>> {
+    NewlineGroupParser<List<Triple<VocabularyItem, Translation, SampleSentence?>>>(rawContent) {
+    override fun getValues(assocLines: List<String>): List<Triple<VocabularyItem, Translation, SampleSentence?>> {
         return assocLines.map {
             val parts = it.split("\t")
             val (fullText, reading, transRaw) = parts.take(3)
@@ -65,7 +65,7 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
             val vocabItem = VocabularyItem(alignedReading, vocabModifiers)
 
             val translationStrings = transRaw.commaTokens
-            val translation = VocabTranslation(translationStrings.first(), translationStrings.drop(1))
+            val translation = Translation(translationStrings.first(), translationStrings.drop(1))
 
             val sampleSentence = parts.getOrNull(3)?.let(SampleSentence.Companion::parse)
 

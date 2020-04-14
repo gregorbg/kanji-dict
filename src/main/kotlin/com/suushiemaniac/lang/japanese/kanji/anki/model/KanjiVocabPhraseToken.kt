@@ -3,12 +3,13 @@ package com.suushiemaniac.lang.japanese.kanji.anki.model
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologicalData
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.MorphologyToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+import com.suushiemaniac.lang.japanese.kanji.model.reading.token.WordLevelToken
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 
 data class KanjiVocabPhraseToken(
     val token: MorphologyToken,
     val annotation: String? = null
-) : TokenWithSurfaceForm by token {
+) : WordLevelToken by token {
     val tokenData: MorphologicalData?
         get() = token.morphology
 

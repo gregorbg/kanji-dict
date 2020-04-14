@@ -1,6 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.vocabulary
 
-data class VocabTranslation(
+data class Translation(
     val mainTranslation: String,
     val otherTranslations: List<String> = NO_TRANSLATIONS
 ) {

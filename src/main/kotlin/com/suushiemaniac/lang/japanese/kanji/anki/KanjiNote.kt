@@ -2,8 +2,8 @@ package com.suushiemaniac.lang.japanese.kanji.anki
 
 import com.suushiemaniac.lang.japanese.kanji.anki.AnkiExporter.JSON
 import com.suushiemaniac.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
+import com.suushiemaniac.lang.japanese.kanji.model.KanjiElements.Companion.cleanComponents
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
-import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Elements
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.KanjiDictEntry
 import com.suushiemaniac.lang.japanese.kanji.model.kanjium.Radical
 import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
@@ -11,6 +11,8 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.annotation.KanjiOnYom
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.KanjiToken
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.SymbolToken
 import com.suushiemaniac.lang.japanese.kanji.model.workbook.WorkbookMetadata
+import com.suushiemaniac.lang.japanese.kanji.source.KanjiElementsSource
+import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.util.*
@@ -64,7 +66,8 @@ data class KanjiNote(
     companion object {
         fun from(
             kanji: KanjiDictEntry,
-            elements: Elements,
+            elementsSource: KanjiElementsSource,
+            elementsSymbolSource: KanjiSource,
             elementsTranslationSource: TranslationSource,
             metadata: WorkbookMetadata,
             vocabSource: VocabularySource,
@@ -102,15 +105,22 @@ data class KanjiNote(
                 kanji.radicalVariant?.let { radicalDesc(it) + " (Variante von " + radicalDesc(kanji.radical) + ")" }
                     ?: radicalDesc(kanji.radical)
 
-            val idcIndex = IDC_GRAPH_MAPPING.indexOf(kanji.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
+            val elements = elementsSource.getElementsFor(kanji)
+                ?: error("No valid elements decomposition for $kanji")
 
-            val elementsWithName = elements.kanjiParts
-                .map { KanjiToken(it.first(), it) } // FIXME hack
-                .associateWith { elementsTranslationSource.getTranslationFor(it)?.mainTranslation.orEmpty() }
-                .mapKeys { it.key.kanji }
+            val idcIndex = IDC_GRAPH_MAPPING.indexOf(elements.idc).takeUnless { it == -1 }?.let { it + 1 } ?: 0
 
-            val suitableMeanings = kanji.compactMeaning.unlessEmpty()?.joinToString()
-                ?: elements.compactMeaning
+            val elementsWithName = elements.cleanComponents(elementsSymbolSource, elementsSource)
+                .associateWithNotNull {
+                    val elementsSymbol = elementsSymbolSource.lookupSymbol(it)?.let { c ->
+                        KanjiToken(c.kanji, c.kanji.toString()) // FIXME hack
+                    }
+
+                    val registeredTranslation = elementsSymbol?.let(elementsTranslationSource::getTranslationFor)
+                    registeredTranslation?.mainTranslation.orEmpty()
+                }
+
+            val suitableMeanings = kanji.compactMeaning.joinToString()
 
             val translatedSamples = allSamples
                 .associateWith { vocabTranslationSource.getTranslationFor(it)?.mainTranslation.orEmpty() }
