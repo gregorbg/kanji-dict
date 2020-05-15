@@ -7,6 +7,7 @@ import kotlinx.serialization.Serializable
 data class MorphologicalData(
     val posLevels: List<String>,
     val baseForm: String,
+    val reading: String,
     val pronunciation: String,
     val conjugationForm: String? = null,
     val conjugationType: String? = null
@@ -39,6 +40,7 @@ data class MorphologicalData(
             return MorphologicalData(
                 posLevels,
                 kuromojiToken.baseForm,
+                kuromojiToken.reading,
                 kuromojiToken.pronunciation,
                 kuromojiToken.conjugationForm.takeUnless { it == UNSPECIFIED_SKIP_TOKEN },
                 kuromojiToken.conjugationType.takeUnless { it == UNSPECIFIED_SKIP_TOKEN }

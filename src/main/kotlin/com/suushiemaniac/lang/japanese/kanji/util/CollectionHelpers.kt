@@ -11,6 +11,14 @@ fun <K, V> Map<K, Iterable<V>>.invertMultiMap() =
 fun <K, V> Map<K, Collection<V>>.mergeMultiMap(other: Map<K, Collection<V>>) =
     (keys + other.keys).associateWith { this[it].orEmpty() + other[it].orEmpty() }
 
+fun <K, V> Map<K, Collection<V>>.mergeToMultiMap(other: Map<K, V>) =
+    (keys + other.keys).associateWith {
+        other[it]?.let { v -> this[it].orEmpty() + v } ?: this[it].orEmpty()
+    }
+
+fun <K, V> Collection<Map<K, V>>.reduceToMultiMap() =
+    fold(mapOf<K, Collection<V>>()) { acc, map -> acc.mergeToMultiMap(map) }
+
 fun <T, V> Iterable<T>.associateWithNotNull(mapping: (T) -> V?): Map<T, V> {
     return mapNotNull { t -> mapping(t)?.let { t to it } }.toMap()
 }
@@ -46,4 +54,12 @@ private tailrec fun <S, T> Iterable<T>.decomposeRecursive(
     val newAccu = accu.toMutableList().apply { add(nextChunk) }
 
     return remaining.decomposeRecursive(delimiter, mapping, newAccu)
+}
+
+fun <E> Collection<Collection<E>>.transpose(): List<List<E>> {
+    fun <E> E.append(xs: List<E>): List<E> = listOf(this@append).plus(xs)
+
+    return filter { it.isNotEmpty() }.unlessEmpty()?.let { ys ->
+        ys.map { it.first() }.append(ys.map { it.drop(1) }.transpose())
+    } ?: emptyList()
 }
