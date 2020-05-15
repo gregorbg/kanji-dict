@@ -164,16 +164,21 @@ private fun Kanji.allReadings(): List<String> {
     return combinedReadings.map { it.standardisedReading }.filterNot { it.isEmpty() }
 }
 
-fun List<TokenWithSurfaceForm>.guessVocabModifiers(): List<VocabTagModifier> {
+fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiers()
+        = this.guessVocabModifiersAndReAlign().second
+
+fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiersAndReAlign(): Pair<List<T>, List<VocabTagModifier>> {
     if (this.size >= 2) {
         val (secondToLast, last) = this.takeLast(2)
 
         if (last is KanaToken && secondToLast is KanjiToken) {
-            return VocabTagModifier.fromKana(last.kana)?.singletonList().orEmpty()
+            return VocabTagModifier.fromKana(last.kana)?.let {
+                this.dropLast(1) to it.singletonList()
+            } ?: this to emptyList()
         }
     }
 
-    return emptyList()
+    return this to emptyList()
 }
 
 fun TokenWithSurfaceForm.unwrap() =

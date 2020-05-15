@@ -61,8 +61,8 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
                     KanjiToken(p.first.single(), cleanReading, baseReading)
             }
 
-            val vocabModifiers = alignedReading.guessVocabModifiers()
-            val vocabItem = VocabularyItem(alignedReading, vocabModifiers)
+            val (realignedReading, vocabModifiers) = alignedReading.guessVocabModifiersAndReAlign()
+            val vocabItem = VocabularyItem(realignedReading, vocabModifiers)
 
             val translationStrings = transRaw.commaTokens
             val translation = Translation(translationStrings.first(), translationStrings.drop(1))

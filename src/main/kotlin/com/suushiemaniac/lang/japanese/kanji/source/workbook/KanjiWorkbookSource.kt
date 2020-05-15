@@ -36,6 +36,10 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         vocabularyAndSentenceData.mapValues { it.value.map(Triple<VocabularyItem, Translation, SampleSentence?>::first) }
     }
 
+    private val kanjiSampleSentenceData by lazy {
+        vocabularyAndSentenceData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, Translation, SampleSentence?>::third) }
+    }
+
     private val vocabularySupplementData by lazy {
         vocabularyAndSentenceData.values.flatten().groupBy { it.first }
     }
@@ -76,6 +80,13 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         return sampleSentenceData[vocab].orEmpty().distinctBy { it.surfaceForm }
     }
 
+    fun getSampleSentencesFor(kanji: Kanji, vocab: VocabularyItem): List<SampleSentence> {
+        val kanjiSamples = kanjiSampleSentenceData[kanji.kanji.toString()].orEmpty().distinctBy { it.surfaceForm }
+        val vocabSamples = getSampleSentencesFor(vocab)
+
+        return kanjiSamples.intersect(vocabSamples).toList()
+    }
+
     override fun getTranslationFor(token: TokenWithSurfaceForm): Translation? {
         return translationData[token.surfaceForm]?.singleOrNull()
     }
@@ -86,7 +97,7 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
 
         if (lesson >= 0 && id >= 0) {
             val idOffset = ORDERED_SYMBOLS.map { it.size }
-                .take(bookNum).sum()
+                .drop((bookNum / 2) * 2).take(bookNum % 2).sum()
 
             val actualId = idOffset + id
             val bookKey = RESOURCE_NAMES[bookNum]
@@ -106,14 +117,15 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
 
         private const val ALIGNMENT_SEPARATOR = "."
 
-        private val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1")
+        private val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1", "intermediate_2")
 
-        val ALL_WORKBOOKS = RESOURCE_NAMES.indices.map { lazy { KanjiWorkbookSource(it) } }
+        private val ALL_WORKBOOKS = RESOURCE_NAMES.indices.map { lazy { KanjiWorkbookSource(it) } }
         val ORDERED_SYMBOLS = ALL_WORKBOOKS.asSequence().map { it.value.fetchAll() }
 
         val BEGINNER_JOU by ALL_WORKBOOKS[0]
         val BEGINNER_GE by ALL_WORKBOOKS[1]
         val INTERMEDIATE_JOU by ALL_WORKBOOKS[2]
+        val INTERMEDIATE_GE by ALL_WORKBOOKS[3]
 
         private val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
 
