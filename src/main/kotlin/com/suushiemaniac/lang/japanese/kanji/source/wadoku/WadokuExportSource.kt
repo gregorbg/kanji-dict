@@ -32,6 +32,7 @@ class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : 
 
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
         return entrySequence.filter { it.form.orth.any { o -> kanji.kanji in o.value } }
+            .filterNot { it.ref.any { r -> r.subentrytype in SENTENCE_TYPES } }
             .map { it.asVocabItem(kanjiSource) }
             .toList()
     }
@@ -53,6 +54,8 @@ class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : 
 
         val JAXB_CONTEXT = JAXBContext.newInstance(JaxbEntry::class.java)
         val JAXB_UNMARSHALLER = JAXB_CONTEXT.createUnmarshaller()
+
+        val SENTENCE_TYPES = setOf(SubEntryTypeEnum.VW_BSP, SubEntryTypeEnum.W_IDIOM, SubEntryTypeEnum.X_SATZ, SubEntryTypeEnum.Z_SPR_W)
 
         private fun JaxbEntry.asVocabItem(kanjiSource: KanjiSource): VocabularyItem {
             val surfaceForm = this.form.orth.first().value
