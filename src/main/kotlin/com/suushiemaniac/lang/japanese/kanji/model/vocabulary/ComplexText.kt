@@ -11,4 +11,6 @@ interface ComplexText<T : TokenWithSurfaceForm, S : CompositeTokens<T>> : Compos
 
     override val tokens: List<T>
         get() = this.sentences.map { it.tokens }.interlace(delimiterToken) + delimiterToken
+
+    fun withMorphology(): MorphologyText
 }

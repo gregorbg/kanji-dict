@@ -13,7 +13,6 @@ import it.skrape.core.fetcher.Mode
 import it.skrape.core.htmlDocument
 import it.skrape.extract
 import it.skrape.selects.DocElement
-import it.skrape.selects.html5.p
 import it.skrape.skrape
 import kotlinx.coroutines.runBlocking
 

@@ -10,6 +10,8 @@ data class MorphologyText(override val sentences: List<SampleSentence>) :
 
     override val delimiterToken = DELIMITER_TOKEN
 
+    override fun withMorphology() = this
+
     companion object {
         const val SENTENCE_DELIMITER = FULLSTOP_KUTOTEN.toString()
 

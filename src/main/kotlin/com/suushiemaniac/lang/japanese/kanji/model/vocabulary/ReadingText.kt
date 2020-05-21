@@ -9,6 +9,8 @@ data class ReadingText(override val sentences: List<CompositeSymbolTokens<Symbol
 
     override val delimiterToken = DELIMITER_TOKEN
 
+    override fun withMorphology() = MorphologyText.parse(this.surfaceForm)
+
     companion object {
         const val SENTENCE_DELIMITER = FULLSTOP_KUTOTEN.toString()
         val DELIMITER_TOKEN = KanaToken(SENTENCE_DELIMITER)
@@ -35,7 +37,7 @@ data class ReadingText(override val sentences: List<CompositeSymbolTokens<Symbol
             }
 
             val decomposed = cleanTokens.decompose(SENTENCE_DELIMITER) { it.surfaceForm }
-            val sentences = decomposed.map { ConvertedSymbolTokens(it + DELIMITER_TOKEN) }
+            val sentences = decomposed.map(::ConvertedSymbolTokens)
 
             return ReadingText(sentences)
         }

@@ -5,8 +5,8 @@ import com.suushiemaniac.lang.japanese.kanji.model.nhknews.easy.TopNewsListItem
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.ReadingText
 import com.suushiemaniac.lang.japanese.kanji.source.ComplexTextSource
 import com.suushiemaniac.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
+import com.suushiemaniac.lang.japanese.kanji.util.flatten
 import com.suushiemaniac.lang.japanese.kanji.util.parseRuby
-import com.suushiemaniac.lang.japanese.kanji.util.unwrap
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JsonFeature
@@ -39,7 +39,7 @@ object NewsWebEasy : ComplexTextSource<ReadingText> {
 
     override fun getAvailableIDs(): Set<String> {
         val flatArticles = ALL_ARTICLES_BY_DATE.values.flatten()
-        return flatArticles.mapTo(mutableSetOf()) { it.newsId }
+        return flatArticles.map { it.newsId }.toSet()
     }
 
     override fun getText(id: String): ReadingText {
@@ -57,6 +57,6 @@ object NewsWebEasy : ComplexTextSource<ReadingText> {
             }
         }
 
-        return ReadingText.fromTokens(readingToken.unwrap())
+        return ReadingText.fromTokens(readingToken.flatten())
     }
 }

@@ -181,15 +181,6 @@ fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiersAndReAlign(): Pair<List
     return this to emptyList()
 }
 
-fun TokenWithSurfaceForm.unwrap() =
-    if (this is CompositeTokens<*>) this.tokens else this.singletonList()
-
-fun SymbolToken.unwrap() =
-    if (this is CompositeSymbolTokens<*>) this.tokens else this.singletonList()
-
-fun WordLevelToken.unwrap() =
-    if (this is CompositeWordLevelTokens<*>) this.tokens else this.singletonList()
-
 fun TokenWithSurfaceForm.flatten(): List<TokenWithSurfaceForm> =
     if (this is CompositeTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
 

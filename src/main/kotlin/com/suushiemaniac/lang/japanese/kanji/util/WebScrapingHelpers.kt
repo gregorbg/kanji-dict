@@ -35,7 +35,7 @@ private fun Node.parseRubyRecursive(): SymbolToken {
 
     val cleanedTokens = parsedTokens
         .filter { it.surfaceForm.isNotBlank() }
-        //.flatMap { it.unwrap() }
+        // FIXME .flatMap { it.unwrap() }
 
     return ConvertedSymbolTokens(cleanedTokens)
 }
