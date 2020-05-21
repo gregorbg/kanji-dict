@@ -4,6 +4,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.Kanji
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.SampleSentence
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.Translation
+import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabTagModifier
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import com.suushiemaniac.lang.japanese.kanji.source.KanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
@@ -74,8 +75,12 @@ class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : 
 
             val combinedReading = surfaceForm.alignSymbolsWith(reading, kanjiSource)
 
-            // TODO modifiers (na, suru)
-            return VocabularyItem(combinedReading)
+            val modifiers = listOfNotNull(
+                VocabTagModifier.VERB_SURU.takeIf { this.gramGrp?.meishi?.isSetSuru ?: false },
+                VocabTagModifier.ADJECTIVE_NA.takeIf { this.gramGrp?.isSetKeiyoudoushi ?: false }
+            )
+
+            return VocabularyItem(combinedReading, modifiers)
         }
 
         private fun JaxbEntry.asSampleSentence(): SampleSentence {
