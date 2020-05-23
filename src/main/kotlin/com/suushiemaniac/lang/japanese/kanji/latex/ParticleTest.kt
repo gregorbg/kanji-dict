@@ -19,7 +19,7 @@ class ParticleTest(sentences: List<CompositeWordLevelTokens<out WordLevelToken>>
 
     companion object {
         private val MorphologyToken.isParticle
-            get() = morphology?.posLevels?.firstOrNull() == "助詞"
+            get() = (morphology?.posLevels?.getOrNull(0) == "助詞") && (morphology.posLevels.getOrNull(1) != "接続助詞")
 
         fun makeWriteAnnotation(token: TokenWithSurfaceForm) =
             "(${"　".repeat(token.surfaceForm.length)})"

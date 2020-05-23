@@ -4,8 +4,8 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfac
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
 import com.suushiemaniac.lang.japanese.kanji.util.interlace
 
-interface ComplexText<T : TokenWithSurfaceForm, S : CompositeTokens<T>> : CompositeTokens<T> {
-    val sentences: List<S>
+interface ComplexText<T : TokenWithSurfaceForm> : CompositeTokens<T> {
+    val sentences: List<CompositeTokens<out T>>
 
     val delimiterToken: T
 

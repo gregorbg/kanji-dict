@@ -5,7 +5,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.Composi
 import com.suushiemaniac.lang.japanese.kanji.util.*
 
 data class ReadingText(override val sentences: List<CompositeSymbolTokens<SymbolToken>>) :
-    CompositeSymbolTokens<SymbolToken>, ComplexText<SymbolToken, CompositeSymbolTokens<SymbolToken>> {
+    CompositeSymbolTokens<SymbolToken>, ComplexText<SymbolToken> {
 
     override val delimiterToken = DELIMITER_TOKEN
 

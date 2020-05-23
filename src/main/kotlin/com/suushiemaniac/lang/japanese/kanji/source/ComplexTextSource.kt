@@ -4,7 +4,7 @@ import com.suushiemaniac.lang.japanese.kanji.model.reading.token.TokenWithSurfac
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
 import com.suushiemaniac.lang.japanese.kanji.model.vocabulary.ComplexText
 
-interface ComplexTextSource<T : ComplexText<out TokenWithSurfaceForm, out CompositeTokens<out TokenWithSurfaceForm>>> {
+interface ComplexTextSource<T : ComplexText<out TokenWithSurfaceForm>> {
     fun getAvailableIDs(): Set<String>
 
     fun getText(id: String): T

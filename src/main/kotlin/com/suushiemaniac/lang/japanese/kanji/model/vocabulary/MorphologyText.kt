@@ -6,7 +6,7 @@ import com.suushiemaniac.lang.japanese.kanji.util.FULLSTOP_KUTOTEN
 import com.suushiemaniac.lang.japanese.kanji.util.decompose
 
 data class MorphologyText(override val sentences: List<SampleSentence>) :
-    CompositeWordLevelTokens<MorphologyToken>, ComplexText<MorphologyToken, SampleSentence> {
+    CompositeWordLevelTokens<MorphologyToken>, ComplexText<MorphologyToken> {
 
     override val delimiterToken = DELIMITER_TOKEN
 
