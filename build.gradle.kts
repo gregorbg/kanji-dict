@@ -1,12 +1,11 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
-import org.unbrokendome.gradle.plugins.xjc.XjcGenerate
 
 plugins {
     kotlin("jvm") version "1.3.72"
     kotlin("plugin.serialization") version "1.3.72"
 
     id("com.github.ben-manes.versions") version "0.28.0"
-    id("org.unbroken-dome.xjc") version "1.4.3"
+    id("com.github.edeandrea.xjc-generation") version "1.4"
 }
 
 group = "com.suushiemaniac"
@@ -35,10 +34,12 @@ dependencies {
     implementation("it.skrape:skrapeit-core:1.0.0-alpha6")
     implementation("org.jsoup:jsoup:1.13.1")
 
-    implementation("javax.xml.bind:jaxb-api:2.3.1")
-    add("xjcClasspath", "org.jvnet.jaxb2_commons:jaxb2-basics-annotate:1.1.0")
-    implementation("com.sun.xml.bind:jaxb-core:2.3.0")
-    implementation("com.sun.xml.bind:jaxb-impl:2.3.1")
+    val jaxb = "javax.xml.bind:jaxb-api:2.3.1"
+    implementation(jaxb)
+    "xjc"(jaxb)
+    "xjc"("org.glassfish.jaxb:jaxb-runtime:2.3.3")
+    "xjc"("org.glassfish.jaxb:jaxb-xjc:2.3.3")
+    "xjc"("org.jvnet.jaxb2_commons:jaxb2-basics-annotate:1.1.0")
 
     runtimeOnly("com.h2database:h2:1.4.200")
     runtimeOnly("org.xerial:sqlite-jdbc:3.31.1")
@@ -47,19 +48,20 @@ dependencies {
 sourceSets {
     main {
         java {
-            val task = tasks.getByName("xjcGenerate")
-            srcDir(task.outputs)
+            srcDir("$buildDir/generated-sources/main/xjc")
         }
     }
 }
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-
-    dependsOn("xjcGenerate")
 }
 
-tasks.withType<XjcGenerate> {
-    extension = true
-    extraArgs = listOf("-Xannotate")
+xjcGeneration {
+    schemas {
+        create("wadoku") {
+            schemaFile = "wadoku/entry_1.6.2.xsd"
+            additionalXjcCommandLineArgs = mapOf("-Xannotate" to "")
+        }
+    }
 }
