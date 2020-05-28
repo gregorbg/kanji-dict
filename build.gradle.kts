@@ -37,6 +37,8 @@ dependencies {
 
     val jaxb = "javax.xml.bind:jaxb-api:2.3.1"
     implementation(jaxb)
+    implementation("com.sun.xml.bind:jaxb-core:2.3.0")
+    implementation("com.sun.xml.bind:jaxb-impl:2.3.1")
     "xjc"(jaxb)
     "xjc"("org.glassfish.jaxb:jaxb-runtime:2.3.3")
     "xjc"("org.glassfish.jaxb:jaxb-xjc:2.3.3")

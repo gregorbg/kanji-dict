@@ -5,9 +5,9 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.XmlValue
 
 @Serializable
-@XmlSerialName("token", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
-data class WadokuSenseTransTrToken(
-    val genus: String,
+@XmlSerialName("link", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
+data class WadokuLink(
     val type: String,
-    @XmlValue(true) val token: String
+    val url: String,
+    @XmlValue(true) val link: String
 )

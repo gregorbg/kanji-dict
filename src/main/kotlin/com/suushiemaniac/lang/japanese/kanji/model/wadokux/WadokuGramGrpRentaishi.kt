@@ -5,9 +5,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import nl.adaptivity.xmlutil.serialization.XmlValue
 
 @Serializable
-@XmlSerialName("token", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
-data class WadokuSenseTransTrToken(
-    val genus: String,
-    val type: String,
-    @XmlValue(true) val token: String
+@XmlSerialName("rentaishi", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
+data class WadokuGramGrpRentaishi(
+    @XmlValue(true) val rentaishi: String? = null
 )

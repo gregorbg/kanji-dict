@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
-@XmlSerialName("meishi", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
-data class WadokuGramGrpMeishi(
-    val suru: String? = null
+@XmlSerialName("abbrev", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
+data class WadokuEtymologyAbbreviation(
+    val ref: WadokuReference
 )

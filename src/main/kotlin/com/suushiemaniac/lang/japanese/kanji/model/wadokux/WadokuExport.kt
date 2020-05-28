@@ -7,8 +7,8 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import java.time.ZonedDateTime
 
 @Serializable
-@SerialName("entries")
+@XmlSerialName("entries", "", "")
 data class WadokuExport(
     val date: @Serializable(with = WadokuDateStringEncoder::class) ZonedDateTime,
-    @XmlSerialName("entry", "http://www.wadoku.de/xml/entry", "") val entries: List<WadokuExportEntry>
+    @XmlSerialName("entry", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX) val entries: List<WadokuExportEntry>
 )
