@@ -1,6 +1,7 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
 import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.PronTypeEnum
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -10,9 +11,9 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Deprecated("veraltet, nach Migration auf Schemaversion 1.3 entfernen")
 data class WadokuFormPronounciation(
     @XmlElement(false) val type: PronTypeEnum? = null,
-    val orth: Int? = null,
+    @SerialName("orth") val orthography: Int? = null,
     val accent: Int? = null,
-    val altaccent: Int? = null,
+    @SerialName("altaccent") val alternativeAccent: Int? = null,
     val count: Int? = null,
     @Deprecated("deprecated") val text: List<WadokuText> = emptyList(),
     @XmlElement(true) val dev: List<String> = emptyList()

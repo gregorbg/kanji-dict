@@ -1,17 +1,18 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
 @Serializable
 @XmlSerialName("trans", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
 data class WadokuSenseTrans(
-    val lang: String? = null,
-    val langdesc: String? = null,
-    val descr: WadokuSenseDescription? = null,
-    val usg: List<WadokuUsage> = emptyList(),
+    @SerialName("lang") val language: String? = null,
+    @SerialName("langdesc") val languageDescription: String? = null,
+    @SerialName("descr") val description: WadokuSenseDescription? = null,
+    @SerialName("usg") val usage: List<WadokuUsage> = emptyList(),
     val tr: WadokuSenseTransTrComplex? = null,
-    val def: List<WadokuSenseDefinition> = emptyList(),
-    val etym: WadokuEtymology? = null,
+    @SerialName("def") val definition: List<WadokuSenseDefinition> = emptyList(),
+    @SerialName("etym") val etymology: WadokuEtymology? = null,
     val title: WadokuTitle? = null
 )

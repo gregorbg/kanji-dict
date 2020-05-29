@@ -1,5 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 
@@ -9,17 +10,17 @@ data class WadokuExplanation(
     val options: String? = null,
     val text: List<WadokuText> = emptyList(),
     val literal: List<WadokuLiteral> = emptyList(),
-    val transl: List<String> = emptyList(),
+    @SerialName("transl") val translation: List<String> = emptyList(),
     val iron: List<WadokuIron> = emptyList(),
     val topic: List<String> = emptyList(),
-    val transcr: List<WadokuTranscription> = emptyList(),
+    @SerialName("transcr") val transcription: List<WadokuTranscription> = emptyList(),
     val token: List<WadokuToken> = emptyList(),
-    val jap: List<String> = emptyList(),
-    val ref: List<WadokuReference> = emptyList(),
+    @SerialName("jap") val japanese: List<String> = emptyList(),
+    @SerialName("ref") val reference: List<WadokuReference> = emptyList(),
     val foreign: List<WadokuForeign> = emptyList(),
     val title: List<WadokuTitle> = emptyList(),
-    val emph: List<String> = emptyList(),
-    val specchar: List<String> = emptyList(),
-    val famn: List<WadokuExplanationFamilyName> = emptyList(),
-    val scientif: List<WadokuScientific> = emptyList()
+    @SerialName("emph") val emphasis: List<String> = emptyList(),
+    @SerialName("specchar") val specialCharacter: List<String> = emptyList(),
+    @SerialName("famn") val familyName: List<WadokuExplanationFamilyName> = emptyList(),
+    @SerialName("scientif") val scientific: List<WadokuScientific> = emptyList()
 )
