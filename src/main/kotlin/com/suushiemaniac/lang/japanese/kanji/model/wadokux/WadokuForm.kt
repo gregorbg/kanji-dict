@@ -7,6 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("form", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
 data class WadokuForm(
-    @XmlElement(true) val orth: String,
-    val reading: WadokuFormReading
+    val orth: List<WadokuFormOrth>,
+    val pron: List<WadokuFormPronounciation> = emptyList(),
+    val reading: WadokuFormReading? = null
 )
