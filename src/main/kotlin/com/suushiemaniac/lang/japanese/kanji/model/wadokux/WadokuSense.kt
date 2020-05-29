@@ -1,8 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
 import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.SeasonEnum
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.util.BooleanStringEncoder
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.util.LongStringEncoder
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -10,9 +8,9 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("sense", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
 data class WadokuSense( // TODO model as sealed class?
-    val senseid: @Serializable(with = LongStringEncoder::class) Long? = null,
+    val senseid: Long? = null,
     @Deprecated("veraltet, siehe seasonword") @XmlElement(false) val season: SeasonEnum? = null,
-    val related: @Serializable(with = BooleanStringEncoder::class) Boolean = false,
+    val related: Boolean? = null,
     val descr: WadokuSenseDescription? = null,
     val accent: List<String> = emptyList(),
     // recursion val sense: List<WadokuSense> = emptyList(),

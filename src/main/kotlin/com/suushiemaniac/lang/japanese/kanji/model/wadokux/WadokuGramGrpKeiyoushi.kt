@@ -6,6 +6,6 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("keiyoushi", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
 data class WadokuGramGrpKeiyoushi(
-    val ku: Boolean = false,
-    val shiku: Boolean = false
+    val ku: Boolean? = null,
+    val shiku: Boolean? = null
 )

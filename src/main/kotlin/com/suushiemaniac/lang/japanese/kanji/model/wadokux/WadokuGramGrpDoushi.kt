@@ -13,5 +13,5 @@ data class WadokuGramGrpDoushi(
     @XmlElement(false) val level: LevelEnum? = null,
     @XmlElement(false) val transitivity: TransitivityEnum? = null,
     @XmlElement(false) val godanrow: GodanRow? = null,
-    val onbin: Boolean = false
+    val onbin: Boolean? = null
 )
