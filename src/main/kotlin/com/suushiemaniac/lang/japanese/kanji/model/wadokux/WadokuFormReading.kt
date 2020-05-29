@@ -8,8 +8,9 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("reading", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
 data class WadokuFormReading(
+    val count: Int? = null,
     @XmlElement(true) @SerialName("hira") val hiragana: String,
     @XmlElement(true) val hatsuon: String,
     val romaji: WadokuFormReadingRomaji? = null,
-    @XmlElement(true) val accent: List<Int> = emptyList()
+    @XmlElement(true) val accent: List<String> = emptyList()
 )

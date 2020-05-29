@@ -14,7 +14,7 @@ data class WadokuEtymology(
     @SerialName("ref") val reference: List<WadokuReference> = emptyList(),
     val literal: List<WadokuLiteral> = emptyList(),
     @XmlElement(true) @SerialName("emph") val emphasis: List<String> = emptyList(),
-    @XmlElement(true) @SerialName("trans") val translation: List<String> = emptyList(),
+    @XmlElement(true) @SerialName("transl") val translation: List<String> = emptyList(),
     @SerialName("transcr") val transcription: List<WadokuTranscription> = emptyList(),
     @XmlElement(true) val topic: List<String> = emptyList(),
     val foreign: List<WadokuForeign> = emptyList(),

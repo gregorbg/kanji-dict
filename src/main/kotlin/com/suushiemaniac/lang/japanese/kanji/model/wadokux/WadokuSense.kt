@@ -13,7 +13,7 @@ data class WadokuSense(
     @Deprecated("veraltet, siehe seasonword") @XmlElement(false) val season: SeasonEnum? = null,
     val related: Boolean? = null,
     @SerialName("descr") val description: WadokuSenseDescription? = null,
-    val accent: List<String> = emptyList(),
+    @XmlElement(true) val accent: List<String> = emptyList(),
     // recursion val sense: List<WadokuSense> = emptyList(),
     @SerialName("etym") val etymology: List<WadokuEtymology> = emptyList(),
     @SerialName("usg") val usage: List<WadokuUsage> = emptyList(),

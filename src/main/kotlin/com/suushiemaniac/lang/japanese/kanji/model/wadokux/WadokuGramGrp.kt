@@ -8,7 +8,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 @Serializable
 @XmlSerialName("gramGrp", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
 data class WadokuGramGrp(
-    @Deprecated("veraltet, nach Migration auf Schemaversion 1.3 entfernen") val pos: List<String> = emptyList(),
+    @Deprecated("veraltet, nach Migration auf Schemaversion 1.3 entfernen") val pos: List<WadokuGramGrpPosComplex> = emptyList(),
     val meishi: WadokuGramGrpMeishi? = null,
     val doushi: List<WadokuGramGrpDoushi> = emptyList(),
     val jodoushi: WadokuGramGrpJodoushi? = null,
@@ -21,9 +21,9 @@ data class WadokuGramGrp(
     @XmlElement(true) val prefix: String? = null,
     @XmlElement(true) val suffix: String? = null,
     @XmlElement(true) val rentaishi: String? = null,
-    @XmlElement(true) val setsuzkushi: String? = null,
+    @XmlElement(true) val setsuzokushi: String? = null,
     @XmlElement(true) val daimeishi: String? = null,
-    @XmlElement(true) val setsuzkujoshi: String? = null,
+    @XmlElement(true) val setsuzokujoshi: String? = null,
     @XmlElement(true) val shuujoshi: String? = null,
     @XmlElement(true) val kakarijoshi: String? = null,
     @XmlElement(true) val kakujoshi: String? = null,

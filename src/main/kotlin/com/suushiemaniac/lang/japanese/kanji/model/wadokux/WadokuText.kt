@@ -7,7 +7,7 @@ import nl.adaptivity.xmlutil.serialization.XmlValue
 @Serializable
 @XmlSerialName("text", WadokuExportEntry.NAMESPACE, WadokuExportEntry.NS_PREFIX)
 data class WadokuText(
-    @XmlValue(true) val text: String,
     val hasPrecedingSpace: Boolean? = null,
-    val hasFollowingSpace: Boolean? = null
+    val hasFollowingSpace: Boolean? = null,
+    @XmlValue(true) val text: String = ""
 )

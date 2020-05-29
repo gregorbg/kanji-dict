@@ -14,5 +14,5 @@ data class WadokuTitle(
     @SerialName("abbrev") val isAbbreviation: Boolean? = null,
     val text: List<WadokuText> = emptyList(),
     val token: List<WadokuToken> = emptyList(),
-    @SerialName("emph") val emphasis: List<String> = emptyList()
+    @XmlElement(true) @SerialName("emph") val emphasis: List<String> = emptyList()
 )

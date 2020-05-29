@@ -13,5 +13,5 @@ data class WadokuFormOrthography(
     @SerialName("midashigo") val isMidashigo: Boolean? = null,
     @XmlElement(false) val type: OrthTypeEnum? = null,
     val count: Int? = null,
-    @XmlValue(true) @SerialName("orth") val orthography: String
+    @XmlValue(true) @SerialName("orth") val orthography: String = ""
 )

@@ -12,7 +12,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class WadokuReference(
     val id: Long = 0,
     @SerialName("senseid") val senseId: Long? = null,
-    @XmlElement(false) val type: RefTypeEnum,
+    @XmlElement(false) val type: RefTypeEnum? = null,
     @XmlElement(false) @SerialName("subentrytype") val subEntryType: SubEntryTypeEnum? = null,
     val text: WadokuText? = null,
     @SerialName("transcr") val transcription: WadokuTranscription? = null,
