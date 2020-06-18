@@ -36,6 +36,7 @@ dependencies {
 
     runtimeOnly("com.h2database:h2:1.4.200")
     runtimeOnly("org.xerial:sqlite-jdbc:3.31.1")
+    runtimeOnly("com.fasterxml.woodstox:woodstox-core:5.0.3")
 }
 
 tasks.withType<KotlinCompile> {
