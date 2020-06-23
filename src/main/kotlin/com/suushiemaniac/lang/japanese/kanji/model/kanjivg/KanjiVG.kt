@@ -11,10 +11,14 @@ data class KanjiVG(
     val viewBox: String,
     val elements: List<SvgElement>
 ) {
-    fun withRadicalColors(): KanjiVG {
+    fun withColoredRadicals(): KanjiVG {
         val coloredElements = elements.map { it.withRadicalColor() }
-
         return copy(elements = coloredElements)
+    }
+
+    fun withBoxedRadicals(): KanjiVG {
+        val boxedElements = elements.map { it.withRadicalBox() }
+        return copy(elements = boxedElements)
     }
 
     companion object {

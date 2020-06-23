@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 enum class Radical(val color: String) {
-    @SerialName("general") GENERAL("#ff0000"), // red
-    @SerialName("nelson") NELSON("#00ff00"), // green
-    @SerialName("tradit") TRADITIONAL("#0000ff") // blue
+    @SerialName("general") GENERAL("#00ff00"), // green
+    @SerialName("tradit") TRADITIONAL("#ffff00"), // yellow
+    @SerialName("nelson") NELSON("#0000ff") // blue
 }

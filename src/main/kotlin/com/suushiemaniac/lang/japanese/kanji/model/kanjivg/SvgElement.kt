@@ -9,6 +9,7 @@ sealed class SvgElement {
     abstract val id: String
 
     abstract fun withRadicalColor(level: Int = 0): SvgElement
+    abstract fun withRadicalBox(): SvgElement
 
     abstract fun withIdSuffix(suffix: String): SvgElement
 
@@ -71,6 +72,17 @@ sealed class SvgElement {
                 .copy(elements = coloredChildren)
         }
 
+        override fun withRadicalBox(): SvgElement {
+            val coloredElements = elements.map { it.withRadicalBox() }
+
+            if (radical == null) {
+                return copy(elements = coloredElements)
+            }
+
+            return withStyle(makeBoxStyle(radical.color))
+                .copy(elements = coloredElements)
+        }
+
         override fun withIdSuffix(suffix: String): Group {
             val suffixedChildren = elements.map { it.withIdSuffix(suffix) }
             return copy(id = "$id-$suffix", elements = suffixedChildren)
@@ -90,6 +102,7 @@ sealed class SvgElement {
             const val TRANSFORM_OFFSET = 4.2
 
             private fun makeColorStyle(color: String) = "stroke:$color"
+            private fun makeBoxStyle(color: String) = "outline:solid 2px $color"
             private fun makeTransformStyle(level: Int) =
                 "translate(${level * TRANSFORM_OFFSET},${level * TRANSFORM_OFFSET})"
         }
@@ -103,6 +116,8 @@ sealed class SvgElement {
         @XmlSerialName("type", KanjiVG.KANJIVG_NAMESPACE, KanjiVG.KANJIVG_PREFIX) val type: String? = null
     ) : SvgElement() {
         override fun withRadicalColor(level: Int) = this
+        override fun withRadicalBox() = this
+
         override fun withIdSuffix(suffix: String) = copy(id = "$id-$suffix")
         override fun withStyle(addStyle: String) = this
         override fun withTransform(addTransform: String) = this
