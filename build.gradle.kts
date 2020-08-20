@@ -5,7 +5,6 @@ plugins {
     kotlin("plugin.serialization") version "1.3.72"
 
     id("com.github.ben-manes.versions") version "0.28.0"
-    id("com.github.edeandrea.xjc-generation") version "1.4"
 }
 
 group = "com.suushiemaniac"
@@ -35,36 +34,10 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
     implementation("net.devrieze:xmlutil-serialization-jvm:0.20.0.10")
 
-    val jaxb = "javax.xml.bind:jaxb-api:2.3.1"
-    implementation(jaxb)
-    implementation("com.sun.xml.bind:jaxb-core:2.3.0")
-    implementation("com.sun.xml.bind:jaxb-impl:2.3.1")
-    "xjc"(jaxb)
-    "xjc"("org.glassfish.jaxb:jaxb-runtime:2.3.3")
-    "xjc"("org.glassfish.jaxb:jaxb-xjc:2.3.3")
-    "xjc"("org.jvnet.jaxb2_commons:jaxb2-basics-annotate:1.1.0")
-
     runtimeOnly("com.h2database:h2:1.4.200")
     runtimeOnly("org.xerial:sqlite-jdbc:3.31.1")
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir("$buildDir/generated-sources/main/xjc")
-        }
-    }
-}
-
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
-}
-
-xjcGeneration {
-    schemas {
-        create("wadoku") {
-            schemaFile = "wadoku/entry_1.6.2.xsd"
-            additionalXjcCommandLineArgs = mapOf("-Xannotate" to "")
-        }
-    }
 }
