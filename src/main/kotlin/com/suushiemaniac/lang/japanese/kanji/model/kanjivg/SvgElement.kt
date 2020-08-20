@@ -1,8 +1,13 @@
 package com.suushiemaniac.lang.japanese.kanji.model.kanjivg
 
+import com.suushiemaniac.lang.japanese.kanji.model.kanjivg.enumeration.Position
+import com.suushiemaniac.lang.japanese.kanji.model.kanjivg.enumeration.Radical
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import nl.adaptivity.xmlutil.serialization.XmlValue
 
 @Serializable
 sealed class SvgElement {
@@ -17,6 +22,7 @@ sealed class SvgElement {
     abstract fun withTransform(addTransform: String): SvgElement
 
     @Serializable
+    @SerialName("g")
     @XmlSerialName("g", KanjiVG.SVG_NAMESPACE, KanjiVG.SVG_PREFIX)
     data class Group(
         override val id: String,
@@ -109,6 +115,7 @@ sealed class SvgElement {
     }
 
     @Serializable
+    @SerialName("path")
     @XmlSerialName("path", KanjiVG.SVG_NAMESPACE, KanjiVG.SVG_PREFIX)
     data class Path(
         override val id: String,
@@ -119,6 +126,24 @@ sealed class SvgElement {
         override fun withRadicalBox() = this
 
         override fun withIdSuffix(suffix: String) = copy(id = "$id-$suffix")
+        override fun withStyle(addStyle: String) = this
+        override fun withTransform(addTransform: String) = this
+    }
+
+    @Serializable
+    @SerialName("text")
+    @XmlSerialName("text", KanjiVG.SVG_NAMESPACE, KanjiVG.SVG_PREFIX)
+    data class Text(
+        val transform: String,
+        @XmlValue(true) val text: String
+    ) : SvgElement() {
+        @Transient
+        override val id: String = ""
+
+        override fun withRadicalColor(level: Int) = this
+        override fun withRadicalBox() = this
+
+        override fun withIdSuffix(suffix: String) = this
         override fun withStyle(addStyle: String) = this
         override fun withTransform(addTransform: String) = this
     }
