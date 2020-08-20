@@ -14,7 +14,7 @@ data class WadokuSense(
     val related: Boolean? = null,
     @SerialName("descr") val description: WadokuSenseDescription? = null,
     @XmlElement(true) val accent: List<String> = emptyList(),
-    // recursion val sense: List<WadokuSense> = emptyList(),
+    val sense: List<WadokuSense> = emptyList(),
     @SerialName("etym") val etymology: List<WadokuEtymology> = emptyList(),
     @SerialName("usg") val usage: List<WadokuUsage> = emptyList(),
     @SerialName("trans") val translation: List<WadokuSenseTrans> = emptyList(),

@@ -33,7 +33,7 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization-jvm:1.3.2")
     implementation("it.skrape:skrapeit-core:1.0.0-alpha6")
     implementation("org.jsoup:jsoup:1.13.1")
-    implementation("net.devrieze:xmlutil-serialization-jvm:0.20.0.1")
+    implementation("net.devrieze:xmlutil-serialization-jvm:0.20.0.10")
 
     val jaxb = "javax.xml.bind:jaxb-api:2.3.1"
     implementation(jaxb)

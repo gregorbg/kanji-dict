@@ -10,7 +10,7 @@ import nl.adaptivity.xmlutil.serialization.XmlSerialName
 data class WadokuSenseBracket(
     val prior: Int? = null,
     @SerialName("meta") val isMeta: Boolean? = null,
-    // recursion val def: List<WadokuSenseTransDefinition> = emptyList(),
+    val def: List<WadokuSenseDefinition> = emptyList(),
     @SerialName("expl") val explanation: List<WadokuExplanation> = emptyList(),
     @XmlElement(true) @SerialName("birthdeath") val birthDeath: List<String> = emptyList(),
     @XmlElement(true) val date: List<String> = emptyList(),
