@@ -1,4 +1,4 @@
-package com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum
+package com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

@@ -1,8 +1,8 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.GenusEnum
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.NumerusEnum
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.PosEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.GenusEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.NumerusEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.PosEnum
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement

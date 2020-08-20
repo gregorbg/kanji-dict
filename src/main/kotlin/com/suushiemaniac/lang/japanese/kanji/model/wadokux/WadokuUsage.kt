@@ -1,6 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.UsgTypeEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.UsgTypeEnum
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement

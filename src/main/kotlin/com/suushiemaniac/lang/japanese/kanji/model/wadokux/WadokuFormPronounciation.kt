@@ -1,6 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.PronTypeEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.PronTypeEnum
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement

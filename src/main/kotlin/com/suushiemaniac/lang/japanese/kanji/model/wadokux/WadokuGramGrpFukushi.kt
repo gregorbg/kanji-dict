@@ -1,6 +1,6 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.TransitivityEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.TransitivityEnum
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement

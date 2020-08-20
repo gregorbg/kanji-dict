@@ -1,8 +1,8 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux
 
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.GodanRow
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.LevelEnum
-import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enum.TransitivityEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.GodanRow
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.LevelEnum
+import com.suushiemaniac.lang.japanese.kanji.model.wadokux.enumeration.TransitivityEnum
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import nl.adaptivity.xmlutil.serialization.XmlElement
