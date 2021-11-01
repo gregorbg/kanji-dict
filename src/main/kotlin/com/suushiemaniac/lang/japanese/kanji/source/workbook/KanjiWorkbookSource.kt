@@ -13,6 +13,7 @@ import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.*
+import com.suushiemaniac.lang.japanese.kanji.util.invert
 
 class KanjiWorkbookSource private constructor(val bookNum: Int) :
     KanjiProgressionSource, VocabularySource, SampleSentenceSource, TranslationSource {
@@ -65,7 +66,7 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
     }
 
     override fun lookupIndex(index: Int): Kanji? {
-        return fetchAll().getOrNull(index)
+        return idData.invert()[index]?.let { lookupSymbol(it.first()) }
     }
 
     override fun fetchAll(): List<Kanji> {

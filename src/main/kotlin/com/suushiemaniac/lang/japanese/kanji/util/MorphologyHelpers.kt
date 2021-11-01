@@ -174,7 +174,7 @@ fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiersAndReAlign(): Pair<List
         if (last is KanaToken && secondToLast is KanjiToken) {
             return VocabTagModifier.fromKana(last.kana)?.let {
                 this.dropLast(1) to it.singletonList()
-            } ?: this to emptyList()
+            } ?: (this to emptyList())
         }
     }
 

@@ -2,6 +2,7 @@ package com.suushiemaniac.lang.japanese.kanji.latex
 
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.*
 import com.suushiemaniac.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
+import com.suushiemaniac.lang.japanese.kanji.util.*
 
 abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences: List<CompositeTokens<out T>>) {
     fun renderIndividual(solution: Boolean = false): String {
@@ -19,10 +20,12 @@ abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences:
         val sentenceSolutionItems = generateSentenceItems(true)
 
         val body = """
-            ${renderEnumeration(sentenceQuestionItems)}
+            ${renderEnumeration(sentenceQuestionItems).prependIndent(3, IndentMode.SPACE).trimStart()}
+            
             \pagebreak
-            ${renderEnumeration(sentenceSolutionItems)}
-        """
+            
+            ${renderEnumeration(sentenceSolutionItems).prependIndent(3, IndentMode.SPACE).trimStart()}
+        """.trimIndent()
 
         return renderDocument(body)
     }
@@ -33,7 +36,9 @@ abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences:
 
             tokens.joinToString("") {
                 processToken(it, solution)
-            }.replace("}\\", "}~\\")
+            }.ensureEndsWith(FULLSTOP_KUTOTEN)
+                .replace("}\\", "}~\\")
+                .replace("\\d+".toRegex()) { number -> "\\rensuji{${number.value}}" }
         }
     }
 
@@ -48,6 +53,7 @@ abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences:
 
                 \usepackage{luatexja}
                 \usepackage{luatexja-ruby}
+                \usepackage{lltjp-geometry}
                 \usepackage{lltjext}
                 \usepackage{enumitem}
                 \usepackage{xcolor}
@@ -57,18 +63,18 @@ abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences:
                 \pagenumbering{gobble}
 
                 \begin{document}
-                $body
+                    ${body.prependIndent(5, IndentMode.SPACE).trimStart()}
                 \end{document}
-            """.trimIndent()
+            """.trimIndent().trimBlankLines()
         }
 
         private fun renderEnumeration(items: List<String>): String {
             return """
                 \LARGE
                 \begin{enumerate}[label=\rensuji{\Large\protect\textcircled{\large\arabic*}}]
-            	    ${items.joinToString("\n") { "\\item $it" }}
+                    ${items.joinToString("\n") { "\\item $it" }.prependIndent(5, IndentMode.SPACE).trimStart()}
                 \end{enumerate}
-            """
+            """.trimIndent()
         }
     }
 }
