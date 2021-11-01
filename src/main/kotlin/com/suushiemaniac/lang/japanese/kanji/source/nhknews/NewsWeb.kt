@@ -8,12 +8,12 @@ import io.ktor.client.HttpClient
 import io.ktor.client.engine.apache.Apache
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.features.json.serializer.KotlinxSerializer
-import io.ktor.client.request.get
-import it.skrape.core.fetcher.Mode
+import io.ktor.client.request.*
 import it.skrape.core.htmlDocument
-import it.skrape.extract
+import it.skrape.fetcher.BrowserFetcher
+import it.skrape.fetcher.response
+import it.skrape.fetcher.skrape
 import it.skrape.selects.DocElement
-import it.skrape.skrape
 import kotlinx.coroutines.runBlocking
 
 object NewsWeb : ComplexTextSource<MorphologyText> {
@@ -33,7 +33,7 @@ object NewsWeb : ComplexTextSource<MorphologyText> {
         val urlPageNum = page.toString().padStart(3, '0')
         val apiEndpoint = "https://www3.nhk.or.jp/news/json16/new_$urlPageNum.json"
 
-        return runBlocking { HTTP_CLIENT.get<NewsListResponse>(apiEndpoint) }
+        return runBlocking { HTTP_CLIENT.get(apiEndpoint) }
     }
 
     private tailrec fun fetchArticlesListRecursive(page: Int = 1, accu: NewsListResponse? = null): NewsListResponse {
@@ -60,14 +60,15 @@ object NewsWeb : ComplexTextSource<MorphologyText> {
         val linkSuffix = ALL_ARTICLES.channel.item.find { it.id == id }
             ?.link ?: error("Invalid NHK news ID: $id")
 
-        val fullText = skrape {
-            url = "https://www3.nhk.or.jp/news/$linkSuffix"
-            mode = Mode.DOM
+        val fullText = skrape(BrowserFetcher) {
+            request {
+                url = "https://www3.nhk.or.jp/news/$linkSuffix"
+            }
 
-            extract {
+            response {
                 htmlDocument {
                     findFirst("p.content--summary").text +
-                            findFirstOrNull("p.content--summary-more")?.text.orEmpty() +
+                            findFirst("p.content--summary-more").text +
                             document.select("content--detail-more div.body-text")
                                 .map { DocElement(it) }
                                 .joinToString("") { text }

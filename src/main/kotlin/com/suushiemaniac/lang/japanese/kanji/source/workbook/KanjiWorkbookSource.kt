@@ -64,6 +64,10 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         return null
     }
 
+    override fun lookupIndex(index: Int): Kanji? {
+        return fetchAll().getOrNull(index)
+    }
+
     override fun fetchAll(): List<Kanji> {
         return idData.keys.mapNotNull { lookupSymbol(it.first()) }
     }

@@ -1,9 +1,13 @@
 package com.suushiemaniac.lang.japanese.kanji.model.wadokux.util
 
-import kotlinx.serialization.*
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.descriptors.PrimitiveKind
+import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
+import kotlinx.serialization.encoding.Decoder
+import kotlinx.serialization.encoding.Encoder
 
 abstract class SingletonStringEncoder<T>(descriptionString: String) : KSerializer<T> {
-    override val descriptor = PrimitiveDescriptor(descriptionString, PrimitiveKind.STRING)
+    override val descriptor = PrimitiveSerialDescriptor(descriptionString, PrimitiveKind.STRING)
 
     override fun deserialize(decoder: Decoder) = makeInstance(decoder.decodeString())
 

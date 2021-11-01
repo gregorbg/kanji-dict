@@ -13,6 +13,7 @@ import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.encodeToString
 
 data class KanjiVocabNote(
     val vocabItem: SymbolToken,
@@ -26,16 +27,16 @@ data class KanjiVocabNote(
             vocabItem.surfaceForm,
             vocabItem.asFurigana(RubyFuriganaFormatter),
             mainTranslation,
-            JSON.stringify(ListSerializer(String.serializer()), additionalTranslations),
-            JSON.stringify(
+            JSON.encodeToString(ListSerializer(String.serializer()), additionalTranslations),
+            JSON.encodeToString(
                 ListSerializer(ListSerializer(String.serializer())),
                 ankiPhrases.map(KanjiVocabPhrase::getLiterals)
             ),
-            JSON.stringify(
+            JSON.encodeToString(
                 ListSerializer(MapSerializer(String.serializer(), String.serializer())),
                 ankiPhrases.map(KanjiVocabPhrase::getReadings)
             ),
-            JSON.stringify(
+            JSON.encodeToString(
                 ListSerializer(
                     MapSerializer(
                         String.serializer(),
@@ -44,7 +45,7 @@ data class KanjiVocabNote(
                 ),
                 ankiPhrases.map(KanjiVocabPhrase::getTokenData)
             ),
-            JSON.stringify(
+            JSON.encodeToString(
                 ListSerializer(MapSerializer(String.serializer(), String.serializer())),
                 ankiPhrases.map(KanjiVocabPhrase::getAnnotations)
             )

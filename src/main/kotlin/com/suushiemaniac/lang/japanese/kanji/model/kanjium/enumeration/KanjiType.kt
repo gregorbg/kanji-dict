@@ -8,7 +8,7 @@ enum class KanjiType {
 
     companion object {
         fun parse(typeRepresentation: String): KanjiType {
-            val nameRep = typeRepresentation.toUpperCase()
+            val nameRep = typeRepresentation.uppercase()
                 .replace(' ', '_')
                 .replace('-', '_')
 

@@ -16,11 +16,12 @@ import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.util.alignSymbolsWith
 import com.suushiemaniac.lang.japanese.kanji.util.unlessEmpty
+import kotlinx.serialization.decodeFromString
 import nl.adaptivity.xmlutil.serialization.XML
 
 class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : VocabularySource, TranslationSource,
     SampleSentenceSource {
-    private val export by lazy { XML_SERIAL.parse(WadokuExport.serializer(), exportXmlPath) }
+    private val export by lazy { XML_SERIAL.decodeFromString<WadokuExport>(exportXmlPath) }
 
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
         return export.entries.filter { it.form.orthography.any { o -> kanji.kanji in o.orthography } }

@@ -41,21 +41,21 @@ data class KanjiNote(
 
         return listOf(
             kanjiSymbol.toString(),
-            JSON.stringify(
+            JSON.encodeToString(
                 MapSerializer(String.serializer(), ListSerializer(String.serializer())),
                 kunReadingsWithSamples.mapKeys { it.key.coreReading.toHiragana() }),
-            JSON.stringify(
+            JSON.encodeToString(
                 MapSerializer(String.serializer(), ListSerializer(String.serializer())),
                 onReadingsWithSamples.mapKeys { it.key.kanaReading.toKatakana() }),
-            JSON.stringify(
+            JSON.encodeToString(
                 MapSerializer(String.serializer(), String.serializer()),
                 rendakuReadingExceptions.mapKeys { it.key.surfaceForm }),
             radicalDescription,
             "<img src=\"idcGraph-$idcGraphNum.png\">",
             elementsWithName.entries.joinToString("<br/>") { "${it.key} ${it.value}" },
             coreMeaning,
-            JSON.stringify(MapSerializer(String.serializer(), String.serializer()), sampleTranslations),
-            JSON.stringify(MapSerializer(String.serializer(), String.serializer()), ankiFormatReadings)
+            JSON.encodeToString(MapSerializer(String.serializer(), String.serializer()), sampleTranslations),
+            JSON.encodeToString(MapSerializer(String.serializer(), String.serializer()), ankiFormatReadings)
         )
     }
 

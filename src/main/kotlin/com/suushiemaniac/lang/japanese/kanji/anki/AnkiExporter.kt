@@ -1,13 +1,12 @@
 package com.suushiemaniac.lang.japanese.kanji.anki
 
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 
 object AnkiExporter {
     const val CSV_SEPARATOR = AnkiDeckNote.CSV_SEPARATOR
     const val CSV_NEWLINE = "\n"
 
-    val JSON = Json(JsonConfiguration.Stable)
+    val JSON = Json.Default
 
     fun makeCSV(cards: List<AnkiDeckNote>): String {
         val csvLines = cards.map {
