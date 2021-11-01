@@ -12,6 +12,7 @@ import com.suushiemaniac.lang.japanese.kanji.source.KanjiProgressionSource
 import com.suushiemaniac.lang.japanese.kanji.source.SampleSentenceSource
 import com.suushiemaniac.lang.japanese.kanji.source.VocabularySource
 import com.suushiemaniac.lang.japanese.kanji.source.TranslationSource
+import com.suushiemaniac.lang.japanese.kanji.source.util.CombinedKanjiSource
 import com.suushiemaniac.lang.japanese.kanji.source.workbook.parser.*
 import com.suushiemaniac.lang.japanese.kanji.util.invert
 
@@ -131,6 +132,8 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         val BEGINNER_GE by ALL_WORKBOOKS[1]
         val INTERMEDIATE_JOU by ALL_WORKBOOKS[2]
         val INTERMEDIATE_GE by ALL_WORKBOOKS[3]
+
+        val COMBINED_SOURCE by lazy { CombinedKanjiSource(BEGINNER_JOU, BEGINNER_GE, INTERMEDIATE_JOU, INTERMEDIATE_GE) }
 
         private val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
 
