@@ -4,24 +4,23 @@ import net.gregorbg.lang.japanese.kanji.anki.AnkiExporter.JSON
 import net.gregorbg.lang.japanese.kanji.anki.model.KanjiVocabPhrase
 import net.gregorbg.lang.japanese.kanji.anki.model.KanjiVocabPhraseToken
 import net.gregorbg.lang.japanese.kanji.anki.model.RubyFuriganaFormatter
-import net.gregorbg.lang.japanese.kanji.model.vocabulary.SampleSentence
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
-import net.gregorbg.lang.japanese.kanji.model.reading.token.SymbolToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.Translation
 import net.gregorbg.lang.japanese.kanji.source.TranslationSource
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
-import kotlinx.serialization.encodeToString
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SentenceLevelToken
 
 data class KanjiVocabNote(
-    val vocabItem: SymbolToken,
+    val vocabItem: TokenWithSurfaceForm,
     val mainTranslation: String,
     val additionalTranslations: List<String>,
     val ankiPhrases: List<KanjiVocabPhrase>,
     val originalKanji: Char
-) : net.gregorbg.lang.japanese.kanji.anki.AnkiDeckNote {
+) : AnkiDeckNote {
     override fun getCSVFacts(): List<String> {
         return listOf(
             vocabItem.surfaceForm,
@@ -62,7 +61,7 @@ data class KanjiVocabNote(
         fun from(
             item: VocabularyItem,
             translation: Translation,
-            samplePhrases: List<SampleSentence>,
+            samplePhrases: List<SentenceLevelToken<MorphologyToken>>,
             originalKanji: Char,
             translationSource: TranslationSource
         ): KanjiVocabNote {
@@ -80,7 +79,7 @@ data class KanjiVocabNote(
             )
         }
 
-        private fun SampleSentence.toVocabTokens(translationSource: TranslationSource): List<KanjiVocabPhraseToken> =
+        private fun SentenceLevelToken<MorphologyToken>.toVocabTokens(translationSource: TranslationSource): List<KanjiVocabPhraseToken> =
             this.tokens.map { KanjiVocabPhraseToken.from(it, translationSource) }
 
         private fun List<KanjiVocabPhraseToken>.maskOriginalWordToken(item: VocabularyItem): List<KanjiVocabPhraseToken> {

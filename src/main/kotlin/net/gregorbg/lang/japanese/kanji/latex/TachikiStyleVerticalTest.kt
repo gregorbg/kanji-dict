@@ -1,10 +1,9 @@
 package net.gregorbg.lang.japanese.kanji.latex
 
 import net.gregorbg.lang.japanese.kanji.model.reading.token.*
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
 import net.gregorbg.lang.japanese.kanji.util.*
 
-abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences: List<CompositeTokens<out T>>) {
+abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences: List<List<T>>) {
     fun renderIndividual(solution: Boolean = false): String {
         val sentenceItems = generateSentenceItems(solution)
         val body = renderEnumeration(sentenceItems)
@@ -32,17 +31,13 @@ abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences:
 
     private fun generateSentenceItems(solution: Boolean): List<String> {
         return sentences.map { sentence ->
-            val tokens = tokenizeSentence(sentence)
-
-            tokens.joinToString("") {
+            sentence.joinToString("") {
                 processToken(it, solution)
             }.ensureEndsWith(FULLSTOP_KUTOTEN)
                 .replace("}\\", "}~\\")
                 .replace("\\d+".toRegex()) { number -> "\\rensuji{${number.value}}" }
         }
     }
-
-    protected abstract fun tokenizeSentence(sentence: CompositeTokens<out T>): List<T>
 
     protected abstract fun processToken(token: T, solution: Boolean): String
 

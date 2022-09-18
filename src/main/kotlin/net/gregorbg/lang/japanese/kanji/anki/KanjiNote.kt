@@ -9,7 +9,6 @@ import net.gregorbg.lang.japanese.kanji.model.kanjium.Radical
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
 import net.gregorbg.lang.japanese.kanji.model.reading.token.KanjiToken
-import net.gregorbg.lang.japanese.kanji.model.reading.token.SymbolToken
 import net.gregorbg.lang.japanese.kanji.model.workbook.WorkbookMetadata
 import net.gregorbg.lang.japanese.kanji.source.KanjiElementsSource
 import net.gregorbg.lang.japanese.kanji.source.KanjiSource
@@ -19,6 +18,7 @@ import net.gregorbg.lang.japanese.kanji.util.*
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
+import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 
 data class KanjiNote(
     val kanjiSymbol: Char,
@@ -30,12 +30,12 @@ data class KanjiNote(
     val elementsWithName: Map<Char, String>,
     val coreMeaning: String,
     val sampleTranslations: Map<String, String>,
-    val sampleReadings: Map<String, SymbolToken>,
+    val sampleReadings: Map<String, TokenWithSurfaceForm>,
     val lesson: Int,
     val id: Int,
     val kanken: String?,
     val jlpt: Int?
-) : net.gregorbg.lang.japanese.kanji.anki.AnkiDeckNote {
+) : AnkiDeckNote {
     override fun getCSVFacts(): List<String> {
         val ankiFormatReadings = sampleReadings.mapValues { it.value.asFurigana(RubyFuriganaFormatter) }
 

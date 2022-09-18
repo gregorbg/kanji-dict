@@ -2,14 +2,15 @@ package net.gregorbg.lang.japanese.kanji.model.vocabulary
 
 import com.atilika.kuromoji.ipadic.Tokenizer
 import net.gregorbg.lang.japanese.kanji.model.reading.token.*
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeWordLevelTokens
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SentenceLevelToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 import net.gregorbg.lang.japanese.kanji.util.toHiragana
 
-data class SampleSentence(override val tokens: List<MorphologyToken>) : CompositeWordLevelTokens<MorphologyToken> {
+data class SampleSentence<T : WordLevelToken>(override val tokens: List<T>) : SentenceLevelToken<T> {
     companion object {
         private val TOKENIZER = Tokenizer()
 
-        fun parse(raw: String): SampleSentence {
+        fun parseWithMorphology(raw: String): SampleSentence<MorphologyToken> {
             val extTokens = TOKENIZER.tokenize(raw)
 
             val intTokens = extTokens.map {

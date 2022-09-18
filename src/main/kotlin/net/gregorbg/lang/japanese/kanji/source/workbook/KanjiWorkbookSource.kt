@@ -4,7 +4,9 @@ import net.gregorbg.lang.japanese.kanji.model.Kanji
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.SampleSentence
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
+import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SentenceLevelToken
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.Translation
 import net.gregorbg.lang.japanese.kanji.model.workbook.SimpleKanji
 import net.gregorbg.lang.japanese.kanji.model.workbook.WorkbookMetadata
@@ -17,7 +19,7 @@ import net.gregorbg.lang.japanese.kanji.source.workbook.parser.*
 import net.gregorbg.lang.japanese.kanji.util.invert
 
 class KanjiWorkbookSource private constructor(val bookNum: Int) :
-    KanjiProgressionSource, VocabularySource, SampleSentenceSource, TranslationSource {
+    KanjiProgressionSource, VocabularySource, SampleSentenceSource<MorphologyToken>, TranslationSource {
     private val lessonsContent = loadFile(bookNum, LESSONS_FILE_TAG)
     private val readingsContent = loadFile(bookNum, READINGS_FILE_TAG)
     private val samplesContent = loadFile(bookNum, SAMPLES_FILE_TAG)
@@ -35,11 +37,11 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
     private val idData by lazy { idParser.getAssociations() }
 
     private val vocabularyData by lazy {
-        vocabularyAndSentenceData.mapValues { it.value.map(Triple<VocabularyItem, Translation, SampleSentence?>::first) }
+        vocabularyAndSentenceData.mapValues { it.value.map(Triple<VocabularyItem, Translation, SampleSentence<MorphologyToken>?>::first) }
     }
 
     private val kanjiSampleSentenceData by lazy {
-        vocabularyAndSentenceData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, Translation, SampleSentence?>::third) }
+        vocabularyAndSentenceData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, Translation, SampleSentence<MorphologyToken>?>::third) }
     }
 
     private val vocabularySupplementData by lazy {
@@ -47,12 +49,12 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
     }
 
     private val translationData by lazy {
-        vocabularySupplementData.mapValues { it.value.map(Triple<VocabularyItem, Translation, SampleSentence?>::second) }
+        vocabularySupplementData.mapValues { it.value.map(Triple<VocabularyItem, Translation, SampleSentence<MorphologyToken>?>::second) }
             .mapKeys { it.key.surfaceForm }
     }
 
     private val sampleSentenceData by lazy {
-        vocabularySupplementData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, Translation, SampleSentence?>::third) }
+        vocabularySupplementData.mapValues { it.value.mapNotNull(Triple<VocabularyItem, Translation, SampleSentence<MorphologyToken>?>::third) }
     }
 
     override fun lookupSymbol(kanji: Char): Kanji? {
@@ -82,11 +84,11 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         return vocabularyData[kanji.kanji.toString()].orEmpty()
     }
 
-    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
+    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SentenceLevelToken<MorphologyToken>> {
         return sampleSentenceData[vocab].orEmpty().distinctBy { it.surfaceForm }
     }
 
-    fun getSampleSentencesFor(kanji: Kanji, vocab: VocabularyItem): List<SampleSentence> {
+    fun getSampleSentencesFor(kanji: Kanji, vocab: VocabularyItem): List<SentenceLevelToken<MorphologyToken>> {
         val kanjiSamples = kanjiSampleSentenceData[kanji.kanji.toString()].orEmpty().distinctBy { it.surfaceForm }
         val vocabSamples = getSampleSentencesFor(vocab)
 

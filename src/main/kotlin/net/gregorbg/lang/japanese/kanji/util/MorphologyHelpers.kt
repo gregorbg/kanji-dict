@@ -2,18 +2,17 @@ package net.gregorbg.lang.japanese.kanji.util
 
 import net.gregorbg.lang.japanese.kanji.model.Kanji
 import net.gregorbg.lang.japanese.kanji.model.reading.token.*
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeWordLevelTokens
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeSymbolTokens
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SymbolLevelToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabTagModifier
 import net.gregorbg.lang.japanese.kanji.source.KanjiSource
 
-fun String.alignSymbolsWith(readingsRaw: String, kanjiSource: KanjiSource): List<AlignedSymbolToken> {
+fun String.alignSymbolsWith(readingsRaw: String, kanjiSource: KanjiSource): List<SymbolLevelToken> {
     val pluckedKanji = this.pluckKanji()
     return zipReadingsExact(pluckedKanji, readingsRaw, kanjiSource)
 }
 
-fun String.alignSymbolsWith(readingsRaw: String): List<SymbolToken> {
+fun String.alignSymbolsWith(readingsRaw: String): List<WordLevelToken> {
     val pluckedKanjiGroups = this.pluckKanjiGroups(true)
     return zipReadings(pluckedKanjiGroups, readingsRaw)
 }
@@ -48,8 +47,8 @@ private fun zipReadingsExact(
     segments: List<String>,
     rawTemplate: String,
     kanjiSource: KanjiSource,
-    accu: List<AlignedSymbolToken> = emptyList()
-): List<AlignedSymbolToken> {
+    accu: List<SymbolLevelToken> = emptyList()
+): List<SymbolLevelToken> {
     if (segments.isEmpty()) {
         return if (rawTemplate.isEmpty()) accu else emptyList()
     }
@@ -91,11 +90,11 @@ private fun zipReadingsExact(
 
         return emptyList()
     } else {
-        val readingModel = KanaToken(next)
+        val readingModel = KanaToken.fromWord(next)
 
         return zipReadingsExact(
             segments.drop(1),
-            rawTemplate.drop(readingModel.reading.length),
+            rawTemplate.drop(readingModel.size),
             kanjiSource,
             accu + readingModel
         )
@@ -105,8 +104,8 @@ private fun zipReadingsExact(
 private fun zipReadings(
     segments: List<String>,
     rawTemplate: String,
-    accu: List<SymbolToken> = emptyList()
-): List<SymbolToken> {
+    accu: List<WordLevelToken> = emptyList()
+): List<WordLevelToken> {
     if (segments.isEmpty()) {
         return if (rawTemplate.isEmpty()) accu else emptyList()
     }
@@ -116,7 +115,7 @@ private fun zipReadings(
 
     if (next.isProbablyKanji(true)) {
         if (remaining.isEmpty()) {
-            val readingModel = if (next.all(Char::isDigit)) KanaToken(next) else CompoundKanjiToken(next, rawTemplate)
+            val readingModel = if (next.all(Char::isDigit)) CompoundKanaToken(next) else CompoundKanjiToken(next, rawTemplate)
 
             return zipReadings(
                 remaining,
@@ -149,7 +148,7 @@ private fun zipReadings(
             return emptyList()
         }
     } else {
-        val readingModel = KanaToken(next)
+        val readingModel = CompoundKanaToken(next)
 
         return zipReadings(
             remaining,
@@ -171,7 +170,7 @@ fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiersAndReAlign(): Pair<List
     if (this.size >= 2) {
         val (secondToLast, last) = this.takeLast(2)
 
-        if (last is KanaToken && secondToLast is KanjiToken) {
+        if (last is CompoundKanaToken && secondToLast is KanjiToken) {
             return VocabTagModifier.fromKana(last.kana)?.let {
                 this.dropLast(1) to it.singletonList()
             } ?: (this to emptyList())
@@ -180,15 +179,6 @@ fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiersAndReAlign(): Pair<List
 
     return this to emptyList()
 }
-
-fun TokenWithSurfaceForm.flatten(): List<TokenWithSurfaceForm> =
-    if (this is CompositeTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
-
-fun SymbolToken.flatten(): List<SymbolToken> =
-    if (this is CompositeSymbolTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
-
-fun WordLevelToken.flatten(): List<WordLevelToken> =
-    if (this is CompositeWordLevelTokens<*>) this.tokens.flatMap { it.flatten() } else this.singletonList()
 
 // https://raw.githubusercontent.com/mifunetoshiro/kanjium/master/data/idc_mappingtable.txt
 val IDC_GRAPH_MAPPING =

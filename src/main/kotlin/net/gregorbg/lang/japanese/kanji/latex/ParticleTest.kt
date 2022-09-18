@@ -1,16 +1,10 @@
 package net.gregorbg.lang.japanese.kanji.latex
 
 import net.gregorbg.lang.japanese.kanji.model.reading.token.*
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeWordLevelTokens
-import net.gregorbg.lang.japanese.kanji.util.flatten
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 
-class ParticleTest(sentences: List<CompositeWordLevelTokens<out WordLevelToken>>) :
+class ParticleTest(sentences: List<List<WordLevelToken>>) :
     TachikiStyleVerticalTest<WordLevelToken>(sentences) {
-    override fun tokenizeSentence(sentence: CompositeTokens<out WordLevelToken>): List<WordLevelToken> {
-        return sentence.tokens.flatMap { it.flatten() }
-    }
-
     override fun processToken(token: WordLevelToken, solution: Boolean): String {
         return if (token is MorphologyToken && token.isParticle)
             if (solution) makeSolutionAnnotation(token) else makeWriteAnnotation(token)

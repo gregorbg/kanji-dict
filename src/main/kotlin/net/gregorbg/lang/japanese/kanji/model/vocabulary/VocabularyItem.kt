@@ -1,12 +1,13 @@
 package net.gregorbg.lang.japanese.kanji.model.vocabulary
 
-import net.gregorbg.lang.japanese.kanji.model.reading.token.AlignedSymbolToken
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeSymbolTokens
+import net.gregorbg.lang.japanese.kanji.model.reading.token.NestedTokens
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SymbolLevelToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 
 data class VocabularyItem(
-    override val tokens: List<AlignedSymbolToken>,
+    override val tokens: List<SymbolLevelToken>,
     val modifiers: List<VocabTagModifier> = NO_MODIFIERS
-) : CompositeSymbolTokens<AlignedSymbolToken> {
+) : WordLevelToken, NestedTokens<SymbolLevelToken> {
     companion object {
         private val NO_MODIFIERS = emptyList<VocabTagModifier>()
     }

@@ -2,8 +2,7 @@ package net.gregorbg.lang.japanese.kanji.anki.model
 
 import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologicalData
 import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
-import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
-import net.gregorbg.lang.japanese.kanji.model.reading.token.WordLevelToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 import net.gregorbg.lang.japanese.kanji.source.TranslationSource
 
 data class KanjiVocabPhraseToken(

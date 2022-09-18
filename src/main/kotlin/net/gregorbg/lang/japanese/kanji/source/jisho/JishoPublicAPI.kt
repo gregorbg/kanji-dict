@@ -21,9 +21,11 @@ import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.runBlocking
+import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SentenceLevelToken
 
 class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, TranslationSource,
-    SampleSentenceSource {
+    SampleSentenceSource<MorphologyToken> {
     private fun searchURL(keyword: String, page: Int = 1) =
         "$API_URL?keyword=$keyword&page=$page"
 
@@ -71,7 +73,7 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         return result.data.mapNotNull { it.toVocabularyItem(kanjiLiteral) }
     }
 
-    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
+    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SentenceLevelToken<MorphologyToken>> {
         val result = executePaginatedSearch(vocab.surfaceForm)
 
         return result.data.filter {
@@ -104,8 +106,8 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         )
     }
 
-    private fun JishoAPIData.extractSampleSentences(): List<SampleSentence> {
-        return this.senses.flatMap { it.sentences }.map(SampleSentence.Companion::parse)
+    private fun JishoAPIData.extractSampleSentences(): List<SentenceLevelToken<MorphologyToken>> {
+        return this.senses.flatMap { it.sentences }.map(SampleSentence.Companion::parseWithMorphology)
     }
 
     companion object {

@@ -7,6 +7,7 @@ import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
 import net.gregorbg.lang.japanese.kanji.model.reading.token.KanaToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.KanjiToken
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
+import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.Translation
 import net.gregorbg.lang.japanese.kanji.util.*
 
@@ -42,8 +43,8 @@ class KunYomiParser(
 }
 
 class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentSequence: String) :
-    NewlineGroupParser<List<Triple<VocabularyItem, Translation, SampleSentence?>>>(rawContent) {
-    override fun getValues(assocLines: List<String>): List<Triple<VocabularyItem, Translation, SampleSentence?>> {
+    NewlineGroupParser<List<Triple<VocabularyItem, Translation, SampleSentence<MorphologyToken>?>>>(rawContent) {
+    override fun getValues(assocLines: List<String>): List<Triple<VocabularyItem, Translation, SampleSentence<MorphologyToken>?>> {
         return assocLines.map {
             val parts = it.split("\t")
             val (fullText, reading, transRaw) = parts.take(3)
@@ -53,12 +54,12 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
 
             require(kanjiParts.size == readingsParts.size) { "Incorrect workbook alignment for $fullText" }
 
-            val alignedReading = kanjiParts.zip(readingsParts).map { p ->
+            val alignedReading = kanjiParts.zip(readingsParts).flatMap { p ->
                 val cleanReading = p.second.cleanRendakuAnnotations()
                 val baseReading = p.second.normalizeRendakuAnnotations()
 
-                if (p.first == cleanReading) KanaToken(p.first) else
-                    KanjiToken(p.first.single(), cleanReading, baseReading)
+                if (p.first == cleanReading) KanaToken.fromWord(p.first) else
+                    KanjiToken(p.first.single(), cleanReading, baseReading).singletonList()
             }
 
             val (realignedReading, vocabModifiers) = alignedReading.guessVocabModifiersAndReAlign()
@@ -67,7 +68,7 @@ class VocabularyWithSampleSentenceParser(rawContent: String, val vocabAlignmentS
             val translationStrings = transRaw.commaTokens
             val translation = Translation(translationStrings.first(), translationStrings.drop(1))
 
-            val sampleSentence = parts.getOrNull(3)?.let(SampleSentence.Companion::parse)
+            val sampleSentence = parts.getOrNull(3)?.let(SampleSentence.Companion::parseWithMorphology)
 
             Triple(vocabItem, translation, sampleSentence)
         }

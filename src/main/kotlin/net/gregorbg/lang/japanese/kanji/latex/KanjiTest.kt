@@ -3,17 +3,13 @@ package net.gregorbg.lang.japanese.kanji.latex
 import net.gregorbg.lang.japanese.kanji.model.Kanji
 import net.gregorbg.lang.japanese.kanji.model.reading.token.CompoundKanjiToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.KanjiToken
-import net.gregorbg.lang.japanese.kanji.model.reading.token.SymbolToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeSymbolTokens
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
-import net.gregorbg.lang.japanese.kanji.util.flatten
 
 class KanjiTest(
-    sentences: List<CompositeSymbolTokens<out SymbolToken>>,
+    sentences: List<List<TokenWithSurfaceForm>>,
     val read: List<Kanji>,
     val write: List<Kanji>
-) : TachikiStyleVerticalTest<SymbolToken>(sentences) {
+) : TachikiStyleVerticalTest<TokenWithSurfaceForm>(sentences) {
     val readSymbols
         get() = read.map { it.kanji }
 
@@ -23,11 +19,7 @@ class KanjiTest(
     private val allSymbols
         get() = readSymbols + writeSymbols
 
-    override fun tokenizeSentence(sentence: CompositeTokens<out SymbolToken>): List<SymbolToken> {
-        return sentence.tokens.flatMap { it.flatten() }
-    }
-
-    override fun processToken(token: SymbolToken, solution: Boolean): String {
+    override fun processToken(token: TokenWithSurfaceForm, solution: Boolean): String {
         return when (token) {
             is CompoundKanjiToken -> when {
                 solution xor token.manyKanji.all(writeSymbols::contains) -> makeWriteAnnotation(token)

@@ -2,6 +2,7 @@ package net.gregorbg.lang.japanese.kanji.util
 
 import net.gregorbg.lang.japanese.kanji.model.reading.token.*
 import it.skrape.selects.DocElement
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Node
@@ -13,29 +14,22 @@ fun DocElement.parseRuby() =
 fun String.parseRuby() =
     Jsoup.parseBodyFragment(this).body().parseRubyRecursive()
 
-private fun Node.parseRubyRecursive(): SymbolToken {
+private fun Node.parseRubyRecursive(): List<WordLevelToken> {
     if (this is TextNode) {
-        return KanaToken(text().orEmpty().trim())
+        return CompoundKanaToken(text().orEmpty().trim()).singletonList()
     }
 
     if (this is Element && this.tagName() == "ruby") {
-        val surface = childNode(0).parseRubyRecursive().surfaceForm
-        val reading = selectFirst("rt")?.parseRubyRecursive()?.reading.orEmpty()
+        val surface = child(0).text().orEmpty().trim()
+        val reading = selectFirst("rt")?.text().orEmpty().trim()
 
-        return if (surface.length == 1) {
-            KanjiToken(surface.first(), reading)
-        } else {
-            CompoundKanjiToken(surface, reading)
-        }
+        return CompoundKanjiToken(surface, reading).singletonList()
     }
 
     val parsedTokens = childNodes()
         .filterNot { it is TextNode && it.isBlank }
-        .map { it.parseRubyRecursive() }
+        .flatMap { it.parseRubyRecursive() }
 
-    val cleanedTokens = parsedTokens
+    return parsedTokens
         .filter { it.surfaceForm.isNotBlank() }
-        // FIXME .flatMap { it.unwrap() }
-
-    return ConvertedSymbolTokens(cleanedTokens)
 }

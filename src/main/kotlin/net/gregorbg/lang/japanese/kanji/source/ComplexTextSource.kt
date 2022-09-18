@@ -1,11 +1,10 @@
 package net.gregorbg.lang.japanese.kanji.source
 
-import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
-import net.gregorbg.lang.japanese.kanji.model.reading.token.compose.CompositeTokens
-import net.gregorbg.lang.japanese.kanji.model.vocabulary.ComplexText
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.TextLevelToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 
-interface ComplexTextSource<T : ComplexText<out TokenWithSurfaceForm>> {
+interface ComplexTextSource<out T : WordLevelToken> {
     fun getAvailableIDs(): Set<String>
 
-    fun getText(id: String): T
+    fun getText(id: String): TextLevelToken<T>
 }

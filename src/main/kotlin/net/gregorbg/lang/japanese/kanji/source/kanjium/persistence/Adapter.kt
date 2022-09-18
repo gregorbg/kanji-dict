@@ -21,7 +21,7 @@ fun KanjiDictDao.toModel(): KanjiDictEntry {
         this.id.value.first(),
         this.radical.toModel(),
         this.radVar?.toModel(),
-        this.phonetic?.first(),
+        this.phonetic?.firstOrNull(),
         this.idc,
         this.type?.let { KanjiType.parse(it) },
         regOn,

@@ -16,8 +16,9 @@ import it.skrape.fetcher.response
 import it.skrape.fetcher.skrape
 import it.skrape.selects.DocElement
 import kotlinx.coroutines.runBlocking
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 
-object NewsWeb : ComplexTextSource<MorphologyText> {
+object NewsWeb : ComplexTextSource<WordLevelToken> {
     private val HTTP_CLIENT = HttpClient(Apache) {
         install(TrimNHKWhitespaceFeature)
         install(ContentNegotiation) {
@@ -68,6 +69,8 @@ object NewsWeb : ComplexTextSource<MorphologyText> {
 
             response {
                 htmlDocument {
+                    relaxed = true
+
                     findFirst("p.content--summary").text +
                             findFirst("p.content--summary-more").text +
                             document.select("content--detail-more div.body-text")

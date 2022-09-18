@@ -10,9 +10,7 @@ import io.ktor.utils.io.writeFully
 import io.ktor.utils.io.writer
 
 class TrimNHKWhitespaceFeature internal constructor() {
-    class DummyConfig
-
-    companion object : HttpClientPlugin<DummyConfig, TrimNHKWhitespaceFeature> {
+    companion object : HttpClientPlugin<Unit, TrimNHKWhitespaceFeature> {
         const val CHAR_ZERO_LENGTH_NBSP = '﻿'
         val TRIM_CHARS = charArrayOf(CHAR_ZERO_LENGTH_NBSP)
 
@@ -32,7 +30,7 @@ class TrimNHKWhitespaceFeature internal constructor() {
             }
         }
 
-        override fun prepare(block: DummyConfig.() -> Unit): TrimNHKWhitespaceFeature {
+        override fun prepare(block: Unit.() -> Unit): TrimNHKWhitespaceFeature {
             return TrimNHKWhitespaceFeature()
         }
     }

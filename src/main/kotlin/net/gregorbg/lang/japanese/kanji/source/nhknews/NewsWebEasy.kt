@@ -2,10 +2,10 @@ package net.gregorbg.lang.japanese.kanji.source.nhknews
 
 import net.gregorbg.lang.japanese.kanji.model.nhknews.easy.EasyNewsListItem
 import net.gregorbg.lang.japanese.kanji.model.nhknews.easy.TopNewsListItem
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.ReadingText
 import net.gregorbg.lang.japanese.kanji.source.ComplexTextSource
 import net.gregorbg.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
-import net.gregorbg.lang.japanese.kanji.util.flatten
 import net.gregorbg.lang.japanese.kanji.util.parseRuby
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
@@ -20,7 +20,7 @@ import it.skrape.fetcher.skrape
 import it.skrape.selects.html5.div
 import kotlinx.coroutines.runBlocking
 
-object NewsWebEasy : ComplexTextSource<ReadingText> {
+object NewsWebEasy : ComplexTextSource<WordLevelToken> {
     private val HTTP_CLIENT = HttpClient(Apache) {
         install(TrimNHKWhitespaceFeature)
         install(ContentNegotiation) {
@@ -45,7 +45,7 @@ object NewsWebEasy : ComplexTextSource<ReadingText> {
     }
 
     override fun getText(id: String): ReadingText {
-        val readingToken = skrape(HttpFetcher) {
+        val readingTokens = skrape(HttpFetcher) {
             request {
                 url = "https://www3.nhk.or.jp/news/easy/$id/$id.html"
             }
@@ -61,6 +61,6 @@ object NewsWebEasy : ComplexTextSource<ReadingText> {
             }
         }
 
-        return ReadingText.fromTokens(readingToken.flatten())
+        return ReadingText.fromTokens(readingTokens)
     }
 }

@@ -17,10 +17,12 @@ import net.gregorbg.lang.japanese.kanji.source.VocabularySource
 import net.gregorbg.lang.japanese.kanji.util.alignSymbolsWith
 import net.gregorbg.lang.japanese.kanji.util.unlessEmpty
 import kotlinx.serialization.decodeFromString
+import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
+import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SentenceLevelToken
 import nl.adaptivity.xmlutil.serialization.XML
 
 class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : VocabularySource, TranslationSource,
-    SampleSentenceSource {
+    SampleSentenceSource<MorphologyToken> {
     private val export by lazy { XML_SERIAL.decodeFromString<WadokuExport>(exportXmlPath) }
 
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
@@ -39,7 +41,7 @@ class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : 
         }
     }
 
-    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence> {
+    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SentenceLevelToken<MorphologyToken>> {
         return export.entries.filter { it.form.orthography.any { o -> vocab.surfaceForm in o.orthography } }
             .filter { it.reference.all { r -> r.subEntryType in SENTENCE_TYPES } }
             .map { it.asSampleSentence() }
@@ -66,10 +68,10 @@ class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : 
             return VocabularyItem(combinedReading, modifiers)
         }
 
-        private fun WadokuExportEntry.asSampleSentence(): SampleSentence {
+        private fun WadokuExportEntry.asSampleSentence(): SampleSentence<MorphologyToken> {
             val surfaceForm = this.form.orthography.first().orthography
 
-            return SampleSentence.parse(surfaceForm)
+            return SampleSentence.parseWithMorphology(surfaceForm)
         }
 
         private fun WadokuSense.extrapolateTranslations(): List<String> {
