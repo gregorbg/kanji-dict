@@ -60,3 +60,20 @@ class ElementsDao(id: EntityID<String>) : Entity<String>(id) {
 
     companion object : EntityClass<String, ElementsDao>(ElementsTable)
 }
+
+class JukugoDao(id: EntityID<Int>) : Entity<Int>(id) {
+    val kanji by KanjiDictDao referencedOn JukugoTable.kanji
+    val jukugo by JukugoTable.jukugo
+    val reading by JukugoTable.reading
+    val meaning by JukugoTable.meaning
+
+    companion object : EntityClass<Int, JukugoDao>(JukugoTable)
+}
+
+class SentencesDao(id: EntityID<Int>): Entity<Int>(id) {
+    val word by SentencesTable.word
+    val japanese by SentencesTable.japanese
+    val english by SentencesTable.english
+
+    companion object : EntityClass<Int, SentencesDao>(SentencesTable)
+}

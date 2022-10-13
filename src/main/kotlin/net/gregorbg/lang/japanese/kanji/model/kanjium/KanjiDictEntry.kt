@@ -25,7 +25,7 @@ data class KanjiDictEntry(
     val educationGrade: Int?,
     val jlpt: Int?,
     val kanken: Int?,
-    val frequency: Int?,
+    // FIXME val frequency: Int?,
     val meaning: List<String>,
     val compactMeaning: List<String>
 ) : Kanji

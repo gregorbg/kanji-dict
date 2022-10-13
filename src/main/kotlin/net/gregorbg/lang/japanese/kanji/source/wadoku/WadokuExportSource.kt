@@ -18,7 +18,6 @@ import net.gregorbg.lang.japanese.kanji.util.alignSymbolsWith
 import net.gregorbg.lang.japanese.kanji.util.unlessEmpty
 import kotlinx.serialization.decodeFromString
 import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
-import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SentenceLevelToken
 import nl.adaptivity.xmlutil.serialization.XML
 
 class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : VocabularySource, TranslationSource,
@@ -41,7 +40,7 @@ class WadokuExportSource(exportXmlPath: String, val kanjiSource: KanjiSource) : 
         }
     }
 
-    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SentenceLevelToken<MorphologyToken>> {
+    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence<MorphologyToken>> {
         return export.entries.filter { it.form.orthography.any { o -> vocab.surfaceForm in o.orthography } }
             .filter { it.reference.all { r -> r.subEntryType in SENTENCE_TYPES } }
             .map { it.asSampleSentence() }

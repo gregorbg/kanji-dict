@@ -6,7 +6,6 @@ import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabularyItem
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotationMode
 import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
-import net.gregorbg.lang.japanese.kanji.model.reading.token.level.SentenceLevelToken
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.Translation
 import net.gregorbg.lang.japanese.kanji.model.workbook.SimpleKanji
 import net.gregorbg.lang.japanese.kanji.model.workbook.WorkbookMetadata
@@ -17,6 +16,7 @@ import net.gregorbg.lang.japanese.kanji.source.TranslationSource
 import net.gregorbg.lang.japanese.kanji.source.util.CombinedKanjiSource
 import net.gregorbg.lang.japanese.kanji.source.workbook.parser.*
 import net.gregorbg.lang.japanese.kanji.util.invert
+import java.io.File
 
 class KanjiWorkbookSource private constructor(val bookNum: Int) :
     KanjiProgressionSource, VocabularySource, SampleSentenceSource<MorphologyToken>, TranslationSource {
@@ -84,11 +84,11 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         return vocabularyData[kanji.kanji.toString()].orEmpty()
     }
 
-    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SentenceLevelToken<MorphologyToken>> {
+    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence<MorphologyToken>> {
         return sampleSentenceData[vocab].orEmpty().distinctBy { it.surfaceForm }
     }
 
-    fun getSampleSentencesFor(kanji: Kanji, vocab: VocabularyItem): List<SentenceLevelToken<MorphologyToken>> {
+    fun getSampleSentencesFor(kanji: Kanji, vocab: VocabularyItem): List<SampleSentence<MorphologyToken>> {
         val kanjiSamples = kanjiSampleSentenceData[kanji.kanji.toString()].orEmpty().distinctBy { it.surfaceForm }
         val vocabSamples = getSampleSentencesFor(vocab)
 
@@ -117,13 +117,13 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
     }
 
     companion object {
-        private const val RESOURCE_PACKAGE = "15kanji_workbook"
-
         private const val LESSONS_FILE_TAG = "lessons"
         private const val READINGS_FILE_TAG = "readings"
         private const val SAMPLES_FILE_TAG = "samples"
 
         private const val ALIGNMENT_SEPARATOR = "."
+
+        var BASE_PATH = "/please/change/this"
 
         private val RESOURCE_NAMES = listOf("beginner_1", "beginner_2", "intermediate_1", "intermediate_2")
 
@@ -135,16 +135,22 @@ class KanjiWorkbookSource private constructor(val bookNum: Int) :
         val INTERMEDIATE_JOU by ALL_WORKBOOKS[2]
         val INTERMEDIATE_GE by ALL_WORKBOOKS[3]
 
-        val COMBINED_SOURCE by lazy { CombinedKanjiSource(BEGINNER_JOU, BEGINNER_GE, INTERMEDIATE_JOU, INTERMEDIATE_GE) }
+        val COMBINED_SOURCE by lazy {
+            CombinedKanjiSource(
+                BEGINNER_JOU,
+                BEGINNER_GE,
+                INTERMEDIATE_JOU,
+                INTERMEDIATE_GE
+            )
+        }
 
         private val KUNYOMI_PARSER = KunYomiAnnotationMode.SeparatorKunYomiParser(ALIGNMENT_SEPARATOR)
 
         private fun loadFile(bookNum: Int, fileTag: String): String {
             val resourceBookName = RESOURCE_NAMES[bookNum]
-            val resourcePath = "/$RESOURCE_PACKAGE/$resourceBookName/$fileTag.txt"
+            val resourcePath = "${BASE_PATH.trimEnd('/')}/$resourceBookName/$fileTag.txt"
 
-            return KanjiWorkbookSource::class.java.getResourceAsStream(resourcePath)
-                ?.reader()?.use { it.readText() }.orEmpty()
+            return File(resourcePath).takeIf { it.exists() }?.reader()?.use { it.readText() }.orEmpty()
         }
     }
 }

@@ -22,7 +22,7 @@ object KanjiDictTable : IdTable<String>("kanjidict") {
     val grade = text("grade")
     val jlpt = text("jlpt").nullable()
     val kanken = text("kanken").nullable()
-    val frequency = integer("frequency").nullable()
+    val frequency = text("frequency").nullable()
     val meaning = text("meaning")
     val compactMeaning = text("compact_meaning").nullable()
 }
@@ -56,4 +56,19 @@ object RadVarTable : RadicalBaseTable("radvars", "radvar") {
     val parentRef = reference("radical",
         RadicalTable
     )
+}
+
+object JukugoTable : IdTable<Int>("jukugo") {
+    override val id = integer("id").entityId()
+    val kanji = reference("kanji", KanjiDictTable)
+    val jukugo = text("jukugo")
+    val reading = text("reading")
+    val meaning = text("meaning")
+}
+
+object SentencesTable : IdTable<Int>("sentences") {
+    override val id = integer("id").entityId()
+    val word = text("word")
+    val japanese = text("japanese")
+    val english = text("english")
 }

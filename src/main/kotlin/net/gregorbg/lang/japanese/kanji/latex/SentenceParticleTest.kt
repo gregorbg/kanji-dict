@@ -3,7 +3,7 @@ package net.gregorbg.lang.japanese.kanji.latex
 import net.gregorbg.lang.japanese.kanji.model.reading.token.*
 import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 
-class ParticleTest(sentences: List<List<WordLevelToken>>) :
+class SentenceParticleTest(sentences: List<List<WordLevelToken>>) :
     TachikiStyleVerticalTest<WordLevelToken>(sentences) {
     override fun processToken(token: WordLevelToken, solution: Boolean): String {
         return if (token is MorphologyToken && token.isParticle)

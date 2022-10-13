@@ -1,39 +1,28 @@
 package net.gregorbg.lang.japanese.kanji.latex
 
+import net.gregorbg.lang.japanese.kanji.latex.model.Document
+import net.gregorbg.lang.japanese.kanji.latex.model.EnumCommand
+import net.gregorbg.lang.japanese.kanji.latex.model.TexCommand
+import net.gregorbg.lang.japanese.kanji.latex.model.TexEnvironment
+import net.gregorbg.lang.japanese.kanji.latex.model.types.DocumentClass
+import net.gregorbg.lang.japanese.kanji.latex.model.types.UsePackage
 import net.gregorbg.lang.japanese.kanji.model.reading.token.*
 import net.gregorbg.lang.japanese.kanji.util.*
 
-abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences: List<List<T>>) {
-    fun renderIndividual(solution: Boolean = false): String {
-        val sentenceItems = generateSentenceItems(solution)
-        val body = renderEnumeration(sentenceItems)
-
-        return renderDocument(body)
+abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences: List<List<T>>): DocumentTest() {
+    override fun renderBody(isSolution: Boolean): String {
+        val sentenceItems = generateSentenceItems(isSolution)
+        return renderEnumeration(sentenceItems)
     }
 
-    fun renderSeparate() =
-        renderIndividual(false) to renderIndividual(true)
-
-    fun renderCombined(): String {
-        val sentenceQuestionItems = generateSentenceItems(false)
-        val sentenceSolutionItems = generateSentenceItems(true)
-
-        val body = """
-            ${renderEnumeration(sentenceQuestionItems).prependIndent(3, IndentMode.SPACE).trimStart()}
-            
-            \pagebreak
-            
-            ${renderEnumeration(sentenceSolutionItems).prependIndent(3, IndentMode.SPACE).trimStart()}
-        """.trimIndent()
-
-        return renderDocument(body)
+    override fun renderDocument(body: String): Document {
+        return compileDocument(body)
     }
 
     private fun generateSentenceItems(solution: Boolean): List<String> {
         return sentences.map { sentence ->
-            sentence.joinToString("") {
-                processToken(it, solution)
-            }.ensureEndsWith(FULLSTOP_KUTOTEN)
+            sentence.joinToString("") { processToken(it, solution) }
+                .ensureEndsWith(FULLSTOP_KUTOTEN)
                 .replace("}\\", "}~\\")
                 .replace("\\d+".toRegex()) { number -> "\\rensuji{${number.value}}" }
         }
@@ -42,34 +31,39 @@ abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences:
     protected abstract fun processToken(token: T, solution: Boolean): String
 
     companion object {
-        private fun renderDocument(body: String): String {
-            return """
-                \documentclass[12pt,landscape]{ltjtarticle}
-
-                \usepackage{luatexja}
-                \usepackage{luatexja-ruby}
-                \usepackage{lltjp-geometry}
-                \usepackage{lltjext}
-                \usepackage{enumitem}
-                \usepackage{xcolor}
-                \usepackage[left=10mm,top=7mm,bottom=7mm,right=14mm]{geometry}
-
-                \linespread{2.8}
-                \pagenumbering{gobble}
-
-                \begin{document}
-                    ${body.prependIndent(5, IndentMode.SPACE).trimStart()}
-                \end{document}
-            """.trimIndent().trimBlankLines()
+        private fun compileDocument(body: String): Document {
+            return Document(
+                EnumCommand(DocumentClass.LTJ_ARTICLE_TATE, "12pt,landscape"),
+                listOf(
+                    EnumCommand(UsePackage.LUATEXJA),
+                    EnumCommand(UsePackage.LUATEXJA_RUBY),
+                    EnumCommand(UsePackage.LUATEXJA_TATE_GEOMETRY),
+                    EnumCommand(UsePackage.LUATEXJA_EXTENSIONS),
+                    EnumCommand(UsePackage.ENUMITEM),
+                    EnumCommand(UsePackage.XCOLOR),
+                    EnumCommand(UsePackage.GEOMETRY, "left=10mm,top=7mm,bottom=7mm,right=14mm"),
+                ),
+                listOf(
+                    TexCommand("linespread", listOf("2.8")),
+                    TexCommand("pagenumbering", listOf("gobble"))
+                ),
+                body
+            )
         }
 
         private fun renderEnumeration(items: List<String>): String {
-            return """
+            val itemsBody = """
                 \LARGE
-                \begin{enumerate}[label=\rensuji{\Large\protect\textcircled{\large\arabic*}}]
-                    ${items.joinToString("\n") { "\\item $it" }.prependIndent(5, IndentMode.SPACE).trimStart()}
-                \end{enumerate}
+                ${items.joinToString("\n") { "\\item $it" }.prependIndent(4, IndentMode.SPACE).trimStart()}
             """.trimIndent()
+
+            val environment = TexEnvironment(
+                "enumerate",
+                options = "label=\\rensuji{\\Large\\protect\\textcircled{\\large\\arabic*}}",
+                body = itemsBody
+            )
+
+            return environment.render()
         }
     }
 }

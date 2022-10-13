@@ -3,21 +3,21 @@ package net.gregorbg.lang.japanese.kanji.source.kanjium
 import net.gregorbg.lang.japanese.kanji.model.Kanji
 import net.gregorbg.lang.japanese.kanji.model.kanjium.Elements
 import net.gregorbg.lang.japanese.kanji.model.kanjium.KanjiDictEntry
+import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
+import net.gregorbg.lang.japanese.kanji.model.vocabulary.SampleSentence
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.Translation
-import net.gregorbg.lang.japanese.kanji.source.KanjiElementsSource
-import net.gregorbg.lang.japanese.kanji.source.kanjium.persistence.ElementsDao
-import net.gregorbg.lang.japanese.kanji.source.kanjium.persistence.KanjiDictDao
-import net.gregorbg.lang.japanese.kanji.source.kanjium.persistence.toModel
-import net.gregorbg.lang.japanese.kanji.source.KanjiSource
-import net.gregorbg.lang.japanese.kanji.source.TranslationSource
-import net.gregorbg.lang.japanese.kanji.util.unlessEmpty
+import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabTagModifier
+import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabularyItem
+import net.gregorbg.lang.japanese.kanji.source.*
+import net.gregorbg.lang.japanese.kanji.source.kanjium.persistence.*
+import net.gregorbg.lang.japanese.kanji.util.alignSymbolsWith
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
 
-class KanjiumDatabaseSource(dbPath: String) : KanjiSource, TranslationSource, KanjiElementsSource {
+class KanjiumDatabaseSource(dbPath: String) : KanjiSource, TranslationSource, KanjiElementsSource, VocabularySource, SampleSentenceSource<MorphologyToken> {
     init {
         Database.connect("jdbc:sqlite:$dbPath", DRIVER)
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
@@ -41,6 +41,25 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource, TranslationSource, Ka
             val full = registry.meaning - compact
 
             Translation(compact.joinToString(), full)
+        }
+    }
+
+    override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
+        return transaction {
+            JukugoDao.find { JukugoTable.kanji eq kanji.kanji.toString() }.map {
+                val alignedReading = it.jukugo.alignSymbolsWith(it.reading, this@KanjiumDatabaseSource)
+                val modifiers = VocabTagModifier.values().filter { m -> m.kana in it.meaning }
+
+                VocabularyItem(alignedReading, modifiers)
+            }
+        }
+    }
+
+    override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence<MorphologyToken>> {
+        return transaction {
+            SentencesDao.find { SentencesTable.word eq vocab.surfaceForm }.map {
+                SampleSentence.parseWithMorphology(it.japanese)
+            }
         }
     }
 

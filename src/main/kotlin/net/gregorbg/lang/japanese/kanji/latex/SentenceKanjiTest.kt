@@ -5,7 +5,7 @@ import net.gregorbg.lang.japanese.kanji.model.reading.token.CompoundKanjiToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.KanjiToken
 import net.gregorbg.lang.japanese.kanji.model.reading.token.TokenWithSurfaceForm
 
-class KanjiTest(
+class SentenceKanjiTest(
     sentences: List<List<TokenWithSurfaceForm>>,
     val read: List<Kanji>,
     val write: List<Kanji>

@@ -33,7 +33,10 @@ fun <T> Collection<T>.unlessEmpty() = takeUnless { it.isEmpty() }
 fun <T> List<T>.unlessEmpty() = takeUnless { it.isEmpty() }
 
 fun <T> T.singletonList() = listOf(this)
+fun <T> T.repeatList(size: Int) = List(size) { this }
 
+fun <T> Iterable<T>.interlace(glue: T) =
+    this.flatMap { listOf(it, glue) }
 fun <T> Iterable<Iterable<T>>.interlace(glue: T) =
     this.reduce { acc, iter -> acc + glue + iter }
 

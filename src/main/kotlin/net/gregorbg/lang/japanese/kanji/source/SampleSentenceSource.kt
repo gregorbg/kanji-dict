@@ -9,9 +9,9 @@ import net.gregorbg.lang.japanese.kanji.model.vocabulary.SampleSentence
 import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabularyItem
 
 interface SampleSentenceSource<T : WordLevelToken> {
-    fun getSampleSentencesFor(vocab: VocabularyItem): List<SentenceLevelToken<T>>
+    fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence<T>>
 
-    fun getSampleSentencesFor(kanji: Kanji, reading: KanjiReadingAnnotation): List<SentenceLevelToken<T>> {
+    fun getSampleSentencesFor(kanji: Kanji, reading: KanjiReadingAnnotation): List<SampleSentence<T>> {
         val mockToken = KanjiToken(kanji.kanji, reading.reading, reading.standardisedReading)
         val mockVocab = VocabularyItem(listOf(mockToken))
 

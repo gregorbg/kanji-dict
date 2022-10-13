@@ -23,7 +23,7 @@ fun KanjiDictDao.toModel(): KanjiDictEntry {
         this.radVar?.toModel(),
         this.phonetic?.firstOrNull(),
         this.idc,
-        this.type?.let { KanjiType.parse(it) },
+        this.type?.takeUnless { it.isEmpty() }?.let { KanjiType.parse(it) },
         regOn,
         regKun,
         fullOn,
@@ -34,7 +34,7 @@ fun KanjiDictDao.toModel(): KanjiDictEntry {
         KanjiMinistryList.parseEducationGrade(this.grade),
         this.jlpt?.toJLPTLevel(),
         this.kanken?.toKankenLevel(),
-        this.frequency,
+        // FIXME this.frequency?.toIntOrNull(),
         this.meaning.splitAndTrim(KANJI_DICT_MEANING_SEP),
         this.compactMeaning?.splitAndTrim(KANJI_DICT_MEANING_SEP).orEmpty()
     )
@@ -64,6 +64,9 @@ private fun List<String>.parseKun(): List<KanjiKunYomi> {
 }
 
 private fun String.toJLPTLevel(): Int? {
+    if (this.isEmpty())
+        return null
+
     return this[1].toString().toIntOrNull()
 }
 
