@@ -6,15 +6,19 @@ import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.math.roundToInt
 
-class NumericalIndexParser(rawContent: String): FileParser<Int>(rawContent) {
+class NumericalIndexParser(rawContent: String) : FileParser<Int>(rawContent) {
     override fun getAssociations(): Map<String, Int> {
         val chars = nonBlankLines.flatMap { it.toStringifiedChars() }
 
-        return chars.mapIndexed { i, k -> k to i }.toMap()
+        return chars.mapIndexed { i, kj -> kj to i }.toMap()
     }
 }
 
-open class PageGroupsParser(rawContent: String, val pagesPerLine: Int = 2, val fixShortLines: Boolean = true): FileParser<Int>(rawContent) {
+open class PageGroupsParser(
+    rawContent: String,
+    private val pagesPerLine: Int = 2,
+    private val fixShortLines: Boolean = true
+) : FileParser<Int>(rawContent) {
     override fun getAssociations(): Map<String, Int> {
         val lines = this.nonBlankLines
 
@@ -30,9 +34,8 @@ open class PageGroupsParser(rawContent: String, val pagesPerLine: Int = 2, val f
             ln.chunked(usedChunkSize)
         }
 
-        val pairAssociations = lineGroups.mapIndexed { i, ks -> ks.toStringifiedChars() allTo i }
-        return pairAssociations.flatten().toMap()
+        return lineGroups.flatMapIndexed { i, ks -> ks.toStringifiedChars() allTo i }.toMap()
     }
 }
 
-class LessonsParser(rawContent: String): PageGroupsParser(rawContent, 1)
+class LessonsParser(rawContent: String) : PageGroupsParser(rawContent, 1)
