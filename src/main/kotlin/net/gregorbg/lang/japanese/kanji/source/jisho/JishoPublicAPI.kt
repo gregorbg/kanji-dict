@@ -22,6 +22,7 @@ import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.coroutines.runBlocking
 import net.gregorbg.lang.japanese.kanji.model.reading.token.MorphologyToken
+import net.gregorbg.lang.japanese.kanji.source.jisho.ktor.JishoRateLimitingFeature
 
 class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, TranslationSource,
     SampleSentenceSource<MorphologyToken> {
@@ -117,6 +118,7 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         const val JISHO_PAGE_MAX = 20
 
         private val HTTP_CLIENT get() = HttpClient(Java) {
+            install(JishoRateLimitingFeature)
             install(ContentNegotiation) {
                 json()
             }

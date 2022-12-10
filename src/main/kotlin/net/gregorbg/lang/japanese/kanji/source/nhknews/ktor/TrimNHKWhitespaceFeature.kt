@@ -1,13 +1,10 @@
 package net.gregorbg.lang.japanese.kanji.source.nhknews.ktor
 
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 import io.ktor.client.plugins.*
-import io.ktor.client.statement.HttpResponseContainer
-import io.ktor.client.statement.HttpResponsePipeline
+import io.ktor.client.statement.*
 import io.ktor.util.*
-import io.ktor.utils.io.ByteReadChannel
-import io.ktor.utils.io.writeFully
-import io.ktor.utils.io.writer
+import io.ktor.utils.io.*
 
 class TrimNHKWhitespaceFeature internal constructor() {
     companion object : HttpClientPlugin<Unit, TrimNHKWhitespaceFeature> {
