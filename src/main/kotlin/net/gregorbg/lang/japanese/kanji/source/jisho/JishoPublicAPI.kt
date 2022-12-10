@@ -16,7 +16,7 @@ import net.gregorbg.lang.japanese.kanji.util.alignSymbolsWith
 import net.gregorbg.lang.japanese.kanji.util.guessVocabModifiers
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.get
 import io.ktor.serialization.kotlinx.json.*
@@ -116,7 +116,7 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
         const val API_URL = "https://jisho.org/api/v1/search/words"
         const val JISHO_PAGE_MAX = 20
 
-        private val HTTP_CLIENT = HttpClient(Apache) {
+        private val HTTP_CLIENT get() = HttpClient(Java) {
             install(ContentNegotiation) {
                 json()
             }

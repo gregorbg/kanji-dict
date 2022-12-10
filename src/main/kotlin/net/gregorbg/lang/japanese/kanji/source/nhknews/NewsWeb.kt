@@ -6,7 +6,7 @@ import net.gregorbg.lang.japanese.kanji.source.ComplexTextSource
 import net.gregorbg.lang.japanese.kanji.source.nhknews.ktor.TrimNHKWhitespaceFeature
 import io.ktor.client.HttpClient
 import io.ktor.client.call.*
-import io.ktor.client.engine.apache.Apache
+import io.ktor.client.engine.java.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.serialization.kotlinx.json.*
@@ -19,7 +19,7 @@ import kotlinx.coroutines.runBlocking
 import net.gregorbg.lang.japanese.kanji.model.reading.token.level.WordLevelToken
 
 object NewsWeb : ComplexTextSource<WordLevelToken> {
-    private val HTTP_CLIENT = HttpClient(Apache) {
+    private val HTTP_CLIENT get() = HttpClient(Java) {
         install(TrimNHKWhitespaceFeature)
         install(ContentNegotiation) {
             json()
