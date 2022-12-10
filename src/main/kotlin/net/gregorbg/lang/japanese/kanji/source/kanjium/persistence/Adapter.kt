@@ -70,8 +70,8 @@ private fun String.toJLPTLevel(): Int? {
     return this[1].toString().toIntOrNull()
 }
 
-private fun String.toKankenLevel(): Int {
-    val baseLevel = takeLastWhile { it.isDigit() }.toInt()
+private fun String.toKankenLevel(): Int? {
+    val baseLevel = takeLastWhile { it.isDigit() }.toIntOrNull() ?: return null
     val preAdd = if (startsWith("pre")) 1 else 0
 
     return when (baseLevel) {

@@ -17,7 +17,7 @@ data class Document(
             ${documentClass.render()}
         
             ${packages.joinToString("\n") { it.render() }.prependIndent(3, IndentMode.SPACE).trimStart()}
-            
+
             ${preamble.joinToString("\n") { it.render() }.prependIndent(3, IndentMode.SPACE).trimStart()}
         
             \begin{document}

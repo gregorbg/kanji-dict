@@ -28,6 +28,10 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource, TranslationSource, Ka
         return lookup?.also { KANJI_CACHE[kanji] = it }
     }
 
+    fun getAll(): List<KanjiDictEntry> {
+        return transaction { KanjiDictDao.all().map { it.toModel() } }
+    }
+
     override fun getElementsFor(kanji: Kanji): Elements? {
         return transaction { ElementsDao.findById(kanji.kanji.toString())?.toModel() }
     }
@@ -56,8 +60,12 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource, TranslationSource, Ka
     }
 
     override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence<MorphologyToken>> {
+        return getSampleSentencesFor(vocab.surfaceForm)
+    }
+
+    fun getSampleSentencesFor(vocabRaw: String): List<SampleSentence<MorphologyToken>> {
         return transaction {
-            SentencesDao.find { SentencesTable.word eq vocab.surfaceForm }.map {
+            SentencesDao.find { SentencesTable.word eq vocabRaw }.map {
                 SampleSentence.parseWithMorphology(it.japanese)
             }
         }

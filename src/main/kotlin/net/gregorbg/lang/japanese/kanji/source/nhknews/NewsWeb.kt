@@ -58,13 +58,17 @@ object NewsWeb : ComplexTextSource<WordLevelToken> {
         return ALL_ARTICLES.channel.item.mapTo(mutableSetOf()) { it.id }
     }
 
-    override fun getText(id: String): MorphologyText {
+    fun getArticleLink(id: String): String {
         val linkSuffix = ALL_ARTICLES.channel.item.find { it.id == id }
             ?.link ?: error("Invalid NHK news ID: $id")
 
+        return "https://www3.nhk.or.jp/news/$linkSuffix"
+    }
+
+    override fun getText(id: String): MorphologyText {
         val fullText = skrape(BrowserFetcher) {
             request {
-                url = "https://www3.nhk.or.jp/news/$linkSuffix"
+                url = getArticleLink(id)
             }
 
             response {

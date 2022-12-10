@@ -10,6 +10,8 @@ enum class UsePackage(override val argName: String) : CommandType {
     ENUMITEM("enumitem"),
     XCOLOR("xcolor"),
     TABULARX("tabularx"),
+    LTABLEX("ltablex"),
+    HYPERREF("hyperref"),
     ;
 
     override val commandName = "usepackage"

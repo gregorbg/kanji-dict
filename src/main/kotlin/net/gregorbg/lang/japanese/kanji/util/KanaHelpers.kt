@@ -14,6 +14,10 @@ fun String.containsOnlyNumbers() = this.all(KanaAppraiser::isZenkakuNumber)
 fun String.containsOnlySymbols() =
     this.containsOnlyAscii() && !this.any(KanaAppraiser::isZenkakuNumber) && !this.any(KanaAppraiser::isZenkakuLetter)
 
+fun String.isHandakuSymbol() = this.toKatakana().all {
+    it == HANDAKU_YA || it == HANDAKU_YU || it == HANDAKU_YO
+}
+
 fun String.containsOnlyHiraganaOrAnnotations(parser: KunYomiAnnotationMode) =
     this.all { KanaAppraiser.isZenkakuHiragana(it) || it in parser.annotationSymbols }
 
@@ -68,6 +72,10 @@ const val REPETITION_MARK_KUTOTEN = '々'
 const val COUNTER_MARK_KUTOTEN = 'ヶ'
 const val LENGTHENING_MARK_KUTOTEN = 'ー'
 const val FULLSTOP_KUTOTEN = '。'
+
+const val HANDAKU_YA = 'ャ'
+const val HANDAKU_YU = 'ュ'
+const val HANDAKU_YO = 'ョ'
 
 fun String.possibleAlternateKatakanaReadings(): List<String> {
     val prefixes = this.first().katakanaDiacriticVariants()

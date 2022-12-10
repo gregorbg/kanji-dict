@@ -4,3 +4,4 @@ build/
 gradle.properties
 src/main/kotlin/Playground.kt
 webtest/
+nhk-cache/

@@ -13,7 +13,8 @@ abstract class TabularKanjiTest : DocumentTest() {
             listOf(
                 EnumCommand(UsePackage.LUATEXJA_FONTSPEC),
                 EnumCommand(UsePackage.GEOMETRY),
-                EnumCommand(UsePackage.TABULARX),
+                EnumCommand(UsePackage.LTABLEX),
+                EnumCommand(UsePackage.HYPERREF),
             ),
             listOf(
                 TexCommand("geometry", listOf("a4paper,margin=1cm")),

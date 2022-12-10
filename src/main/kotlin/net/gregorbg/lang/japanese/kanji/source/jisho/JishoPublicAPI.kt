@@ -66,10 +66,13 @@ class JishoPublicAPI(val kanjiSource: KanjiSource) : VocabularySource, Translati
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
         val kanjiLiteral = kanji.kanji.toString()
 
-        val searchQuery = "*$kanjiLiteral*"
-        val result = executePaginatedSearch(searchQuery)
+        return searchVocabularyItem(kanjiLiteral, "*$kanjiLiteral*")
+    }
 
-        return result.data.mapNotNull { it.toVocabularyItem(kanjiLiteral) }
+    fun searchVocabularyItem(vocabRaw: String, query: String = vocabRaw): List<VocabularyItem> {
+        val result = executePaginatedSearch(query)
+
+        return result.data.mapNotNull { it.toVocabularyItem(vocabRaw) }
     }
 
     override fun getSampleSentencesFor(vocab: VocabularyItem): List<SampleSentence<MorphologyToken>> {

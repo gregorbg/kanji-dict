@@ -37,8 +37,8 @@ fun <T> T.repeatList(size: Int) = List(size) { this }
 
 fun <T> Iterable<T>.interlace(glue: T) =
     this.flatMap { listOf(it, glue) }
-fun <T> Iterable<Iterable<T>>.interlace(glue: T) =
-    this.reduce { acc, iter -> acc + glue + iter }
+fun <T> List<Iterable<T>>.interlace(glue: T) =
+    if (this.isEmpty()) emptyList() else this.reduce { acc, iter -> acc + glue + iter }
 
 fun <S, T> Iterable<T>.decompose(delimiter: S, mapping: (T) -> S) = decomposeRecursive(delimiter, mapping, emptyList())
 
