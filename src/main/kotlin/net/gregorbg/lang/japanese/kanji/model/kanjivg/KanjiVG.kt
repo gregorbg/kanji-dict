@@ -29,6 +29,16 @@ data class KanjiVG(
         return copy(elements = boxedElements)
     }
 
+    fun withoutStrokeNumbers(): KanjiVG {
+        val unnumberedElements = elements.map { it.withoutNumberedStrokes() }
+        return copy(elements = unnumberedElements)
+    }
+
+    fun withBoldedStroke(strokeNum: Int, width: Int = 7): KanjiVG {
+        val strokeElements = elements.map { it.withStrokeInBold(strokeNum, width) }
+        return copy(elements = strokeElements)
+    }
+
     companion object {
         const val SVG_NAMESPACE = "http://www.w3.org/2000/svg"
         const val SVG_PREFIX = "" // on purpose

@@ -15,6 +15,8 @@ sealed class SvgElement {
 
     abstract fun withRadicalColor(level: Int = 0): SvgElement
     abstract fun withRadicalBox(): SvgElement
+    abstract fun withoutNumberedStrokes(): SvgElement
+    abstract fun withStrokeInBold(strokeNum: Int, width: Int): SvgElement
 
     abstract fun withIdSuffix(suffix: String): SvgElement
 
@@ -89,6 +91,22 @@ sealed class SvgElement {
                 .copy(elements = coloredElements)
         }
 
+        override fun withoutNumberedStrokes(): SvgElement {
+            if ("StrokeNumbers" in this.id) {
+                val unnumberedElements = elements.map { it.withoutNumberedStrokes() }
+                val nonTextElements = unnumberedElements.filter { it !is Text }
+
+                return copy(elements = nonTextElements)
+            }
+
+            return this
+        }
+
+        override fun withStrokeInBold(strokeNum: Int, width: Int): SvgElement {
+            val coloredElements = elements.map { it.withStrokeInBold(strokeNum, width) }
+            return copy(elements = coloredElements)
+        }
+
         override fun withIdSuffix(suffix: String): Group {
             val suffixedChildren = elements.map { it.withIdSuffix(suffix) }
             return copy(id = "$id-$suffix", elements = suffixedChildren)
@@ -120,10 +138,19 @@ sealed class SvgElement {
     data class Path(
         override val id: String,
         val d: String,
-        @XmlSerialName("type", KanjiVG.KANJIVG_NAMESPACE, KanjiVG.KANJIVG_PREFIX) val type: String? = null
+        @XmlSerialName("type", KanjiVG.KANJIVG_NAMESPACE, KanjiVG.KANJIVG_PREFIX) val type: String? = null,
+        @SerialName("stroke-width") val strokeWidth: Int? = null,
     ) : SvgElement() {
         override fun withRadicalColor(level: Int) = this
         override fun withRadicalBox() = this
+        override fun withoutNumberedStrokes() = this
+
+        override fun withStrokeInBold(strokeNum: Int, width: Int): SvgElement {
+            if (this.id.endsWith("-s${strokeNum}"))
+                return copy(strokeWidth = width)
+
+            return copy(strokeWidth = width / 3)
+        }
 
         override fun withIdSuffix(suffix: String) = copy(id = "$id-$suffix")
         override fun withStyle(addStyle: String) = this
@@ -142,6 +169,8 @@ sealed class SvgElement {
 
         override fun withRadicalColor(level: Int) = this
         override fun withRadicalBox() = this
+        override fun withoutNumberedStrokes() = this
+        override fun withStrokeInBold(strokeNum: Int, width: Int) = this
 
         override fun withIdSuffix(suffix: String) = this
         override fun withStyle(addStyle: String) = this
