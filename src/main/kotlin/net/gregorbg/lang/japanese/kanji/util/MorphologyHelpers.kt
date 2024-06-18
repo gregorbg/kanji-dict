@@ -71,7 +71,7 @@ private fun zipReadingsExact(
                 ) {
                     val readingFromTemplate = rawTemplate.take(readingVariation.length)
 
-                    val baseReading = possibleReading.takeUnless { readingVariation == readingFromTemplate }
+                    val baseReading = possibleReading.takeUnless { it.toKatakana() == readingFromTemplate.toKatakana() }
                     val readingModel = KanjiToken(next.first(), readingFromTemplate, baseReading)
 
                     val continuedAlignment = zipReadingsExact(
@@ -101,6 +101,9 @@ private fun zipReadingsExact(
     }
 }
 
+@JvmInline
+private value class WordLevelAdapter(val symbolLevelToken: SymbolLevelToken) : WordLevelToken, TokenWithSurfaceForm by symbolLevelToken
+
 private fun zipReadings(
     segments: List<String>,
     rawTemplate: String,
@@ -113,9 +116,12 @@ private fun zipReadings(
     val next = segments.first()
     val remaining = segments.drop(1)
 
+    fun makeKanjiToken(kanji: String, reading: String) =
+        if (kanji.length == 1) WordLevelAdapter(KanjiToken(kanji.first(), reading)) else CompoundKanjiToken(kanji, reading)
+
     if (next.isProbablyKanji(true)) {
         if (remaining.isEmpty()) {
-            val readingModel = if (next.all(Char::isDigit)) CompoundKanaToken(next) else CompoundKanjiToken(next, rawTemplate)
+            val readingModel = if (next.all(Char::isDigit)) CompoundKanaToken(next) else makeKanjiToken(next, rawTemplate)
 
             return zipReadings(
                 remaining,
@@ -132,7 +138,7 @@ private fun zipReadings(
 
             for (occurrence in kanaOccurrences) {
                 val readingFromTemplate = rawTemplate.take(occurrence)
-                val readingModel = CompoundKanjiToken(next, readingFromTemplate)
+                val readingModel = makeKanjiToken(next, readingFromTemplate)
 
                 val continuedAlignment = zipReadings(
                     remaining,
@@ -163,10 +169,10 @@ private fun Kanji.allReadings(): List<String> {
     return combinedReadings.map { it.standardisedReading }.filterNot { it.isEmpty() }
 }
 
-fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiers()
+fun <T : TokenWithSurfaceForm> List<T>.guessVocabModifiers()
         = this.guessVocabModifiersAndReAlign().second
 
-fun <T: TokenWithSurfaceForm> List<T>.guessVocabModifiersAndReAlign(): Pair<List<T>, List<VocabTagModifier>> {
+fun <T : TokenWithSurfaceForm> List<T>.guessVocabModifiersAndReAlign(): Pair<List<T>, List<VocabTagModifier>> {
     if (this.size >= 2) {
         val (secondToLast, last) = this.takeLast(2)
 

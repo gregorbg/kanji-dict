@@ -24,7 +24,7 @@ abstract class TachikiStyleVerticalTest<T : TokenWithSurfaceForm>(val sentences:
             sentence.joinToString("") { processToken(it, solution) }
                 .ensureEndsWith(FULLSTOP_KUTOTEN)
                 .replace("}\\", "}~\\")
-                .replace("\\d+".toRegex()) { number -> "\\rensuji{${number.value}}" }
+                .replace("\\d+".toRegex()) { "\\rensuji{${it.value}}" }
         }
     }
 
