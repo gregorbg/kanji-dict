@@ -5,6 +5,8 @@ infix fun <A, B> Iterable<A>.allTo(item: B) = map { it to item }
 
 fun Iterable<String>.singleOrAll() = singleOrNull() ?: joinToString()
 
+fun List<String>.trimEmptyChars() = dropWhile { it.isEmpty() }.dropLastWhile { it.isEmpty() }
+
 fun <K, V> Map<K, V>.invert() = entries.associate { it.value to it.key }
 
 fun <K, V> Map<K, Iterable<V>>.invertMultiMap() =

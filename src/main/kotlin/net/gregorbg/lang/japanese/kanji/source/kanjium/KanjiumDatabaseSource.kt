@@ -32,6 +32,10 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource, TranslationSource, Ka
         return transaction { KanjiDictDao.all().map { it.toModel() } }
     }
 
+    fun getAllJukugo(): List<VocabularyItem> {
+        return transaction { JukugoDao.all().map { it.toModel(this@KanjiumDatabaseSource) } }
+    }
+
     override fun getElementsFor(kanji: Kanji): Elements? {
         return transaction { ElementsDao.findById(kanji.kanji.toString())?.toModel() }
     }
@@ -51,10 +55,7 @@ class KanjiumDatabaseSource(dbPath: String) : KanjiSource, TranslationSource, Ka
     override fun getVocabularyItemsFor(kanji: Kanji): List<VocabularyItem> {
         return transaction {
             JukugoDao.find { JukugoTable.kanji eq kanji.kanji.toString() }.map {
-                val alignedReading = it.jukugo.alignSymbolsWith(it.reading, this@KanjiumDatabaseSource)
-                val modifiers = VocabTagModifier.values().filter { m -> m.kana in it.meaning }
-
-                VocabularyItem(alignedReading, modifiers)
+                it.toModel(this@KanjiumDatabaseSource)
             }
         }
     }

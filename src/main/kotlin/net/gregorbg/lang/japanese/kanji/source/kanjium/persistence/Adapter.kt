@@ -8,8 +8,13 @@ import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KunYomiAnnotati
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KanjiKunYomi
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.KanjiOnYomi
 import net.gregorbg.lang.japanese.kanji.model.reading.annotation.SinoReadingEra
+import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabTagModifier
+import net.gregorbg.lang.japanese.kanji.model.vocabulary.VocabularyItem
+import net.gregorbg.lang.japanese.kanji.source.KanjiSource
+import net.gregorbg.lang.japanese.kanji.util.alignSymbolsWith
 import net.gregorbg.lang.japanese.kanji.util.japaneseSymbolsToASCII
 import net.gregorbg.lang.japanese.kanji.util.splitAndTrim
+import net.gregorbg.lang.japanese.kanji.util.trimEmptyChars
 
 fun KanjiDictDao.toModel(): KanjiDictEntry {
     val fullOn = this.onyomi?.splitAndTrim(KANJI_DICT_ONYOMI_SEP).orEmpty().parseOn()
@@ -38,6 +43,13 @@ fun KanjiDictDao.toModel(): KanjiDictEntry {
         this.meaning.splitAndTrim(KANJI_DICT_MEANING_SEP),
         this.compactMeaning?.splitAndTrim(KANJI_DICT_MEANING_SEP).orEmpty()
     )
+}
+
+fun JukugoDao.toModel(dbSource: KanjiSource): VocabularyItem {
+    val alignedReading = this.jukugo.alignSymbolsWith(this.reading, dbSource)
+    val modifiers = VocabTagModifier.entries.filter { m -> m.kana in this.meaning }
+
+    return VocabularyItem(alignedReading, modifiers)
 }
 
 private fun List<String>.normalizeAllSymbols() = map { it.japaneseSymbolsToASCII() }
@@ -93,9 +105,9 @@ fun ElementsDao.toModel(): Elements {
     return Elements(
         this.kanji.id.value.first(),
         this.idc,
-        this.elements.split(EMPTY_SEP),
-        this.extraElements?.split(EMPTY_SEP).orEmpty(),
-        this.kanjiParts?.splitAndTrim(ELEMENTS_KANJI_PARTS_SEP).orEmpty(),
+        this.elements.split(EMPTY_SEP).trimEmptyChars(),
+        this.extraElements?.split(EMPTY_SEP).orEmpty().trimEmptyChars(),
+        this.kanjiParts?.splitAndTrim(ELEMENTS_KANJI_PARTS_SEP).orEmpty().trimEmptyChars(),
         partOfData,
         this.compactMeaning
     )
