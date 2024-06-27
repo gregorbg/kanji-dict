@@ -1,6 +1,7 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
 import kotlin.math.pow
+import kotlin.math.round
 import kotlin.math.sqrt
 
 data class GeomPoint(
@@ -30,7 +31,7 @@ data class GeomPoint(
         return sqrt(sumX + sumY)
     }
 
-    fun toSvg(): String = "${this.x},${this.y}"
+    fun toSvg(): String = "${toSvgNumber(this.x)},${toSvgNumber(this.y)}"
 
     companion object {
         operator fun Float.times(point: GeomPoint): GeomPoint {
@@ -45,6 +46,11 @@ data class GeomPoint(
                 this * point.x,
                 this * point.y,
             )
+        }
+
+        fun toSvgNumber(value: Float): String {
+            val rounded = round(value * 100) / 100
+            return rounded.toString().dropLastWhile { it == '0' }.trimEnd('.')
         }
     }
 }

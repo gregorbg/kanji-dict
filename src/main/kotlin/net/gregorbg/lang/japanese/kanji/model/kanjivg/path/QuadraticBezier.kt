@@ -1,17 +1,19 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.CommandMode
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.PathCommand
 
 data class QuadraticBezier(
     override val start: GeomPoint,
     val controlPoint: GeomPoint,
     override val end: GeomPoint,
 ) : BezierCurve<QuadraticBezier>(controlPoint) {
-    override fun toSvg(): String {
-        return """
-            M ${this.start.toSvg()}
-            Q ${this.controlPoint.toSvg()} ${this.end.toSvg()}
-        """.trimIndent()
+    override fun toSvgCommand(mode: CommandMode): PathCommand<QuadraticBezier> {
+        val controlMovement = if (mode == CommandMode.RELATIVE) this.controlPoint - this.start else this.controlPoint
+        val endMovement = if (mode == CommandMode.RELATIVE) this.end - this.start else this.end
+
+        return PathCommand.QuadraticBezierCurve(mode, controlMovement, endMovement)
     }
 
     override fun positionAt(t: Float): GeomPoint {

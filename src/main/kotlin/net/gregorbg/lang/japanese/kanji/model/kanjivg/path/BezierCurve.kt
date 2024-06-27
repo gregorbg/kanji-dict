@@ -3,8 +3,6 @@ package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 import kotlin.math.abs
 
 abstract class BezierCurve<T : BezierCurve<T>>(vararg val controlPoints: GeomPoint) : PathPrimitive<T> {
-    override fun arcLength() = this.arcLength(ARC_LENGTH_EPSILON)
-
     override fun positionAt(t: Float): GeomPoint {
         val initialSegments = listOf(this.start) + this.controlPoints.asList() + listOf(this.end)
         return deCasteljau(t, initialSegments)
@@ -21,6 +19,8 @@ abstract class BezierCurve<T : BezierCurve<T>>(vararg val controlPoints: GeomPoi
 
         return deCasteljau(t, nextIter)
     }
+
+    override fun arcLength() = this.arcLength(ARC_LENGTH_EPSILON)
 
     fun arcLength(epsilon: Float): Float {
         val baseLength = this.start.distanceTo(this.end)

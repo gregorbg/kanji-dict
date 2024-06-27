@@ -1,21 +1,15 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.CommandMode
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Path
 import kotlin.math.abs
 
-data class Path(
+data class CombinedPathComponent(
     override val start: GeomPoint,
-    val relations: List<PathStep>,
     val segments: List<PathPrimitive<*>>,
-) : PathPrimitive<Path> {
+) : PathComponent<CombinedPathComponent> {
     override val end: GeomPoint
-        get() = this.segments.lastOrNull()?.end ?: start
-
-    override fun toSvg(): String {
-        return """
-            M ${this.start.toSvg()}
-            ${this.segments.joinToString { it.toSvg() }}
-        """.trimIndent()
-    }
+        get() = this.segments.lastOrNull()?.end ?: this.start
 
     override fun arcLength(): Float {
         return this.segments.map { it.arcLength() }.sum()
@@ -39,11 +33,19 @@ data class Path(
         return lookupSegment.positionAt(rescaledT)
     }
 
-    override fun reverse(): Path {
-        return Path(
+    override fun reverse(): CombinedPathComponent {
+        return CombinedPathComponent(
             this.end,
-            this.relations.reversed(),
             this.segments.map { it.reverse() }.reversed()
+        )
+    }
+
+    fun toSvgModel(commandModes: List<CommandMode>): Path {
+        val commands = commandModes.zip(this.segments).map { (cmd, seg) -> seg.toSvgCommand(cmd) }
+
+        return Path(
+            this.start,
+            commands,
         )
     }
 }

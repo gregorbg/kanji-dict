@@ -1,14 +1,8 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
-interface PathPrimitive<T : PathPrimitive<T>> {
-    val start: GeomPoint
-    val end: GeomPoint
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.CommandMode
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.PathCommand
 
-    fun toSvg(): String
-
-    fun arcLength(): Float
-
-    fun positionAt(t: Float): GeomPoint
-
-    fun reverse(): T
+interface PathPrimitive<T : PathPrimitive<T>> : PathComponent<T> {
+    fun toSvgCommand(mode: CommandMode): PathCommand<T>
 }
