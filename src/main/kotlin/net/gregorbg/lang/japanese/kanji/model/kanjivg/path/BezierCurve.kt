@@ -2,7 +2,10 @@ package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
 import kotlin.math.abs
 
-abstract class BezierCurve<T : BezierCurve<T>>(vararg val controlPoints: GeomPoint) : PathPrimitive<T> {
+abstract class BezierCurve<T : BezierCurve<T>>(vararg val controlPoints: GeomPoint) : PathComponent<T> {
+    override val orderedPoints: List<GeomPoint>
+        get() = listOf(this.start) + this.controlPoints + listOf(this.end)
+
     override fun positionAt(t: Float): GeomPoint {
         val initialSegments = listOf(this.start) + this.controlPoints.asList() + listOf(this.end)
         return deCasteljau(t, initialSegments)
@@ -48,14 +51,12 @@ abstract class BezierCurve<T : BezierCurve<T>>(vararg val controlPoints: GeomPoi
 
     abstract fun velocityAt(t: Float): GeomPoint
 
-    fun extendLine(): Line {
+    override fun extendLine(): Line {
         return Line(
             this.end,
             this.end + this.velocityAt(1f)
         )
     }
-
-    abstract fun extendContinuous(): T
 
     companion object {
         const val ARC_LENGTH_EPSILON = 0.00001f

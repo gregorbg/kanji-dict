@@ -1,16 +1,40 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command
 
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.CubicBezier
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.Line
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.PathComponent
 
-class PathBuilder(val start: GeomPoint) {
+class PathBuilder(var position: GeomPoint = ORIGIN) {
     val commands = mutableListOf<PathCommand<*>>()
 
+    private fun <T : PathComponent<T>> executeCommand(
+        command: Command,
+        commandMode: CommandMode,
+        createComponent: (GeomPoint) -> PathComponent<T>
+    ) {
+        val backingComponent = createComponent(this.position.copy())
+
+        this.commands.add(PathCommand(command, commandMode, backingComponent))
+        this.position = backingComponent.end.copy()
+    }
+
     fun M(targetX: Float, targetY: Float) {
-        this.commands.add(PathCommand.MoveTo(CommandMode.ABSOLUTE, GeomPoint(targetX, targetY)))
+        this.executeCommand(Command.MOVE_TO, CommandMode.ABSOLUTE) {
+            Line(
+                it,
+                GeomPoint(targetX, targetY)
+            )
+        }
     }
 
     fun m(targetDx: Float, targetDy: Float) {
-        this.commands.add(PathCommand.MoveTo(CommandMode.RELATIVE, GeomPoint(targetDx, targetDy)))
+        this.executeCommand(Command.MOVE_TO, CommandMode.RELATIVE) {
+            Line(
+                it,
+                it + GeomPoint(targetDx, targetDy)
+            )
+        }
     }
 
     fun C(
@@ -21,12 +45,14 @@ class PathBuilder(val start: GeomPoint) {
         endX: Float,
         endY: Float,
     ) {
-        this.commands.add(PathCommand.BezierCurveCommand(
-            CommandMode.ABSOLUTE,
-            GeomPoint(controlStartX, controlStartY),
-            GeomPoint(controlEndX, controlEndY),
-            GeomPoint(endX, endY),
-        ))
+        this.executeCommand(Command.BEZIER_CURVE, CommandMode.ABSOLUTE) {
+            CubicBezier(
+                it,
+                GeomPoint(controlStartX, controlStartY),
+                GeomPoint(controlEndX, controlEndY),
+                GeomPoint(endX, endY),
+            )
+        }
     }
 
     fun c(
@@ -37,22 +63,28 @@ class PathBuilder(val start: GeomPoint) {
         endDx: Float,
         endDy: Float,
     ) {
-        this.commands.add(PathCommand.BezierCurveCommand(
-            CommandMode.RELATIVE,
-            GeomPoint(controlStartDx, controlStartDy),
-            GeomPoint(controlEndDx, controlEndDy),
-            GeomPoint(endDx, endDy),
-        ))
+        this.executeCommand(Command.BEZIER_CURVE, CommandMode.RELATIVE) {
+            CubicBezier(
+                it,
+                it + GeomPoint(controlStartDx, controlStartDy),
+                it + GeomPoint(controlEndDx, controlEndDy),
+                it + GeomPoint(endDx, endDy),
+            )
+        }
     }
 
     fun toPath(): Path {
-        return Path(this.start, this.commands)
+        return Path(this.commands)
+    }
+
+    companion object {
+        val ORIGIN = GeomPoint(0f, 0f)
     }
 }
 
 fun svgPath(startX: Float, startY: Float, build: PathBuilder.() -> Unit): Path {
-    val start = GeomPoint(startX, startY)
-    val builder = PathBuilder(start)
+    val builder = PathBuilder()
+    builder.M(startX, startY)
 
     builder.build()
 

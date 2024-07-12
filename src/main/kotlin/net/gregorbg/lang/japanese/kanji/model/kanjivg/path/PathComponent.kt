@@ -4,9 +4,14 @@ interface PathComponent<T : PathComponent<T>> {
     val start: GeomPoint
     val end: GeomPoint
 
+    val orderedPoints: List<GeomPoint>
+
     fun arcLength(): Float
 
     fun positionAt(t: Float): GeomPoint
 
     fun reverse(): T
+
+    fun extendContinuous(): T
+    fun extendLine(): Line
 }

@@ -1,17 +1,13 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.CommandMode
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.PathCommand
 
 data class Line(
     override val start: GeomPoint,
     override val end: GeomPoint,
-) : PathPrimitive<Line> {
-    override fun toSvgCommand(mode: CommandMode): PathCommand<Line> {
-        val movement = if (mode == CommandMode.RELATIVE) this.end - this.start else this.end
-        return PathCommand.LineCommand(mode, movement)
-    }
+) : PathComponent<Line> {
+    override val orderedPoints: List<GeomPoint>
+        get() = listOf(this.start, this.end)
 
     override fun arcLength(): Float {
         return this.start.distanceTo(this.end)
@@ -23,5 +19,13 @@ data class Line(
 
     override fun reverse(): Line {
         return Line(this.end, this.start)
+    }
+
+    override fun extendLine(): Line {
+        return Line(this.end, this.end + (this.end - this.start))
+    }
+
+    override fun extendContinuous(): Line {
+        return this.extendLine()
     }
 }
