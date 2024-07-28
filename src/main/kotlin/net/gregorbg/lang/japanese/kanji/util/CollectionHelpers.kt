@@ -70,3 +70,8 @@ fun <E> Collection<Collection<E>>.transpose(): List<List<E>> {
         ys.map { it.first() }.append(ys.map { it.drop(1) }.transpose())
     } ?: emptyList()
 }
+
+fun <E> List<E>.cycle(steps: Int): List<E> {
+    val cycleStep = steps % this.size
+    return (this + this).drop(cycleStep).dropLast(this.size - cycleStep)
+}

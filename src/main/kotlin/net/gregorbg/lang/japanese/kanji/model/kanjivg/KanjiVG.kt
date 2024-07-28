@@ -5,11 +5,17 @@ import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.PathComponent
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.Rectangle
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.svgPath
+import net.gregorbg.lang.japanese.kanji.util.cycle
+import net.gregorbg.lang.japanese.kanji.util.math.PerlinRandom
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import java.io.File
+import kotlin.math.absoluteValue
 
 @Serializable
 @XmlSerialName("svg", KanjiVG.SVG_NAMESPACE, KanjiVG.SVG_PREFIX)
@@ -42,6 +48,79 @@ data class KanjiVG(
     fun withBoldedStroke(strokeNum: Int, width: Int = 7): KanjiVG {
         val strokeElements = elements.map { it.withStrokeInBold(strokeNum, width) }
         return copy(elements = strokeElements)
+    }
+
+    fun withCoffeeStains(
+        coverPath: PathComponent<*>,
+        noisePoints: Int,
+        globalScaling: Float,
+        includeClockwise: Boolean = true,
+    ): KanjiVG {
+        val boundingRect = this.boundingRectangle()
+
+        val perlin = PerlinRandom(this.hashCode())
+        val perlinOffsets = perlin.generateNoise(noisePoints)
+
+        val controlPoints = perlinOffsets.mapIndexed { i, p ->
+            val positionIndex = (i + 1f) / (noisePoints + 1)
+
+            val linePosition = coverPath.positionAt(positionIndex)
+            val linePerpendicular = coverPath.velocityAt(positionIndex).perpendicular()
+
+            val minScaling = linePosition.minScaling(linePerpendicular, boundingRect)
+            val maxScaling = linePosition.maxScaling(linePerpendicular, boundingRect)
+
+            val lineMaxPerpendicular = if (p >= 0) linePerpendicular * maxScaling else linePerpendicular * minScaling
+
+            linePosition + p.absoluteValue * lineMaxPerpendicular * globalScaling
+        }
+
+        val (firstCp, secondCp) = controlPoints.take(2)
+        val remainingControlPoints = controlPoints.drop(2)
+
+        val path = svgPath(coverPath.start.x, coverPath.start.y) {
+            val initialEnd = remainingControlPoints.firstOrNull() ?: coverPath.end
+
+            C(firstCp.x, firstCp.y, secondCp.x, secondCp.y, initialEnd.x, initialEnd.y)
+
+            val followUp = remainingControlPoints.drop(1).chunked(2)
+
+            for (cps in followUp) {
+                val symmStartPoint = cps.first()
+                val symmEndPoint = cps.getOrNull(1) ?: coverPath.end
+
+                S(symmStartPoint.x, symmStartPoint.y, symmEndPoint.x, symmEndPoint.y)
+            }
+
+            val coverPathEndVelocity = coverPath.velocityAt(1f)
+
+            val maxScalingEnd = coverPath.end.maxScaling(coverPathEndVelocity, boundingRect)
+            val maxScaledEnd = coverPath.end + maxScalingEnd * coverPathEndVelocity
+
+            val cornerSideIndexEnd = boundingRect.cwSideIndex(maxScaledEnd)
+
+            val coverPathStartVelocity = coverPath.velocityAt(0f)
+
+            val minScalingEnd = coverPath.start.minScaling(coverPathStartVelocity, boundingRect)
+            val minScaledEnd = coverPath.start + minScalingEnd * coverPathStartVelocity
+
+            val cornerSideIndexStartBase = boundingRect.cwSideIndex(minScaledEnd)
+            val cornerSideIndexStart = if (cornerSideIndexStartBase <= cornerSideIndexEnd) cornerSideIndexStartBase + 4 else cornerSideIndexStartBase
+
+            val containedCorners = boundingRect.cornersCw().cycle(cornerSideIndexEnd + 1).take(cornerSideIndexStart - cornerSideIndexEnd)
+            val includedCorners = if (includeClockwise) containedCorners else boundingRect.cornersCw().minus(containedCorners).reversed()
+
+            for (ics in includedCorners) {
+                L(ics.x, ics.y)
+            }
+
+            Z()
+        }
+
+        val pathElement = SvgElement.Path("coffeeStainPath", path.toSvg())
+        val pathGroup = SvgElement.Group("coffeeStain", style = "fill:darkgoldenrod;stroke:black;", elements = listOf(pathElement))
+
+        return this.copy(elements = this.elements + pathGroup)
     }
 
     fun boundingRectangle(): Rectangle {
