@@ -3,8 +3,11 @@ package net.gregorbg.lang.japanese.kanji.model.kanjivg
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
+import java.io.File
 
 @Serializable
 @XmlSerialName("svg", KanjiVG.SVG_NAMESPACE, KanjiVG.SVG_PREFIX)
@@ -50,5 +53,16 @@ data class KanjiVG(
         const val SVG_VERSION_DEFAULT = "1.0"
         const val SVG_CONTENT_SCRIPT_TYPE_DEFAULT = "text/ecmascript"
         const val SVG_CONTENT_STYLE_TYPE_DEFAULT = "text/css"
+
+        val XML_PARSER = XML { autoPolymorphic = true }
+
+        fun loadSvg(symbol: Char, basePath: File): KanjiVG {
+            val kanjiCode = symbol.code.toString(16).padStart(5, '0')
+
+            val kanjiFile = File(basePath, "$kanjiCode.svg")
+            val kanjiSvgRaw = kanjiFile.readText()
+
+            return XML_PARSER.decodeFromString<KanjiVG>(kanjiSvgRaw)
+        }
     }
 }
