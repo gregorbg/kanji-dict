@@ -49,8 +49,6 @@ abstract class BezierCurve<T : BezierCurve<T>>(vararg val controlPoints: GeomPoi
         return arcLengthRec(numSegments + 1, segmentSize, epsilon)
     }
 
-    abstract fun velocityAt(t: Float): GeomPoint
-
     override fun extendLine(): Line {
         return Line(
             this.end,

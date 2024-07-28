@@ -4,6 +4,8 @@ import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.Rectangle
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
@@ -40,6 +42,13 @@ data class KanjiVG(
     fun withBoldedStroke(strokeNum: Int, width: Int = 7): KanjiVG {
         val strokeElements = elements.map { it.withStrokeInBold(strokeNum, width) }
         return copy(elements = strokeElements)
+    }
+
+    fun boundingRectangle(): Rectangle {
+        return Rectangle(
+            GeomPoint(0f, 0f),
+            GeomPoint(this.width.toFloat(), this.height.toFloat()),
+        )
     }
 
     companion object {

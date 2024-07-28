@@ -22,13 +22,97 @@ data class GeomPoint(
         )
     }
 
-    fun distanceTo(other: GeomPoint): Float {
-        val distanceVec = other - this
+    operator fun times(other: Float): GeomPoint {
+        return GeomPoint(
+            this.x * other,
+            this.y * other,
+        )
+    }
 
-        val sumX = distanceVec.x.pow(2)
-        val sumY = distanceVec.y.pow(2)
+    operator fun times(other: Int): GeomPoint {
+        return GeomPoint(
+            this.x * other,
+            this.y * other,
+        )
+    }
+
+    operator fun div(other: Float): GeomPoint {
+        return GeomPoint(
+            this.x / other,
+            this.y / other,
+        )
+    }
+
+    operator fun div(other: Int): GeomPoint {
+        return GeomPoint(
+            this.x / other,
+            this.y / other,
+        )
+    }
+
+    operator fun unaryPlus(): GeomPoint {
+        return this.copy()
+    }
+
+    operator fun unaryMinus(): GeomPoint {
+        return -1 * this
+    }
+
+    fun distanceTo(other: GeomPoint): Float {
+        return (other - this).abs()
+    }
+
+    fun abs(): Float {
+        val sumX = this.x.pow(2)
+        val sumY = this.y.pow(2)
 
         return sqrt(sumX + sumY)
+    }
+
+    fun norm(): GeomPoint {
+        return this / this.abs()
+    }
+
+    fun mirrorAt(other: GeomPoint): GeomPoint {
+        return 2 * other - this
+    }
+
+    fun perpendicularCcw(): GeomPoint {
+        return GeomPoint(
+            this.y,
+            -this.x,
+        )
+    }
+
+    fun perpendicularCw(): GeomPoint {
+        return GeomPoint(
+            -this.y,
+            this.x,
+        )
+    }
+
+    fun perpendicular(cw: Boolean = false): GeomPoint {
+        return if (cw) this.perpendicularCw() else this.perpendicularCcw()
+    }
+
+    private fun scalingFactors(direction: GeomPoint, boundingBox: Rectangle): List<Float> {
+        val lowX = (boundingBox.startCorner.x - this.x) / direction.x
+        val lowY = (boundingBox.startCorner.y - this.y) / direction.y
+        val highX = (boundingBox.endCorner.x - this.x) / direction.x
+        val highY = (boundingBox.endCorner.y - this.y) / direction.y
+
+        return listOf(lowX, lowY, highX, highY).filter {
+            val scaledCoord = this + it * direction
+            scaledCoord in boundingBox
+        }
+    }
+
+    fun maxScaling(direction: GeomPoint, boundingBox: Rectangle): Float {
+        return this.scalingFactors(direction, boundingBox).max()
+    }
+
+    fun minScaling(direction: GeomPoint, boundingBox: Rectangle): Float {
+        return this.scalingFactors(direction, boundingBox).min()
     }
 
     fun toSvg(): String = "${toSvgNumber(this.x)},${toSvgNumber(this.y)}"

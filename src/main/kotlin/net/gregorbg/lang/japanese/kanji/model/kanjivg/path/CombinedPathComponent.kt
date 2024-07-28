@@ -17,7 +17,7 @@ data class CombinedPathComponent(
         return this.segments.map { it.arcLength() }.sum()
     }
 
-    override fun positionAt(t: Float): GeomPoint {
+    private fun <T> componentFnAt(t: Float, componentFn: PathComponent<*>.(Float) -> T): T {
         val arcLengths = this.segments.map { it.arcLength() }
         val totalArcLength = arcLengths.sum()
 
@@ -32,7 +32,15 @@ data class CombinedPathComponent(
 
         val rescaledT = startToT / relArcLengths[lookupIndex]
 
-        return lookupSegment.positionAt(rescaledT)
+        return lookupSegment.componentFn(rescaledT)
+    }
+
+    override fun positionAt(t: Float): GeomPoint {
+        return this.componentFnAt(t) { positionAt(it) }
+    }
+
+    override fun velocityAt(t: Float): GeomPoint {
+        return this.componentFnAt(t) { velocityAt(it) }
     }
 
     override fun reverse(): CombinedPathComponent {

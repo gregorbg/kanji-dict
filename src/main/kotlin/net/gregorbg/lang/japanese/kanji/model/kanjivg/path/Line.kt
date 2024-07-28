@@ -17,6 +17,10 @@ data class Line(
         return this.start + t * (this.end - this.start)
     }
 
+    override fun velocityAt(t: Float): GeomPoint {
+        return this.end - this.start
+    }
+
     override fun reverse(): Line {
         return Line(this.end, this.start)
     }

@@ -9,6 +9,7 @@ interface PathComponent<T : PathComponent<T>> {
     fun arcLength(): Float
 
     fun positionAt(t: Float): GeomPoint
+    fun velocityAt(t: Float): GeomPoint
 
     fun reverse(): T
 
