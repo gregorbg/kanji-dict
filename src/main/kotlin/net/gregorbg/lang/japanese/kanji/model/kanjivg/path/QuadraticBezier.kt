@@ -14,7 +14,7 @@ data class QuadraticBezier(
     }
 
     override fun velocityAt(t: Float): GeomPoint {
-        return (2 * (t - 1) * this.start) +
+        return (-2 * (1 - t) * this.start) +
                 ((2 - 4 * t) * this.controlPoint) +
                 ((2 * t) * this.end)
     }
