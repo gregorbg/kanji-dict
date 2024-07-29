@@ -24,7 +24,7 @@ data class CombinedPathComponent(
         val relArcLengths = arcLengths.map { it / totalArcLength }
         val runningArcSums = relArcLengths.runningReduce { a, b -> a + b }
 
-        val lookupIndex = runningArcSums.indexOfFirst { it >= t }
+        val lookupIndex = runningArcSums.indexOfFirst { it + FLOAT_ROUNDING_ERR >= t }
         val lookupSegment = this.segments[lookupIndex]
 
         val untilT = relArcLengths.take(lookupIndex).sum()
@@ -56,5 +56,9 @@ data class CombinedPathComponent(
 
     override fun extendLine(): Line {
         return this.segments.lastOrNull()?.extendLine() ?: error("Cannot extend an empty path")
+    }
+
+    companion object {
+        const val FLOAT_ROUNDING_ERR = .0001f
     }
 }

@@ -122,6 +122,12 @@ sealed class SvgElement {
             return copy(transform = newTransform)
         }
 
+        fun recursiveElements(): List<SvgElement> {
+            return this.elements.flatMap {
+                if (it is Group) it.recursiveElements() else listOf(it)
+            }
+        }
+
         companion object {
             const val TRANSFORM_OFFSET = 4.2
 

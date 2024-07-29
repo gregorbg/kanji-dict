@@ -11,11 +11,14 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         commandMode: CommandMode,
         dropControls: Int,
         createComponent: (GeomPoint) -> PathComponent<T>,
-    ) {
+    ): PathCommand<T> {
         val backingComponent = createComponent(this.position.copy())
+        val compiledCommand = PathCommand(command, commandMode, backingComponent, dropControls)
 
-        this.commands.add(PathCommand(command, commandMode, backingComponent, dropControls))
+        this.commands.add(compiledCommand)
         this.position = backingComponent.end.copy()
+
+        return compiledCommand
     }
 
     private fun <T : PathComponent<T>> executeCommand(
@@ -24,8 +27,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         createComponent: (GeomPoint) -> PathComponent<T>
     ) = this.executeCommand(command, commandMode, 1, createComponent)
 
-    fun M(targetX: Float, targetY: Float) {
-        this.executeCommand(Command.MOVE_TO, CommandMode.ABSOLUTE) {
+    fun M(targetX: Float, targetY: Float): PathCommand<Line> {
+        return this.executeCommand(Command.MOVE_TO, CommandMode.ABSOLUTE) {
             Line(
                 it,
                 GeomPoint(targetX, targetY)
@@ -33,8 +36,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         }
     }
 
-    fun m(targetDx: Float, targetDy: Float) {
-        this.executeCommand(Command.MOVE_TO, CommandMode.RELATIVE) {
+    fun m(targetDx: Float, targetDy: Float): PathCommand<Line> {
+        return this.executeCommand(Command.MOVE_TO, CommandMode.RELATIVE) {
             Line(
                 it,
                 it + GeomPoint(targetDx, targetDy)
@@ -42,8 +45,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         }
     }
 
-    fun L(targetX: Float, targetY: Float) {
-        this.executeCommand(Command.LINE, CommandMode.ABSOLUTE) {
+    fun L(targetX: Float, targetY: Float): PathCommand<Line> {
+        return this.executeCommand(Command.LINE, CommandMode.ABSOLUTE) {
             Line(
                 it,
                 GeomPoint(targetX, targetY)
@@ -51,8 +54,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         }
     }
 
-    fun l(targetDx: Float, targetDy: Float) {
-        this.executeCommand(Command.LINE, CommandMode.RELATIVE) {
+    fun l(targetDx: Float, targetDy: Float): PathCommand<Line> {
+        return this.executeCommand(Command.LINE, CommandMode.RELATIVE) {
             Line(
                 it,
                 it + GeomPoint(targetDx, targetDy)
@@ -60,8 +63,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         }
     }
 
-    fun Z() {
-        this.executeCommand(Command.CLOSE_PATH, CommandMode.ABSOLUTE, 2) {
+    fun Z(): PathCommand<Line> {
+        return this.executeCommand(Command.CLOSE_PATH, CommandMode.ABSOLUTE, 2) {
             Line(
                 it,
                 this.start.copy()
@@ -69,8 +72,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         }
     }
 
-    fun z() {
-        this.executeCommand(Command.CLOSE_PATH, CommandMode.RELATIVE, 2) {
+    fun z(): PathCommand<Line> {
+        return this.executeCommand(Command.CLOSE_PATH, CommandMode.RELATIVE, 2) {
             Line(
                 it,
                 this.start.copy()
@@ -85,8 +88,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndY: Float,
         endX: Float,
         endY: Float,
-    ) {
-        this.executeCommand(Command.BEZIER_CURVE, CommandMode.ABSOLUTE) {
+    ): PathCommand<CubicBezier> {
+        return this.executeCommand(Command.BEZIER_CURVE, CommandMode.ABSOLUTE) {
             CubicBezier(
                 it,
                 GeomPoint(controlStartX, controlStartY),
@@ -103,8 +106,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndDy: Float,
         endDx: Float,
         endDy: Float,
-    ) {
-        this.executeCommand(Command.BEZIER_CURVE, CommandMode.RELATIVE) {
+    ): PathCommand<CubicBezier> {
+        return this.executeCommand(Command.BEZIER_CURVE, CommandMode.RELATIVE) {
             CubicBezier(
                 it,
                 it + GeomPoint(controlStartDx, controlStartDy),
@@ -119,8 +122,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndY: Float,
         endX: Float,
         endY: Float,
-    ) {
-        this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.ABSOLUTE, 2) {
+    ): PathCommand<CubicBezier> {
+        return this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.ABSOLUTE, 2) {
             val prevComponent = this.commands.lastOrNull()?.toComponent()
 
             if (prevComponent is CubicBezier) {
@@ -149,8 +152,8 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndDy: Float,
         endDx: Float,
         endDy: Float,
-    ) {
-        this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.RELATIVE, 2) {
+    ): PathCommand<CubicBezier> {
+        return this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.RELATIVE, 2) {
             val prevComponent = this.commands.lastOrNull()?.toComponent()
 
             if (prevComponent is CubicBezier) {
@@ -171,6 +174,22 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
                 it + GeomPoint(controlEndDx, controlEndDy),
                 it + GeomPoint(endDx, endDy),
             )
+        }
+    }
+
+    operator fun invoke(command: Char, vararg coords: Float): PathCommand<*> {
+        return when (command) {
+            'M' -> M(coords[0], coords[1])
+            'm' -> m(coords[0], coords[1])
+            'L' -> L(coords[0], coords[1])
+            'l' -> l(coords[0], coords[1])
+            'Z' -> Z()
+            'z' -> z()
+            'C' -> C(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5])
+            'c' -> c(coords[0], coords[1], coords[2], coords[3], coords[4], coords[5])
+            'S' -> S(coords[0], coords[1], coords[2], coords[3])
+            's' -> s(coords[0], coords[1], coords[2], coords[3])
+            else -> error("Unrecognized command: $command")
         }
     }
 

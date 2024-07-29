@@ -5,10 +5,10 @@ import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.grammar.SvgPathReader
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.*
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.PathComponent
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.Rectangle
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Path
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.svgPath
 import net.gregorbg.lang.japanese.kanji.util.XmlUtils
 import net.gregorbg.lang.japanese.kanji.util.cycle
@@ -129,6 +129,47 @@ data class KanjiVG(
             GeomPoint(0f, 0f),
             GeomPoint(this.width.toFloat(), this.height.toFloat()),
         )
+    }
+
+    fun strokePaths(): List<Path> {
+        val strokePathsGroup = this.elements
+            .filterIsInstance<SvgElement.Group>()
+            .find { "StrokePaths" in it.id }
+
+        val strokePaths = strokePathsGroup
+            ?.recursiveElements()
+            .orEmpty()
+            .filterIsInstance<SvgElement.Path>()
+
+        return strokePaths.map { SvgPathReader.parse(it.d) }
+    }
+
+    fun withConnectedStrokes(): KanjiVG {
+        val paths = this.strokePaths()
+
+        val joiningPaths = paths.asSequence()
+            .map { it.toComponent() }
+            .map { CombinedPathComponent(it.segments.drop(1)) }
+            .windowed(2)
+            .map { (a, b) ->
+                val prevControlEnd = a.orderedPoints.reversed()[1]
+                val controlStart = prevControlEnd.mirrorAt(a.end)
+
+                val nextControlStart = b.orderedPoints[1]
+                val controlEnd = nextControlStart.mirrorAt(b.start)
+
+                CubicBezier(a.end, controlStart, controlEnd, b.start)
+            }
+            .map {
+                svgPath(it.start.x, it.start.y) {
+                    C(it.controlStart.x, it.controlStart.y, it.controlEnd.x, it.controlEnd.y, it.end.x, it.end.y)
+                }
+            }
+            .map { SvgElement.Path("connect${it.hashCode()}", it.toSvg()) }
+            .toList()
+
+        val joiningPathGroup = SvgElement.Group("joining-path-group", elements = joiningPaths, style = "fill:none;stroke:black;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;")
+        return this.copy(elements = this.elements + joiningPathGroup)
     }
 
     companion object : StringFormat by XmlUtils.XML_PARSER {

@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.serialization") version "2.0.0"
 
     id("com.github.ben-manes.versions") version "0.51.0"
+    id("antlr")
 }
 
 group = "net.gregorbg"
@@ -13,6 +14,8 @@ repositories {
 }
 
 dependencies {
+    antlr("org.antlr:antlr4:4.13.1")
+
     // Align versions of all Kotlin components
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
@@ -33,4 +36,14 @@ dependencies {
     runtimeOnly("com.h2database:h2:2.2.224")
     runtimeOnly("org.xerial:sqlite-jdbc:3.46.0.0")
     runtimeOnly("com.fasterxml.woodstox:woodstox-core:6.6.2")
+}
+
+tasks.generateGrammarSource {
+    arguments = arguments + listOf("-no-listener", "-visitor", "-package", "net.gregorbg.lang.japanese.kanji.model.kanjivg.grammar")
+}
+
+sourceSets.main {
+    java {
+        srcDir(tasks.generateGrammarSource)
+    }
 }
