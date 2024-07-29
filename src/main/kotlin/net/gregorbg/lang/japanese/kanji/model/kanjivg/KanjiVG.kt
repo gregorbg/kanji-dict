@@ -3,15 +3,16 @@ package net.gregorbg.lang.japanese.kanji.model.kanjivg
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.enumeration.ZoomAndPan.*
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.PathComponent
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.Rectangle
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.svgPath
+import net.gregorbg.lang.japanese.kanji.util.XmlUtils
 import net.gregorbg.lang.japanese.kanji.util.cycle
 import net.gregorbg.lang.japanese.kanji.util.math.PerlinRandom
-import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import java.io.File
@@ -130,7 +131,7 @@ data class KanjiVG(
         )
     }
 
-    companion object {
+    companion object : StringFormat by XmlUtils.XML_PARSER {
         const val SVG_NAMESPACE = "http://www.w3.org/2000/svg"
         const val SVG_PREFIX = "" // on purpose
 
@@ -142,15 +143,13 @@ data class KanjiVG(
         const val SVG_CONTENT_SCRIPT_TYPE_DEFAULT = "text/ecmascript"
         const val SVG_CONTENT_STYLE_TYPE_DEFAULT = "text/css"
 
-        val XML_PARSER = XML { autoPolymorphic = true }
-
         fun loadSvg(symbol: Char, basePath: File): KanjiVG {
             val kanjiCode = symbol.code.toString(16).padStart(5, '0')
 
             val kanjiFile = File(basePath, "$kanjiCode.svg")
             val kanjiSvgRaw = kanjiFile.readText()
 
-            return XML_PARSER.decodeFromString<KanjiVG>(kanjiSvgRaw)
+            return this.decodeFromString<KanjiVG>(kanjiSvgRaw)
         }
     }
 }
