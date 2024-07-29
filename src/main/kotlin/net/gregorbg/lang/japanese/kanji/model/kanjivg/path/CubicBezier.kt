@@ -16,7 +16,7 @@ data class CubicBezier(
     }
 
     override fun velocityAt(t: Float): GeomPoint {
-        return ((3 * (t - 1) * (t - 1)) * this.start) +
+        return ((-3 * (1 - t) * (1 - t)) * this.start) +
                 ((9 * (t * t) - 12 * t + 3) * this.controlStart) +
                 ((-9 * (t * t) + 6 * t) * this.controlEnd) +
                 ((3 * (t * t)) * this.end)
