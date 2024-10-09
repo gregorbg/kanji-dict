@@ -158,11 +158,11 @@ data class KanjiVG(
                 val nextControlStart = b.orderedPoints[1]
                 val controlEnd = nextControlStart.mirrorAt(b.start)
 
-                CubicBezier(a.end, controlStart, controlEnd, b.start)
+                BezierCurve(a.end, controlStart, controlEnd, b.start)
             }
             .map {
                 svgPath(it.start.x, it.start.y) {
-                    C(it.controlStart.x, it.controlStart.y, it.controlEnd.x, it.controlEnd.y, it.end.x, it.end.y)
+                    C(it.controlPoints[1].x, it.controlPoints[1].y, it.controlPoints[2].x, it.controlPoints[2].y, it.end.x, it.end.y)
                 }
             }
             .map { SvgElement.Path("connect${it.hashCode()}", it.toSvg()) }

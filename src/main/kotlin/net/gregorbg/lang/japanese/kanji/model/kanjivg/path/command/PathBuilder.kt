@@ -88,9 +88,9 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndY: Float,
         endX: Float,
         endY: Float,
-    ): PathCommand<CubicBezier> {
+    ): PathCommand<BezierCurve> {
         return this.executeCommand(Command.BEZIER_CURVE, CommandMode.ABSOLUTE) {
-            CubicBezier(
+            BezierCurve(
                 it,
                 GeomPoint(controlStartX, controlStartY),
                 GeomPoint(controlEndX, controlEndY),
@@ -106,9 +106,9 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndDy: Float,
         endDx: Float,
         endDy: Float,
-    ): PathCommand<CubicBezier> {
+    ): PathCommand<BezierCurve> {
         return this.executeCommand(Command.BEZIER_CURVE, CommandMode.RELATIVE) {
-            CubicBezier(
+            BezierCurve(
                 it,
                 it + GeomPoint(controlStartDx, controlStartDy),
                 it + GeomPoint(controlEndDx, controlEndDy),
@@ -122,15 +122,15 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndY: Float,
         endX: Float,
         endY: Float,
-    ): PathCommand<CubicBezier> {
+    ): PathCommand<BezierCurve> {
         return this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.ABSOLUTE, 2) {
             val prevComponent = this.commands.lastOrNull()?.toComponent()
 
-            if (prevComponent is CubicBezier) {
-                val lastControlPoint = prevComponent.controlEnd.copy()
+            if (prevComponent is BezierCurve) {
+                val lastControlPoint = prevComponent.controlPoints[prevComponent.degree].copy()
                 val mirroredControl = lastControlPoint.mirrorAt(it)
 
-                CubicBezier(
+                BezierCurve(
                     it,
                     mirroredControl,
                     GeomPoint(controlEndX, controlEndY),
@@ -138,7 +138,7 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
                 )
             }
 
-            CubicBezier(
+            BezierCurve(
                 it,
                 it,
                 GeomPoint(controlEndX, controlEndY),
@@ -152,15 +152,15 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         controlEndDy: Float,
         endDx: Float,
         endDy: Float,
-    ): PathCommand<CubicBezier> {
+    ): PathCommand<BezierCurve> {
         return this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.RELATIVE, 2) {
             val prevComponent = this.commands.lastOrNull()?.toComponent()
 
-            if (prevComponent is CubicBezier) {
-                val lastControlPoint = prevComponent.controlEnd.copy()
+            if (prevComponent is BezierCurve) {
+                val lastControlPoint = prevComponent.controlPoints[prevComponent.degree].copy()
                 val mirroredControl = lastControlPoint.mirrorAt(it)
 
-                CubicBezier(
+                BezierCurve(
                     it,
                     mirroredControl,
                     it + GeomPoint(controlEndDx, controlEndDy),
@@ -168,7 +168,7 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
                 )
             }
 
-            CubicBezier(
+            BezierCurve(
                 it,
                 it,
                 it + GeomPoint(controlEndDx, controlEndDy),

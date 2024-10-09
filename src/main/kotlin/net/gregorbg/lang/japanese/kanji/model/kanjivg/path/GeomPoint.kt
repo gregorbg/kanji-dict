@@ -36,6 +36,13 @@ data class GeomPoint(
         )
     }
 
+    operator fun times(other: Long): GeomPoint {
+        return GeomPoint(
+            this.x * other,
+            this.y * other,
+        )
+    }
+
     operator fun div(other: Float): GeomPoint {
         return GeomPoint(
             this.x / other,
@@ -44,6 +51,13 @@ data class GeomPoint(
     }
 
     operator fun div(other: Int): GeomPoint {
+        return GeomPoint(
+            this.x / other,
+            this.y / other,
+        )
+    }
+
+    operator fun div(other: Long): GeomPoint {
         return GeomPoint(
             this.x / other,
             this.y / other,
