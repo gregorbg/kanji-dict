@@ -4,6 +4,21 @@ data class Rectangle(
     val startCorner: GeomPoint,
     val endCorner: GeomPoint,
 ) {
+    val topCorner: GeomPoint
+        get() = GeomPoint(endCorner.x, startCorner.y)
+
+    val bottomCorner: GeomPoint
+        get() = GeomPoint(startCorner.x, endCorner.y)
+
+    val center: GeomPoint
+        get() = this.startCorner + this.diagonal() / 2
+
+    val width: Float
+        get() = this.endCorner.x - this.startCorner.x
+
+    val height: Float
+        get() = this.endCorner.y - this.startCorner.y
+
     operator fun contains(point: GeomPoint): Boolean {
         return point.x >= startCorner.x && point.x <= endCorner.x && point.y >= startCorner.y && point.y <= endCorner.y
     }
@@ -11,9 +26,9 @@ data class Rectangle(
     fun cornersCw(): List<GeomPoint> {
         return listOf(
             startCorner,
-            GeomPoint(endCorner.x, startCorner.y),
+            topCorner,
             endCorner,
-            GeomPoint(startCorner.x, endCorner.y),
+            bottomCorner,
         )
     }
 
@@ -43,5 +58,13 @@ data class Rectangle(
         }
 
         return -1
+    }
+
+    fun diagonal(): GeomPoint {
+        return this.startCorner.segmentTo(this.endCorner)
+    }
+
+    fun centerCornerRays(): List<GeomPoint> {
+        return this.cornersCw().map { this.center.segmentTo(it) }
     }
 }

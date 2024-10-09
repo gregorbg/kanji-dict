@@ -5,14 +5,15 @@ import kotlin.math.pow
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
 
-class BezierCurve(vararg val controlPoints: GeomPoint) : PathComponent<BezierCurve> {
+data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<BezierCurve> {
+    constructor(vararg controlPoints: GeomPoint) : this(controlPoints.asList())
+
     override val start: GeomPoint
         get() = this.controlPoints.first()
     override val end: GeomPoint
         get() = this.controlPoints.last()
 
-    override val orderedPoints
-        get() = this.controlPoints.asList()
+    override val orderedPoints = this.controlPoints
 
     val degree: Int
         get() = this.controlPoints.size - 1
@@ -42,15 +43,11 @@ class BezierCurve(vararg val controlPoints: GeomPoint) : PathComponent<BezierCur
     }
 
     fun derivative(): BezierCurve {
-        return BezierCurve(
-            *this.derivativeControls().toTypedArray()
-        )
+        return BezierCurve(this.derivativeControls())
     }
 
     override fun reverse(): BezierCurve {
-        return BezierCurve(
-            *this.controlPoints.reversed().toTypedArray()
-        )
+        return BezierCurve(this.controlPoints.reversed())
     }
 
     override fun velocityAt(t: Float): GeomPoint = this.derivative().velocityAt(t)
@@ -93,9 +90,7 @@ class BezierCurve(vararg val controlPoints: GeomPoint) : PathComponent<BezierCur
     }
 
     override fun extendContinuous(): BezierCurve {
-        return BezierCurve(
-            *this.computeContinuation().toTypedArray()
-        )
+        return BezierCurve(this.computeContinuation())
     }
 
     private fun computeContinuation(accu: List<GeomPoint> = emptyList(), derivateBase: BezierCurve = this): List<GeomPoint> {
@@ -117,6 +112,20 @@ class BezierCurve(vararg val controlPoints: GeomPoint) : PathComponent<BezierCur
         val nextPoint = (numerator / denominator) - patchSum
 
         return computeContinuation(accu + nextPoint, derivateBase.derivative())
+    }
+
+    fun looseBoundingBox(): Rectangle {
+        val start = GeomPoint(
+            this.controlPoints.minOf { it.x },
+            this.controlPoints.minOf { it.y }
+        )
+
+        val end = GeomPoint(
+            this.controlPoints.maxOf { it.x },
+            this.controlPoints.maxOf { it.y }
+        )
+
+        return Rectangle(start, end)
     }
 
     companion object {

@@ -72,8 +72,12 @@ data class GeomPoint(
         return -1 * this
     }
 
+    fun segmentTo(other: GeomPoint): GeomPoint {
+        return other - this
+    }
+
     fun distanceTo(other: GeomPoint): Float {
-        return (other - this).abs()
+        return this.segmentTo(other).abs()
     }
 
     fun abs(): Float {
