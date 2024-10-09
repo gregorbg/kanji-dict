@@ -9,10 +9,12 @@ data class PathCommand<T : PathComponent<T>>(
     val dropControls: Int = 1,
 ): SvgCommand<T> {
     override fun toSvg(): String {
-        val svgCommandTag = if (commandMode == CommandMode.ABSOLUTE) this.command.svgCommand.uppercase() else this.command.svgCommand.lowercase()
         val controlsExceptFirst = pathComponent.orderedPoints.drop(this.dropControls)
 
-        return "$svgCommandTag ${controlsExceptFirst.joinToString(" ") { it.toSvg() }}"
+        val svgCommandTag = if (commandMode == CommandMode.ABSOLUTE) this.command.svgCommand.uppercase() else this.command.svgCommand.lowercase()
+        val svgCommandCoords = if (commandMode == CommandMode.ABSOLUTE) controlsExceptFirst else controlsExceptFirst.map { this.pathComponent.start.segmentTo(it) }
+
+        return "$svgCommandTag ${svgCommandCoords.joinToString(" ") { it.toSvg() }}"
     }
 
     override fun toComponent() = pathComponent
