@@ -67,4 +67,11 @@ data class Rectangle(
     fun centerCornerRays(): List<GeomPoint> {
         return this.cornersCw().map { this.center.segmentTo(it) }
     }
+
+    fun translate(translation: GeomPoint): Rectangle {
+        return Rectangle(
+            this.startCorner.translate(translation),
+            this.endCorner.translate(translation),
+        )
+    }
 }

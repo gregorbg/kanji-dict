@@ -1,7 +1,11 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
+import kotlin.math.PI
+import kotlin.math.atan2
+import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.round
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 data class GeomPoint(
@@ -93,6 +97,24 @@ data class GeomPoint(
 
     fun mirrorAt(other: GeomPoint): GeomPoint {
         return 2 * other - this
+    }
+
+    fun angleToXAxis(): Float {
+        return ((atan2(
+            this.y,
+            this.x,
+        ) + 2 * PI) % (2 * PI)).toFloat()
+    }
+
+    fun translate(translation: GeomPoint): GeomPoint {
+        return this + translation
+    }
+
+    fun rotate(angleRadians: Float): GeomPoint {
+        return GeomPoint(
+            this.x * cos(angleRadians) - this.y * sin(angleRadians),
+            this.x * sin(angleRadians) - this.y * cos(angleRadians),
+        )
     }
 
     fun perpendicularCcw(): GeomPoint {

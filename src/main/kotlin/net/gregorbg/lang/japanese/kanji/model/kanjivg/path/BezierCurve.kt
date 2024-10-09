@@ -4,6 +4,8 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
+import kotlin.math.PI
+import kotlin.math.atan2
 
 data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<BezierCurve> {
     constructor(vararg controlPoints: GeomPoint) : this(controlPoints.asList())
@@ -114,18 +116,42 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         return computeContinuation(accu + nextPoint, derivateBase.derivative())
     }
 
-    fun looseBoundingBox(): Rectangle {
-        val start = GeomPoint(
-            this.controlPoints.minOf { it.x },
-            this.controlPoints.minOf { it.y }
-        )
+    fun controlBoundingBox(): Rectangle {
+        return computeBoundingBox(this.controlPoints)
+    }
 
-        val end = GeomPoint(
-            this.controlPoints.maxOf { it.x },
-            this.controlPoints.maxOf { it.y }
-        )
+    fun tightBoundingBox(): Rectangle {
+        //val localExtremes = this.derivative().zeros()
+        val localExtremes = listOf<Float>()
 
-        return Rectangle(start, end)
+        val candidateMeasures = listOf(0f, 1f) + localExtremes
+        val candidatePoints = candidateMeasures.map { this.positionAt(it) }
+
+        return computeBoundingBox(candidatePoints)
+    }
+
+    fun optimalBoundingBox(boxEstimateFn: BezierCurve.() -> Rectangle = BezierCurve::controlBoundingBox): Pair<Rectangle, Float> {
+        val originTranslation = -this.start
+        val translatedToOrigin = this.translate(originTranslation)
+
+        val alignmentRotation = -translatedToOrigin.end.angleToXAxis()
+        val normalized =  translatedToOrigin.rotate(alignmentRotation)
+
+        val rawBoundingBox = normalized.boxEstimateFn()
+
+        return rawBoundingBox.translate(-originTranslation) to -alignmentRotation
+    }
+
+    fun translate(translation: GeomPoint): BezierCurve {
+        val translatedPoints = this.controlPoints.map { it.translate(translation) }
+
+        return BezierCurve(translatedPoints)
+    }
+
+    fun rotate(angleRadians: Float): BezierCurve {
+        val rotatedPoints = this.controlPoints.map { it.rotate(angleRadians) }
+
+        return BezierCurve(rotatedPoints)
     }
 
     companion object {
@@ -139,9 +165,23 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
             return ((this - factors)..this).fold(1, Long::times)
         }
 
-        fun binomCoeff(n: Int, k: Int): Long {
+        private fun binomCoeff(n: Int, k: Int): Long {
             val denominator = k.factorial() * (n - k).factorial()
             return n.factorial() / denominator
+        }
+
+        private fun computeBoundingBox(points: List<GeomPoint>): Rectangle {
+            val start = GeomPoint(
+                points.minOf { it.x },
+                points.minOf { it.y }
+            )
+
+            val end = GeomPoint(
+                points.maxOf { it.x },
+                points.maxOf { it.y }
+            )
+
+            return Rectangle(start, end)
         }
     }
 }
