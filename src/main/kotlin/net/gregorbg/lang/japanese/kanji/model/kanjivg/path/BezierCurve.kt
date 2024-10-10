@@ -188,8 +188,8 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
             .map { it.translate(-originTranslation) }
     }
 
-    fun coveringCircle(): Circle {
-        val candidatePoints = this.extremePoints() + this.controlPoints
+    fun coveringCircle(additionalPoints: List<GeomPoint> = emptyList()): Circle {
+        val candidatePoints = this.extremePoints() + this.controlPoints + additionalPoints
         val convexHull = GeomPoint.grahamScan(candidatePoints)
 
         return Circle.findMinimalEnclosingCircle(convexHull)

@@ -10,6 +10,7 @@ enum class Position {
     @SerialName("top") TOP,
     @SerialName("bottom") BOTTOM,
     @SerialName("nyo") NYO,
+    @SerialName("nyoc") NYOC,
     @SerialName("tare") TARE,
     @SerialName("kamae") KAMAE,
     @SerialName("kamae1") KAMAE1,
