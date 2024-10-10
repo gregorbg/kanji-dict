@@ -4,8 +4,7 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
-import kotlin.math.PI
-import kotlin.math.atan2
+import kotlin.math.sqrt
 
 data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<BezierCurve> {
     constructor(vararg controlPoints: GeomPoint) : this(controlPoints.asList())
@@ -37,11 +36,34 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
     protected fun bernstein(t: Float): GeomPoint {
         return (0..this.degree)
             .map { this.bernsteinPolynomial(it, t) * this.controlPoints[it] }
-            .reduce(GeomPoint::plus)
+            .fold(GeomPoint.origin, GeomPoint::plus)
     }
 
     private fun bernsteinPolynomial(i: Int, t: Float): Float {
         return binomCoeff(this.degree, i) * t.pow(i) * (1 - t).pow(this.degree - i)
+    }
+
+    protected fun algebraicPos(t: Float): GeomPoint {
+        return (0..this.degree)
+            .map { t.pow(it) * this.algebraicPolynomial(it) }
+            .fold(GeomPoint.origin, GeomPoint::plus)
+    }
+
+    fun polynomialCoefficients(): List<GeomPoint> {
+        return (0..this.degree).reversed().map { algebraicPolynomial(it) }
+    }
+
+    private fun algebraicPolynomial(j: Int): GeomPoint {
+        val sum = (0..j).map {
+            val sign = (-1f).pow(it + j)
+            val denominator = it.factorial() * (j - it).factorial()
+
+            (this.controlPoints[it] * sign) / denominator
+        }.fold(GeomPoint.origin, GeomPoint::plus)
+
+        val binomScaling = this.degree.factorial() / (this.degree - j).factorial()
+
+        return binomScaling * sum
     }
 
     fun derivative(): BezierCurve {
@@ -84,6 +106,25 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         return arcLengthRec(numSegments + 1, segmentSize, epsilon)
     }
 
+    fun curveRoots(): List<Float> {
+        if (this.degree == 1) {
+            val (m, n) = this.polynomialCoefficients()
+
+            return listOf(
+                solveLinear(m.x, n.x),
+                solveLinear(m.y, n.y),
+            ).flatten().filter { it >= 0 && it <= 1 }.distinct()
+        } else if (this.degree == 2) {
+            val (a, b, c) = this.polynomialCoefficients()
+
+            return listOf(
+                solveQuadratic(a.x, b.x, c.x),
+                solveQuadratic(a.y, b.y, c.y),
+            ).flatten().filter { it >= 0 && it <= 1 }.distinct()
+        } else
+            return error("Cannot solve equations >= rank 3")
+    }
+
     override fun extendLine(): Line {
         return Line(
             this.end,
@@ -109,7 +150,7 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
                 val i = accu.size
 
                 (-1f).pow(k) * binomCoeff(i, k) * pt
-            }.fold(GeomPoint(0f, 0f), GeomPoint::plus)
+            }.fold(GeomPoint.origin, GeomPoint::plus)
 
         val nextPoint = (numerator / denominator) - patchSum
 
@@ -120,26 +161,38 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         return computeBoundingBox(this.controlPoints)
     }
 
-    fun tightBoundingBox(): Rectangle {
-        //val localExtremes = this.derivative().zeros()
-        val localExtremes = listOf<Float>()
-
+    private fun extremePoints(): List<GeomPoint> {
+        val localExtremes = this.derivative().curveRoots()
         val candidateMeasures = listOf(0f, 1f) + localExtremes
-        val candidatePoints = candidateMeasures.map { this.positionAt(it) }
 
+        return candidateMeasures.distinct()
+            .map { this.positionAt(it) }
+    }
+
+    fun tightBoundingBox(): Rectangle {
+        val candidatePoints = this.extremePoints()
         return computeBoundingBox(candidatePoints)
     }
 
-    fun optimalBoundingBox(boxEstimateFn: BezierCurve.() -> Rectangle = BezierCurve::controlBoundingBox): Pair<Rectangle, Float> {
+    fun rotateBoundingBox(originalBoxFn: BezierCurve.() -> Rectangle): List<GeomPoint> {
         val originTranslation = -this.start
         val translatedToOrigin = this.translate(originTranslation)
 
         val alignmentRotation = -translatedToOrigin.end.angleToXAxis()
         val normalized =  translatedToOrigin.rotate(alignmentRotation)
 
-        val rawBoundingBox = normalized.boxEstimateFn()
+        val rawBoundingBox = normalized.originalBoxFn()
 
-        return rawBoundingBox.translate(-originTranslation) to -alignmentRotation
+        return rawBoundingBox.cornersCw()
+            .map { it.rotate(-alignmentRotation) }
+            .map { it.translate(-originTranslation) }
+    }
+
+    fun coveringCircle(): Circle {
+        val candidatePoints = this.extremePoints() + this.controlPoints
+        val convexHull = GeomPoint.grahamScan(candidatePoints)
+
+        return Circle.findMinimalEnclosingCircle(convexHull)
     }
 
     fun translate(translation: GeomPoint): BezierCurve {
@@ -168,6 +221,24 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         private fun binomCoeff(n: Int, k: Int): Long {
             val denominator = k.factorial() * (n - k).factorial()
             return n.factorial() / denominator
+        }
+
+        private fun solveLinear(m: Float, n: Float): List<Float> {
+            if (m == 0f) return emptyList()
+
+            return listOf(-n / m)
+        }
+
+        private fun solveQuadratic(a: Float, b: Float, c: Float): List<Float> {
+            val rootTerm = b.pow(2) - 4 * a * c
+
+            if (rootTerm < 0)
+                return emptyList()
+
+            val pos = (-b + sqrt(rootTerm)) / (2 * a)
+            val neg = (-b - sqrt(rootTerm)) / (2 * a)
+
+            return listOf(pos, neg).distinct()
         }
 
         private fun computeBoundingBox(points: List<GeomPoint>): Rectangle {

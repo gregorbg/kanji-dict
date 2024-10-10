@@ -1,8 +1,10 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.hypot
 import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sin
@@ -81,18 +83,15 @@ data class GeomPoint(
     }
 
     fun distanceTo(other: GeomPoint): Float {
-        return this.segmentTo(other).abs()
+        return this.segmentTo(other).norm()
     }
 
-    fun abs(): Float {
-        val sumX = this.x.pow(2)
-        val sumY = this.y.pow(2)
-
-        return sqrt(sumX + sumY)
+    fun norm(): Float {
+        return hypot(this.x, this.y)
     }
 
-    fun norm(): GeomPoint {
-        return this / this.abs()
+    fun unit(): GeomPoint {
+        return this / this.norm()
     }
 
     fun mirrorAt(other: GeomPoint): GeomPoint {
@@ -100,7 +99,7 @@ data class GeomPoint(
     }
 
     fun angleToXAxis(): Float {
-        return ((atan2(
+        return abs((atan2(
             this.y,
             this.x,
         ) + 2 * PI) % (2 * PI)).toFloat()
@@ -113,7 +112,7 @@ data class GeomPoint(
     fun rotate(angleRadians: Float): GeomPoint {
         return GeomPoint(
             this.x * cos(angleRadians) - this.y * sin(angleRadians),
-            this.x * sin(angleRadians) - this.y * cos(angleRadians),
+            this.x * sin(angleRadians) + this.y * cos(angleRadians),
         )
     }
 
@@ -155,9 +154,23 @@ data class GeomPoint(
         return this.scalingFactors(direction, boundingBox).min()
     }
 
+    fun dotProduct(other: GeomPoint): Float {
+        return this.x * other.x + this.y * other.y
+    }
+
+    fun crossProduct(other: GeomPoint): Float {
+        return this.x * other.y - this.y * other.x
+    }
+
     fun toSvg(): String = "${toSvgNumber(this.x)},${toSvgNumber(this.y)}"
 
     companion object {
+        val origin: GeomPoint
+            get() = GeomPoint(0f, 0f)
+
+        val unit: GeomPoint
+            get() = GeomPoint(1f, 1f)
+
         operator fun Float.times(point: GeomPoint): GeomPoint {
             return GeomPoint(
                 this * point.x,
@@ -170,6 +183,40 @@ data class GeomPoint(
                 this * point.x,
                 this * point.y,
             )
+        }
+
+        operator fun Long.times(point: GeomPoint): GeomPoint {
+            return GeomPoint(
+                this * point.x,
+                this * point.y,
+            )
+        }
+
+        fun grahamScan(points: List<GeomPoint>): List<GeomPoint> {
+            val anchor = points.minWith(compareBy({ it.y }, { it.x }))
+
+            val sortedPoints = points.sortedWith(compareBy<GeomPoint> {
+                anchor.segmentTo(it).angleToXAxis()
+            }.thenBy { anchor.segmentTo(it).norm() })
+
+            return sortedPoints.fold(listOf(anchor)) { hull, point ->
+                removeClockwiseTurns(hull, point) + point
+            }
+        }
+
+        private tailrec fun removeClockwiseTurns(hull: List<GeomPoint>, nextPoint: GeomPoint): List<GeomPoint> {
+            if (hull.size < 2) {
+                return hull
+            }
+
+            val (a, b) = hull.takeLast(2)
+            val crossProduct = a.segmentTo(b).crossProduct(a.segmentTo(nextPoint))
+
+            if (crossProduct > 0) {
+                return hull
+            }
+
+            return removeClockwiseTurns(hull.dropLast(1), nextPoint)
         }
 
         fun toSvgNumber(value: Float): String {
