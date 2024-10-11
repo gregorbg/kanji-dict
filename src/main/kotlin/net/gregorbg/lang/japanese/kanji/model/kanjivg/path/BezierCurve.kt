@@ -4,6 +4,9 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
+import kotlin.math.PI
+import kotlin.math.roundToInt
+import kotlin.math.sin
 import kotlin.math.sqrt
 
 data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<BezierCurve> {
@@ -210,6 +213,12 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
     companion object {
         const val ARC_LENGTH_EPSILON = 0.00001f
 
+        val TURBO_COEFFICIENTS = listOf(
+            listOf(0.13572138, 4.61539260, -42.66032258, 132.13108234, -152.94239396, 59.28637943),
+            listOf(0.09140261, 2.19418839, 4.84296658, -14.18503333, 4.27729857, 2.82956604),
+            listOf(0.10667330, 12.64194608, -60.58204836, 110.36276771, -89.90310912, 27.34824973),
+        )
+
         private fun Int.factorial(): Long {
             return (1..this).fold(1, Long::times)
         }
@@ -241,6 +250,24 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
             return listOf(pos, neg).distinct()
         }
 
+        fun fromPolynomial(polyCoefficients: List<GeomPoint>): BezierCurve {
+            val polyControlPoints = computePolynomial(polyCoefficients)
+            return BezierCurve(polyControlPoints)
+        }
+
+        private tailrec fun computePolynomial(polyCoefficients: List<GeomPoint>, accu: List<GeomPoint> = emptyList()): List<GeomPoint> {
+            if (accu.size == polyCoefficients.size)
+                return accu
+
+            val nextControl = polyCoefficients
+                .reversed()
+                .subList(0, accu.size + 1)
+                .mapIndexed { idx, coeff -> binomCoeff(accu.size, idx) * coeff / binomCoeff(polyCoefficients.size - 1, idx) }
+                .fold(GeomPoint.origin, GeomPoint::plus)
+
+            return computePolynomial(polyCoefficients, accu + nextControl)
+        }
+
         private fun computeBoundingBox(points: List<GeomPoint>): Rectangle {
             val start = GeomPoint(
                 points.minOf { it.x },
@@ -253,6 +280,24 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
             )
 
             return Rectangle(start, end)
+        }
+
+        private fun rgbColormap(mapping: (Int) -> Double): Triple<Int, Int, Int> {
+            val (r, g, b) = (0 until 3)
+                .map(mapping)
+                .map { (255 * it).roundToInt() }
+
+            return Triple(r, g, b)
+        }
+
+        fun rgbSineColormap(t: Float): Triple<Int, Int, Int> {
+            return rgbColormap { (sin(2 * PI * (t + it / 3)) + 1) / 2 }
+        }
+
+        fun rgbTurboColormap(t: Float): Triple<Int, Int, Int> {
+            return rgbColormap {
+                TURBO_COEFFICIENTS[it].reduceIndexed { i, sum, coeff -> sum + coeff * t.pow(i) }
+            }
         }
     }
 }
