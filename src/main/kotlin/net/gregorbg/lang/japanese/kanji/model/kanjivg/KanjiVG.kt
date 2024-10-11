@@ -151,7 +151,7 @@ data class KanjiVG(
 
         val joiningPaths = paths.asSequence()
             .map { it.toComponent() }
-            .map { CombinedPathComponent(it.segments.drop(1)) }
+            .map { Spline(it.segments.drop(1)) }
             .windowed(2)
             .map { (a, b) ->
                 val prevControlEnd = a.orderedPoints.reversed()[1]

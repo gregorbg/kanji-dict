@@ -11,6 +11,8 @@ interface PathComponent<T : PathComponent<T>> {
     fun positionAt(t: Float): GeomPoint
     fun velocityAt(t: Float): GeomPoint
 
+    fun positionForArc(t: Float): GeomPoint
+
     fun reverse(): T
 
     fun extendContinuous(): T

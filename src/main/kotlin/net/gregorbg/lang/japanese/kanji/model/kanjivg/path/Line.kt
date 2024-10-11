@@ -21,6 +21,10 @@ data class Line(
         return this.end - this.start
     }
 
+    override fun positionForArc(t: Float): GeomPoint {
+        return this.positionAt(t)
+    }
+
     override fun reverse(): Line {
         return Line(this.end, this.start)
     }

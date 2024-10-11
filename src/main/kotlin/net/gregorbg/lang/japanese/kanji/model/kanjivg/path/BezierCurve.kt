@@ -79,7 +79,19 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         return BezierCurve(this.controlPoints.reversed())
     }
 
-    override fun velocityAt(t: Float): GeomPoint = this.derivative().velocityAt(t)
+    override fun velocityAt(t: Float): GeomPoint = this.derivative().positionAt(t)
+
+    override fun positionForArc(t: Float): GeomPoint {
+        val lookupPoints = this.convergingLookupPoints(ARC_LENGTH_EPSILON)
+
+        val stableLut = lookupPoints.zipWithNext()
+            .map { (a, b) -> Line(a, b) }
+
+        val (lookupIndex, baseUnitT) = arcLengthRescaling(t, stableLut)
+        val localT = (lookupIndex.toFloat() / stableLut.size) + baseUnitT * (1 / stableLut.size)
+
+        return this.positionAt(localT)
+    }
 
     protected fun derivativeControls(): List<GeomPoint> {
         return (0 until this.degree).map { this.degree * (this.controlPoints[it + 1] - this.controlPoints[it]) }
@@ -88,27 +100,30 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
     override fun arcLength() = this.arcLength(ARC_LENGTH_EPSILON)
 
     fun arcLength(epsilon: Float): Float {
-        val baseLength = this.start.distanceTo(this.end)
-
-        return arcLengthRec(2, baseLength, epsilon)
+        val lut = convergingLookupPoints(epsilon)
+        return lerpArcLength(lut)
     }
 
-    private tailrec fun arcLengthRec(numSegments: Int, prevLength: Float, epsilon: Float): Float {
-        val stepSize = 1f / numSegments
+    private tailrec fun convergingLookupPoints(
+        epsilon: Float,
+        accu: List<GeomPoint> = listOf(this.start, this.end)
+    ): List<GeomPoint> {
+        val stepSize = 1f / accu.size
 
-        val segmentSize = (0..numSegments).map { it * stepSize }
+        val nextAccu = (0..accu.size)
+            .map { it * stepSize }
             .map { this.positionAt(it) }
-            .zipWithNext()
-            .map { (a, b) -> a.distanceTo(b) }
-            .sum()
+
+        val segmentSize = lerpArcLength(nextAccu)
+        val prevLength = lerpArcLength(accu)
 
         val error = abs(segmentSize - prevLength)
 
         if (error < epsilon) {
-            return segmentSize
+            return nextAccu
         }
 
-        return arcLengthRec(numSegments + 1, segmentSize, epsilon)
+        return convergingLookupPoints(epsilon, nextAccu)
     }
 
     fun curveRoots(): List<Float> {
@@ -301,6 +316,27 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
             return rgbColormap {
                 TURBO_COEFFICIENTS[it].reduceIndexed { i, sum, coeff -> sum + coeff * t.pow(i) }
             }
+        }
+
+        private fun lerpArcLength(lutPoints: List<GeomPoint>): Float {
+            return lutPoints
+                .zipWithNext()
+                .map { (a, b) -> a.distanceTo(b) }
+                .sum()
+        }
+
+        fun arcLengthRescaling(t: Float, components: List<PathComponent<*>>): Pair<Int, Float> {
+            val cumulativeArcLengths = components.runningFold(0f) { arcAccu, component -> arcAccu + component.arcLength() }
+            val totalArcLength = cumulativeArcLengths.last()
+
+            val lookupIndex = cumulativeArcLengths.indexOfLast { it / totalArcLength <= t }
+
+            val curveStartLength = cumulativeArcLengths[lookupIndex]
+            val curveEndLength = cumulativeArcLengths[lookupIndex + 1]
+
+            val localT = (t * totalArcLength - curveStartLength) / (curveEndLength - curveStartLength)
+
+            return lookupIndex to localT
         }
     }
 }
