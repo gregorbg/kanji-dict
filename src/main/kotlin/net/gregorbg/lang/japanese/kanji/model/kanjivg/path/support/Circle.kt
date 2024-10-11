@@ -1,17 +1,14 @@
-package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
+package net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support
 
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
 import kotlin.math.max
 
 data class Circle(val center: GeomPoint, val radius: Float) {
-    operator fun contains(p: GeomPoint): Boolean {
-        return isPointInsideCircle(p, this)
+    operator fun contains(point: GeomPoint): Boolean {
+        return point.segmentTo(this.center).norm() <= this.radius
     }
 
     companion object {
-        fun isPointInsideCircle(point: GeomPoint, circle: Circle): Boolean {
-            return point.segmentTo(circle.center).norm() <= circle.radius
-        }
-
         fun circleFromTwoPoints(p1: GeomPoint, p2: GeomPoint): Circle {
             val center = (p1 + p2) / 2
             val radius = p1.segmentTo(p2).norm() / 2
@@ -48,7 +45,7 @@ data class Circle(val center: GeomPoint, val radius: Float) {
             return when {
                 points.isEmpty() || boundary.size == 3 -> {
                     when (boundary.size) {
-                        0 -> Circle(GeomPoint.origin, 0f)
+                        0 -> Circle(GeomPoint.Companion.origin, 0f)
                         1 -> Circle(boundary[0], 0f)
                         2 -> circleFromTwoPoints(boundary[0], boundary[1])
                         3 -> circleFromThreePoints(boundary[0], boundary[1], boundary[2])

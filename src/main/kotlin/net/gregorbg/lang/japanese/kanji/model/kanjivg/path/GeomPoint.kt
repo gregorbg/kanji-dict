@@ -1,14 +1,13 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Rectangle
 import kotlin.math.PI
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
-import kotlin.math.pow
 import kotlin.math.round
 import kotlin.math.sin
-import kotlin.math.sqrt
 
 data class GeomPoint(
     val x: Float,

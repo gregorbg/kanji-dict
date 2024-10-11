@@ -2,7 +2,7 @@ package net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.*
 
-class PathBuilder(var position: GeomPoint = ORIGIN) {
+class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
     val start = position.copy()
     val commands = mutableListOf<PathCommand<*>>()
 
@@ -26,6 +26,17 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
         commandMode: CommandMode,
         createComponent: (GeomPoint) -> PathComponent<T>
     ) = this.executeCommand(command, commandMode, 1, createComponent)
+
+    fun <T : PathComponent<T>> imitate(imitationCommand: PathCommand<T>): PathCommand<T> {
+        return this.executeCommand(
+            imitationCommand.command,
+            imitationCommand.commandMode,
+            imitationCommand.dropControls,
+        ) {
+            val translationVector = imitationCommand.pathComponent.start.segmentTo(it)
+            imitationCommand.pathComponent.translate(translationVector)
+        }
+    }
 
     fun M(targetX: Float, targetY: Float): PathCommand<Line> {
         return this.executeCommand(Command.MOVE_TO, CommandMode.ABSOLUTE) {
@@ -196,10 +207,6 @@ class PathBuilder(var position: GeomPoint = ORIGIN) {
     fun toPath(): Path {
         return Path(this.commands)
     }
-
-    companion object {
-        val ORIGIN = GeomPoint(0f, 0f)
-    }
 }
 
 fun svgPath(startX: Float, startY: Float, build: PathBuilder.() -> Unit): Path {
@@ -210,3 +217,5 @@ fun svgPath(startX: Float, startY: Float, build: PathBuilder.() -> Unit): Path {
 
     return builder.toPath()
 }
+
+fun svgPath(start: GeomPoint, build: PathBuilder.() -> Unit) = svgPath(start.x, start.y, build)

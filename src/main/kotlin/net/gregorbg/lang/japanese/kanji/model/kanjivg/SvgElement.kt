@@ -146,6 +146,7 @@ sealed class SvgElement {
         val d: String,
         @XmlSerialName("type", KanjiVG.KANJIVG_NAMESPACE, KanjiVG.KANJIVG_PREFIX) val type: String? = null,
         @SerialName("stroke-width") val strokeWidth: Int? = null,
+        val stroke: String? = null,
     ) : SvgElement() {
         override fun withRadicalColor(level: Int) = this
         override fun withRadicalBox() = this

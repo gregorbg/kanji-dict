@@ -8,8 +8,10 @@ import kotlinx.serialization.decodeFromString
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.grammar.SvgPathReader
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.*
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Command
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Path
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.svgPath
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Rectangle
 import net.gregorbg.lang.japanese.kanji.util.XmlUtils
 import net.gregorbg.lang.japanese.kanji.util.cycle
 import net.gregorbg.lang.japanese.kanji.util.math.PerlinRandom
@@ -79,7 +81,7 @@ data class KanjiVG(
         val (firstCp, secondCp) = controlPoints.take(2)
         val remainingControlPoints = controlPoints.drop(2)
 
-        val path = svgPath(coverPath.start.x, coverPath.start.y) {
+        val path = svgPath(coverPath.start) {
             val initialEnd = remainingControlPoints.firstOrNull() ?: coverPath.end
 
             C(firstCp.x, firstCp.y, secondCp.x, secondCp.y, initialEnd.x, initialEnd.y)
@@ -161,7 +163,7 @@ data class KanjiVG(
                 BezierCurve(a.end, controlStart, controlEnd, b.start)
             }
             .map {
-                svgPath(it.start.x, it.start.y) {
+                svgPath(it.start) {
                     C(it.controlPoints[1].x, it.controlPoints[1].y, it.controlPoints[2].x, it.controlPoints[2].y, it.end.x, it.end.y)
                 }
             }
@@ -169,6 +171,25 @@ data class KanjiVG(
             .toList()
 
         val joiningPathGroup = SvgElement.Group("joining-path-group", elements = joiningPaths, style = "fill:none;stroke:black;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;")
+        return this.copy(elements = this.elements + joiningPathGroup)
+    }
+
+    fun markedStrokes(): KanjiVG {
+        val visibleCommands = this.strokePaths()
+            .flatMap { it.commands }
+            .filter { it.command != Command.MOVE_TO && it.command != Command.CLOSE_PATH }
+
+        val newPaths = visibleCommands
+            .mapIndexed { idx, cmd ->
+                val newPath = svgPath(cmd.pathComponent.start) { imitate(cmd) }
+
+                val colorIndex = idx.toFloat() / (visibleCommands.size - 1)
+                val (r, g, b) = BezierCurve.rgbTurboColormap(colorIndex)
+
+                SvgElement.Path("colorMark${cmd.hashCode()}", newPath.toSvg(), stroke = "rgb($r, $g, $b)")
+            }
+
+        val joiningPathGroup = SvgElement.Group("coloring-path", elements = newPaths, style = "fill:none;")
         return this.copy(elements = this.elements + joiningPathGroup)
     }
 

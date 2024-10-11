@@ -58,6 +58,11 @@ data class CombinedPathComponent(
         return this.segments.lastOrNull()?.extendLine() ?: error("Cannot extend an empty path")
     }
 
+    override fun translate(translation: GeomPoint): CombinedPathComponent {
+        val translatedParts = this.segments.map { it.translate(translation) }
+        return CombinedPathComponent(translatedParts)
+    }
+
     companion object {
         const val FLOAT_ROUNDING_ERR = .0001f
     }

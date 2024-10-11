@@ -15,4 +15,6 @@ interface PathComponent<T : PathComponent<T>> {
 
     fun extendContinuous(): T
     fun extendLine(): Line
+
+    fun translate(translation: GeomPoint): T
 }

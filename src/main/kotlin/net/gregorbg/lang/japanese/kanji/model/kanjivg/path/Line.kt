@@ -29,6 +29,10 @@ data class Line(
         return Line(this.end, this.end + (this.end - this.start))
     }
 
+    override fun translate(translation: GeomPoint): Line {
+        return Line(this.start.translate(translation), this.end.translate(translation))
+    }
+
     override fun extendContinuous(): Line {
         return this.extendLine()
     }

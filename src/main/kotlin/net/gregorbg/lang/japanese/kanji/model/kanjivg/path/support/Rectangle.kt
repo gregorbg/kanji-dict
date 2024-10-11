@@ -1,4 +1,6 @@
-package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
+package net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support
+
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
 
 data class Rectangle(
     val startCorner: GeomPoint,

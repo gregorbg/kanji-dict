@@ -4,6 +4,8 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Circle
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Rectangle
 import kotlin.math.PI
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -195,10 +197,10 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         val candidatePoints = this.extremePoints() + this.controlPoints + additionalPoints
         val convexHull = GeomPoint.grahamScan(candidatePoints)
 
-        return Circle.findMinimalEnclosingCircle(convexHull)
+        return Circle.Companion.findMinimalEnclosingCircle(convexHull)
     }
 
-    fun translate(translation: GeomPoint): BezierCurve {
+    override fun translate(translation: GeomPoint): BezierCurve {
         val translatedPoints = this.controlPoints.map { it.translate(translation) }
 
         return BezierCurve(translatedPoints)
@@ -213,6 +215,7 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
     companion object {
         const val ARC_LENGTH_EPSILON = 0.00001f
 
+        // see https://gist.github.com/mikhailov-work/0d177465a8151eb6ede1768d51d476c7
         val TURBO_COEFFICIENTS = listOf(
             listOf(0.13572138, 4.61539260, -42.66032258, 132.13108234, -152.94239396, 59.28637943),
             listOf(0.09140261, 2.19418839, 4.84296658, -14.18503333, 4.27729857, 2.82956604),
@@ -291,7 +294,7 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         }
 
         fun rgbSineColormap(t: Float): Triple<Int, Int, Int> {
-            return rgbColormap { (sin(2 * PI * (t + it / 3)) + 1) / 2 }
+            return rgbColormap { (sin(2 * PI * (t + it / 3f)) + 1) / 2 }
         }
 
         fun rgbTurboColormap(t: Float): Triple<Int, Int, Int> {
