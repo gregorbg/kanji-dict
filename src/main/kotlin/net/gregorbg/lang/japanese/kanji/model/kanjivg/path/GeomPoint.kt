@@ -3,6 +3,7 @@ package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Rectangle
 import kotlin.math.PI
 import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -131,26 +132,6 @@ data class GeomPoint(
 
     fun perpendicular(cw: Boolean = false): GeomPoint {
         return if (cw) this.perpendicularCw() else this.perpendicularCcw()
-    }
-
-    private fun scalingFactors(direction: GeomPoint, boundingBox: Rectangle): List<Float> {
-        val lowX = (boundingBox.startCorner.x - this.x) / direction.x
-        val lowY = (boundingBox.startCorner.y - this.y) / direction.y
-        val highX = (boundingBox.endCorner.x - this.x) / direction.x
-        val highY = (boundingBox.endCorner.y - this.y) / direction.y
-
-        return listOf(lowX, lowY, highX, highY).filter {
-            val scaledCoord = this + it * direction
-            scaledCoord in boundingBox
-        }
-    }
-
-    fun maxScaling(direction: GeomPoint, boundingBox: Rectangle): Float {
-        return this.scalingFactors(direction, boundingBox).max()
-    }
-
-    fun minScaling(direction: GeomPoint, boundingBox: Rectangle): Float {
-        return this.scalingFactors(direction, boundingBox).min()
     }
 
     fun dotProduct(other: GeomPoint): Float {

@@ -1,6 +1,7 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support
 
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint
+import net.gregorbg.lang.japanese.kanji.util.cycle
 
 data class Rectangle(
     val startCorner: GeomPoint,
@@ -60,6 +61,41 @@ data class Rectangle(
         }
 
         return -1
+    }
+
+    fun getCorner(indexCw: Int): GeomPoint {
+        return this.cornersCw()[indexCw]
+    }
+
+    fun getCornersPath(start: GeomPoint, end: GeomPoint, clockwise: Boolean, stackSafeguard: Boolean = false): List<GeomPoint> {
+        val startIdx = cwSideIndex(start)
+        val endIdx = cwSideIndex(end)
+
+        if (startIdx >= endIdx && !stackSafeguard)
+            return getCornersPath(end, start, clockwise, true)
+
+        val rawIndices = if (clockwise) {
+            (startIdx + 1 until endIdx + 1)
+        } else {
+            (endIdx + 1 until startIdx + 1 + 4)
+        }
+
+        return rawIndices.map { it % 4 }.map(this::getCorner)
+    }
+
+    private fun axisScaling(pos: Float, normalComp: Float, maxBound: Float): Float {
+        return if (normalComp != 0f) {
+            if (normalComp > 0) (maxBound - pos) / normalComp else -pos / normalComp
+        } else {
+            Float.MAX_VALUE
+        }
+    }
+
+    fun scalingFactor(inscribed: GeomPoint, direction: GeomPoint): Float {
+        val xScaling = axisScaling(inscribed.x, direction.x, this.width)
+        val yScaling = axisScaling(inscribed.y, direction.y, this.height)
+
+        return minOf(xScaling, yScaling)
     }
 
     fun diagonal(): GeomPoint {

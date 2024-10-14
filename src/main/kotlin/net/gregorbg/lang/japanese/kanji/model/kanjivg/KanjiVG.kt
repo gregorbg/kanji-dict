@@ -7,18 +7,17 @@ import kotlinx.serialization.StringFormat
 import kotlinx.serialization.decodeFromString
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.grammar.SvgPathReader
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.*
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Command
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.ParsedPath
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.svgPath
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Rectangle
 import net.gregorbg.lang.japanese.kanji.util.XmlUtils
-import net.gregorbg.lang.japanese.kanji.util.cycle
 import net.gregorbg.lang.japanese.kanji.util.math.PerlinRandom
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import java.io.File
-import kotlin.math.absoluteValue
+import kotlin.math.min
+import kotlin.math.sign
 
 @Serializable
 @XmlSerialName("svg", KanjiVG.SVG_NAMESPACE, KanjiVG.SVG_PREFIX)
@@ -56,7 +55,7 @@ data class KanjiVG(
     fun withCoffeeStains(
         coverPath: BezierCurve,
         noisePoints: Int,
-        globalScaling: Float,
+        globalScaling: Float = 1f,
         includeClockwise: Boolean = true,
     ): KanjiVG {
         val boundingRect = this.boundingRectangle()
@@ -67,57 +66,32 @@ data class KanjiVG(
         val coverPathVelocity = coverPath.derivative()
         val coverPathNormals = coverPathVelocity.derivative()
 
-        val controlPoints = perlinOffsets.mapIndexed { i, p ->
-            val positionIndex = (i + 1f) / (noisePoints + 1)
+        val controlPoints = perlinOffsets.mapIndexed { i, noise ->
+            val t = (i + 1f) / (noisePoints + 2f)
 
-            val linePosition = coverPath.positionAt(positionIndex)
-            val linePerpendicular = coverPathNormals.positionAt(positionIndex)
+            val position = coverPath.positionAt(t)
+            val normal = coverPathNormals.positionAt(t)
 
-            val minScaling = linePosition.minScaling(linePerpendicular, boundingRect)
-            val maxScaling = linePosition.maxScaling(linePerpendicular, boundingRect)
+            val randomizedNormal = normal * noise.sign
 
-            val lineMaxPerpendicular = if (p >= 0) linePerpendicular * maxScaling else linePerpendicular * minScaling
+            val potentialScaling = boundingRect.scalingFactor(position, randomizedNormal)
+            val actualScaling = min(noise, potentialScaling)
 
-            linePosition + p.absoluteValue * lineMaxPerpendicular * globalScaling
+            position + randomizedNormal * actualScaling * globalScaling
         }
 
-        val (firstCp, secondCp) = controlPoints.take(2)
-        val remainingControlPoints = controlPoints.drop(2)
-
         val path = svgPath(coverPath.start) {
-            val initialEnd = remainingControlPoints.firstOrNull() ?: coverPath.end
+            val (c1, c2, e) = controlPoints.take(3)
+            C(c1.x, c1.y, c2.x, c2.y, e.x, e.y)
 
-            C(firstCp.x, firstCp.y, secondCp.x, secondCp.y, initialEnd.x, initialEnd.y)
-
-            val followUp = remainingControlPoints.drop(1).chunked(2)
-
-            for (cps in followUp) {
-                val symmStartPoint = cps.first()
-                val symmEndPoint = cps.getOrNull(1) ?: coverPath.end
-
-                S(symmStartPoint.x, symmStartPoint.y, symmEndPoint.x, symmEndPoint.y)
+            val remainingStainPoints = controlPoints.drop(3) + coverPath.end
+            remainingStainPoints.chunked(2).forEach { (c2, e) ->
+                S(c2.x, c2.y, e.x, e.y)
             }
 
-            val coverPathEndVelocity = coverPathVelocity.positionAt(1f)
-
-            val maxScalingEnd = coverPath.end.maxScaling(coverPathEndVelocity, boundingRect)
-            val maxScaledEnd = coverPath.end + maxScalingEnd * coverPathEndVelocity
-
-            val cornerSideIndexEnd = boundingRect.cwSideIndex(maxScaledEnd)
-
-            val coverPathStartVelocity = coverPathVelocity.positionAt(0f)
-
-            val minScalingEnd = coverPath.start.minScaling(coverPathStartVelocity, boundingRect)
-            val minScaledEnd = coverPath.start + minScalingEnd * coverPathStartVelocity
-
-            val cornerSideIndexStartBase = boundingRect.cwSideIndex(minScaledEnd)
-            val cornerSideIndexStart = if (cornerSideIndexStartBase <= cornerSideIndexEnd) cornerSideIndexStartBase + 4 else cornerSideIndexStartBase
-
-            val containedCorners = boundingRect.cornersCw().cycle(cornerSideIndexEnd + 1).take(cornerSideIndexStart - cornerSideIndexEnd)
-            val includedCorners = if (includeClockwise) containedCorners else boundingRect.cornersCw().minus(containedCorners).reversed()
-
-            for (ics in includedCorners) {
-                L(ics.x, ics.y)
+            val coveringCorners = boundingRect.getCornersPath(coverPath.start, coverPath.end, includeClockwise)
+            coveringCorners.forEach {
+                L(it.x, it.y)
             }
 
             Z()
