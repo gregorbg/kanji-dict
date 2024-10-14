@@ -1,6 +1,6 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.grammar
 
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Path
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.ParsedPath
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.PathBuilder
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.PathCommand
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.svgPath
@@ -9,7 +9,7 @@ import org.antlr.v4.runtime.CharStreams
 import org.antlr.v4.runtime.CommonTokenStream
 import org.antlr.v4.runtime.tree.ParseTree
 
-class SvgPathReader : SvgPathBaseVisitor<Path>() {
+class SvgPathReader : SvgPathBaseVisitor<ParsedPath>() {
     private val coordinateReader = CoordinateReader()
     private val coordinatePairReader = CoordinatePairReader()
     private val coordinatePairDoubleReader = CoordinatePairDoubleReader()
@@ -114,7 +114,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
 
     private inner class DrawingCommandParser(
         private val pathBuilder: PathBuilder
-    ) : SvgPathBaseVisitor<PathCommand<*>>() {
+    ) : SvgPathBaseVisitor<PathCommand>() {
         private val coordinateSequenceReader = CoordinateSequenceReader()
         private val coordinatePairSequenceReader = CoordinatePairSequenceReader()
         private val coordinatePairDoubleSequenceReader = CoordinatePairDoubleSequenceReader()
@@ -125,7 +125,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             coordinateReader: SvgPathVisitor<List<T>>,
             coordinateContextFn: C.() -> ParseTree,
             coordinatePackingFn: (T) -> Collection<Float>
-        ): PathCommand<*> {
+        ): PathCommand {
             val commandChar = ctx.text.first()
             val coordinateSequence = coordinateReader.visit(ctx.coordinateContextFn()).orEmpty()
 
@@ -141,7 +141,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             return executedCommands.last()
         }
 
-        override fun visitMoveTo(ctx: SvgPathParser.MoveToContext): PathCommand<*> {
+        override fun visitMoveTo(ctx: SvgPathParser.MoveToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinatePairSequenceReader,
@@ -150,7 +150,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             )
         }
 
-        override fun visitClosePath(ctx: SvgPathParser.ClosePathContext): PathCommand<*> {
+        override fun visitClosePath(ctx: SvgPathParser.ClosePathContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinateSequenceReader,
@@ -158,7 +158,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             ) { listOf(it) }
         }
 
-        override fun visitLineTo(ctx: SvgPathParser.LineToContext): PathCommand<*> {
+        override fun visitLineTo(ctx: SvgPathParser.LineToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinatePairSequenceReader,
@@ -167,7 +167,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             )
         }
 
-        override fun visitHorizontalLineTo(ctx: SvgPathParser.HorizontalLineToContext): PathCommand<*> {
+        override fun visitHorizontalLineTo(ctx: SvgPathParser.HorizontalLineToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinateSequenceReader,
@@ -175,7 +175,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             ) { listOf(it) }
         }
 
-        override fun visitVerticalLineTo(ctx: SvgPathParser.VerticalLineToContext): PathCommand<*> {
+        override fun visitVerticalLineTo(ctx: SvgPathParser.VerticalLineToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinateSequenceReader,
@@ -183,7 +183,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             ) { listOf(it) }
         }
 
-        override fun visitCurveTo(ctx: SvgPathParser.CurveToContext): PathCommand<*> {
+        override fun visitCurveTo(ctx: SvgPathParser.CurveToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinatePairTripletSequenceReader,
@@ -191,7 +191,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             ) { it.toList().flatMap(Pair<Float, Float>::toList) }
         }
 
-        override fun visitSmoothCurveTo(ctx: SvgPathParser.SmoothCurveToContext): PathCommand<*> {
+        override fun visitSmoothCurveTo(ctx: SvgPathParser.SmoothCurveToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinatePairDoubleSequenceReader,
@@ -199,7 +199,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             ) { it.toList().flatMap(Pair<Float, Float>::toList) }
         }
 
-        override fun visitQuadraticBezierCurveTo(ctx: SvgPathParser.QuadraticBezierCurveToContext): PathCommand<*> {
+        override fun visitQuadraticBezierCurveTo(ctx: SvgPathParser.QuadraticBezierCurveToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinatePairDoubleSequenceReader,
@@ -207,7 +207,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
             ) { it.toList().flatMap(Pair<Float, Float>::toList) }
         }
 
-        override fun visitSmoothQuadraticBezierCurveTo(ctx: SvgPathParser.SmoothQuadraticBezierCurveToContext): PathCommand<*> {
+        override fun visitSmoothQuadraticBezierCurveTo(ctx: SvgPathParser.SmoothQuadraticBezierCurveToContext): PathCommand {
             return this.visitExecutingCommands(
                 ctx,
                 this.coordinatePairSequenceReader,
@@ -217,7 +217,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
         }
     }
 
-    override fun visitSvgPath(ctx: SvgPathParser.SvgPathContext): Path {
+    override fun visitSvgPath(ctx: SvgPathParser.SvgPathContext): ParsedPath {
         val coordinatePairSequence = this.coordinatePairSequenceReader.visit(ctx.moveTo().coordinatePairSequence())
         val startCoordinates = coordinatePairSequence.last()
 
@@ -233,7 +233,7 @@ class SvgPathReader : SvgPathBaseVisitor<Path>() {
     companion object {
         val READER = SvgPathReader()
 
-        fun parse(input: String): Path {
+        fun parse(input: String): ParsedPath {
             val charStream = CharStreams.fromString(input)
             val lexer = SvgPathLexer(charStream)
 

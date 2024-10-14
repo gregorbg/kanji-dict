@@ -11,20 +11,20 @@ import kotlin.math.roundToInt
 import kotlin.math.sin
 import kotlin.math.sqrt
 
-data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<BezierCurve> {
+data class BezierCurve(val controlPoints: List<GeomPoint>) {
     constructor(vararg controlPoints: GeomPoint) : this(controlPoints.asList())
 
-    override val start: GeomPoint
+    val start: GeomPoint
         get() = this.controlPoints.first()
-    override val end: GeomPoint
+    val end: GeomPoint
         get() = this.controlPoints.last()
 
-    override val orderedPoints = this.controlPoints
+    val orderedPoints = this.controlPoints
 
     val degree: Int
         get() = this.controlPoints.size - 1
 
-    override fun positionAt(t: Float) = this.bernstein(t)
+    fun positionAt(t: Float) = this.bernstein(t)
 
     protected tailrec fun deCasteljau(t: Float, iter: List<GeomPoint>): GeomPoint {
         val larpLines = iter.zipWithNext()
@@ -32,7 +32,7 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         if (larpLines.isEmpty())
             return iter.first()
 
-        val nextIter = larpLines.map { (a, b) -> Line(a, b) }
+        val nextIter = larpLines.map { (a, b) -> BezierCurve(a, b) }
             .map { it.positionAt(t) }
 
         return deCasteljau(t, nextIter)
@@ -75,17 +75,15 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         return BezierCurve(this.derivativeControls())
     }
 
-    override fun reverse(): BezierCurve {
+    fun reverse(): BezierCurve {
         return BezierCurve(this.controlPoints.reversed())
     }
 
-    override fun velocityAt(t: Float): GeomPoint = this.derivative().positionAt(t)
-
-    override fun positionForArc(t: Float): GeomPoint {
+    fun positionForArc(t: Float): GeomPoint {
         val lookupPoints = this.convergingLookupPoints(ARC_LENGTH_EPSILON)
 
         val stableLut = lookupPoints.zipWithNext()
-            .map { (a, b) -> Line(a, b) }
+            .map { (a, b) -> BezierCurve(a, b) }
 
         val (lookupIndex, baseUnitT) = arcLengthRescaling(t, stableLut)
         val localT = (lookupIndex.toFloat() / stableLut.size) + baseUnitT * (1 / stableLut.size)
@@ -97,7 +95,7 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         return (0 until this.degree).map { this.degree * (this.controlPoints[it + 1] - this.controlPoints[it]) }
     }
 
-    override fun arcLength() = this.arcLength(ARC_LENGTH_EPSILON)
+    fun arcLength() = this.arcLength(ARC_LENGTH_EPSILON)
 
     fun arcLength(epsilon: Float): Float {
         val lut = convergingLookupPoints(epsilon)
@@ -145,14 +143,16 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
             return error("Cannot solve equations >= rank 3")
     }
 
-    override fun extendLine(): Line {
-        return Line(
+    fun extendLine(): BezierCurve {
+        val mirrorExtension = this.derivative().positionAt(1f) / this.degree
+
+        return BezierCurve(
             this.end,
-            this.end + this.velocityAt(1f)
+            this.end + mirrorExtension
         )
     }
 
-    override fun extendContinuous(): BezierCurve {
+    fun extendContinuous(): BezierCurve {
         return BezierCurve(this.computeContinuation())
     }
 
@@ -215,7 +215,7 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
         return Circle.Companion.findMinimalEnclosingCircle(convexHull)
     }
 
-    override fun translate(translation: GeomPoint): BezierCurve {
+    fun translate(translation: GeomPoint): BezierCurve {
         val translatedPoints = this.controlPoints.map { it.translate(translation) }
 
         return BezierCurve(translatedPoints)
@@ -325,7 +325,7 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) : PathComponent<Bezie
                 .sum()
         }
 
-        fun arcLengthRescaling(t: Float, components: List<PathComponent<*>>): Pair<Int, Float> {
+        fun arcLengthRescaling(t: Float, components: List<BezierCurve>): Pair<Int, Float> {
             val cumulativeArcLengths = components.runningFold(0f) { arcAccu, component -> arcAccu + component.arcLength() }
             val totalArcLength = cumulativeArcLengths.last()
 

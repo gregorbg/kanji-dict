@@ -9,7 +9,7 @@ import net.gregorbg.lang.japanese.kanji.model.kanjivg.grammar.SvgPathReader
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.*
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.GeomPoint.Companion.times
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Command
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.Path
+import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.ParsedPath
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.command.svgPath
 import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Rectangle
 import net.gregorbg.lang.japanese.kanji.util.XmlUtils
@@ -54,7 +54,7 @@ data class KanjiVG(
     }
 
     fun withCoffeeStains(
-        coverPath: PathComponent<*>,
+        coverPath: BezierCurve,
         noisePoints: Int,
         globalScaling: Float,
         includeClockwise: Boolean = true,
@@ -64,11 +64,14 @@ data class KanjiVG(
         val perlin = PerlinRandom(this.hashCode())
         val perlinOffsets = perlin.generateNoise(noisePoints)
 
+        val coverPathVelocity = coverPath.derivative()
+        val coverPathNormals = coverPathVelocity.derivative()
+
         val controlPoints = perlinOffsets.mapIndexed { i, p ->
             val positionIndex = (i + 1f) / (noisePoints + 1)
 
             val linePosition = coverPath.positionAt(positionIndex)
-            val linePerpendicular = coverPath.velocityAt(positionIndex).perpendicular()
+            val linePerpendicular = coverPathNormals.positionAt(positionIndex)
 
             val minScaling = linePosition.minScaling(linePerpendicular, boundingRect)
             val maxScaling = linePosition.maxScaling(linePerpendicular, boundingRect)
@@ -95,14 +98,14 @@ data class KanjiVG(
                 S(symmStartPoint.x, symmStartPoint.y, symmEndPoint.x, symmEndPoint.y)
             }
 
-            val coverPathEndVelocity = coverPath.velocityAt(1f)
+            val coverPathEndVelocity = coverPathVelocity.positionAt(1f)
 
             val maxScalingEnd = coverPath.end.maxScaling(coverPathEndVelocity, boundingRect)
             val maxScaledEnd = coverPath.end + maxScalingEnd * coverPathEndVelocity
 
             val cornerSideIndexEnd = boundingRect.cwSideIndex(maxScaledEnd)
 
-            val coverPathStartVelocity = coverPath.velocityAt(0f)
+            val coverPathStartVelocity = coverPathVelocity.positionAt(0f)
 
             val minScalingEnd = coverPath.start.minScaling(coverPathStartVelocity, boundingRect)
             val minScaledEnd = coverPath.start + minScalingEnd * coverPathStartVelocity
@@ -133,7 +136,7 @@ data class KanjiVG(
         )
     }
 
-    fun strokePaths(): List<Path> {
+    fun strokePaths(): List<ParsedPath> {
         val strokePathsGroup = this.elements
             .filterIsInstance<SvgElement.Group>()
             .find { "StrokePaths" in it.id }
@@ -150,17 +153,13 @@ data class KanjiVG(
         val paths = this.strokePaths()
 
         val joiningPaths = paths.asSequence()
-            .map { it.toComponent() }
-            .map { Spline(it.segments.drop(1)) }
+            .map { it.trace() }
             .windowed(2)
-            .map { (a, b) ->
-                val prevControlEnd = a.orderedPoints.reversed()[1]
-                val controlStart = prevControlEnd.mirrorAt(a.end)
+            .map { (prevSpline, nextSpline) ->
+                val prevExtension = prevSpline.last().extendLine()
+                val nextExtension = nextSpline.first().reverse().extendLine()
 
-                val nextControlStart = b.orderedPoints[1]
-                val controlEnd = nextControlStart.mirrorAt(b.start)
-
-                BezierCurve(a.end, controlStart, controlEnd, b.start)
+                BezierCurve(prevExtension.start, prevExtension.end, nextExtension.end, nextExtension.start)
             }
             .map {
                 svgPath(it.start) {
@@ -181,7 +180,7 @@ data class KanjiVG(
 
         val newPaths = visibleCommands
             .mapIndexed { idx, cmd ->
-                val newPath = svgPath(cmd.pathComponent.start) { imitate(cmd) }
+                val newPath = svgPath(cmd.tracingCurve.start) { imitate(cmd) }
 
                 val colorIndex = idx.toFloat() / (visibleCommands.size - 1)
                 val (r, g, b) = BezierCurve.rgbTurboColormap(colorIndex)

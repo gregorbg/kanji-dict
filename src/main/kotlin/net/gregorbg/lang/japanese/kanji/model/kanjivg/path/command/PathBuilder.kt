@@ -4,14 +4,14 @@ import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.*
 
 class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
     val start = position.copy()
-    val commands = mutableListOf<PathCommand<*>>()
+    val commands = mutableListOf<PathCommand>()
 
-    private fun <T : PathComponent<T>> executeCommand(
+    private fun executeCommand(
         command: Command,
         commandMode: CommandMode,
         dropControls: Int,
-        createComponent: (GeomPoint) -> PathComponent<T>,
-    ): PathCommand<T> {
+        createComponent: (GeomPoint) -> BezierCurve,
+    ): PathCommand {
         val backingComponent = createComponent(this.position.copy())
         val compiledCommand = PathCommand(command, commandMode, backingComponent, dropControls)
 
@@ -21,71 +21,71 @@ class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
         return compiledCommand
     }
 
-    private fun <T : PathComponent<T>> executeCommand(
+    private fun executeCommand(
         command: Command,
         commandMode: CommandMode,
-        createComponent: (GeomPoint) -> PathComponent<T>
+        createComponent: (GeomPoint) -> BezierCurve
     ) = this.executeCommand(command, commandMode, 1, createComponent)
 
-    fun <T : PathComponent<T>> imitate(imitationCommand: PathCommand<T>): PathCommand<T> {
+    fun imitate(imitationCommand: PathCommand): PathCommand {
         return this.executeCommand(
             imitationCommand.command,
             imitationCommand.commandMode,
             imitationCommand.dropControls,
         ) {
-            val translationVector = imitationCommand.pathComponent.start.segmentTo(it)
-            imitationCommand.pathComponent.translate(translationVector)
+            val translationVector = imitationCommand.tracingCurve.start.segmentTo(it)
+            imitationCommand.tracingCurve.translate(translationVector)
         }
     }
 
-    fun M(targetX: Float, targetY: Float): PathCommand<Line> {
+    fun M(targetX: Float, targetY: Float): PathCommand {
         return this.executeCommand(Command.MOVE_TO, CommandMode.ABSOLUTE) {
-            Line(
+            BezierCurve(
                 it,
                 GeomPoint(targetX, targetY)
             )
         }
     }
 
-    fun m(targetDx: Float, targetDy: Float): PathCommand<Line> {
+    fun m(targetDx: Float, targetDy: Float): PathCommand {
         return this.executeCommand(Command.MOVE_TO, CommandMode.RELATIVE) {
-            Line(
+            BezierCurve(
                 it,
                 it + GeomPoint(targetDx, targetDy)
             )
         }
     }
 
-    fun L(targetX: Float, targetY: Float): PathCommand<Line> {
+    fun L(targetX: Float, targetY: Float): PathCommand {
         return this.executeCommand(Command.LINE, CommandMode.ABSOLUTE) {
-            Line(
+            BezierCurve(
                 it,
                 GeomPoint(targetX, targetY)
             )
         }
     }
 
-    fun l(targetDx: Float, targetDy: Float): PathCommand<Line> {
+    fun l(targetDx: Float, targetDy: Float): PathCommand {
         return this.executeCommand(Command.LINE, CommandMode.RELATIVE) {
-            Line(
+            BezierCurve(
                 it,
                 it + GeomPoint(targetDx, targetDy)
             )
         }
     }
 
-    fun Z(): PathCommand<Line> {
+    fun Z(): PathCommand {
         return this.executeCommand(Command.CLOSE_PATH, CommandMode.ABSOLUTE, 2) {
-            Line(
+            BezierCurve(
                 it,
                 this.start.copy()
             )
         }
     }
 
-    fun z(): PathCommand<Line> {
+    fun z(): PathCommand {
         return this.executeCommand(Command.CLOSE_PATH, CommandMode.RELATIVE, 2) {
-            Line(
+            BezierCurve(
                 it,
                 this.start.copy()
             )
@@ -99,7 +99,7 @@ class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
         controlEndY: Float,
         endX: Float,
         endY: Float,
-    ): PathCommand<BezierCurve> {
+    ): PathCommand {
         return this.executeCommand(Command.BEZIER_CURVE, CommandMode.ABSOLUTE) {
             BezierCurve(
                 it,
@@ -117,7 +117,7 @@ class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
         controlEndDy: Float,
         endDx: Float,
         endDy: Float,
-    ): PathCommand<BezierCurve> {
+    ): PathCommand {
         return this.executeCommand(Command.BEZIER_CURVE, CommandMode.RELATIVE) {
             BezierCurve(
                 it,
@@ -133,9 +133,9 @@ class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
         controlEndY: Float,
         endX: Float,
         endY: Float,
-    ): PathCommand<BezierCurve> {
+    ): PathCommand {
         return this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.ABSOLUTE, 2) {
-            val prevComponent = this.commands.lastOrNull()?.toComponent()
+            val prevComponent = this.commands.lastOrNull()?.tracingCurve
 
             if (prevComponent is BezierCurve) {
                 val lastControlPoint = prevComponent.controlPoints[prevComponent.degree].copy()
@@ -163,9 +163,9 @@ class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
         controlEndDy: Float,
         endDx: Float,
         endDy: Float,
-    ): PathCommand<BezierCurve> {
+    ): PathCommand {
         return this.executeCommand(Command.SYMMETRIC_BEZIER_CURVE, CommandMode.RELATIVE, 2) {
-            val prevComponent = this.commands.lastOrNull()?.toComponent()
+            val prevComponent = this.commands.lastOrNull()?.tracingCurve
 
             if (prevComponent is BezierCurve) {
                 val lastControlPoint = prevComponent.controlPoints[prevComponent.degree].copy()
@@ -188,7 +188,7 @@ class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
         }
     }
 
-    operator fun invoke(command: Char, vararg coords: Float): PathCommand<*> {
+    operator fun invoke(command: Char, vararg coords: Float): PathCommand {
         return when (command) {
             'M' -> M(coords[0], coords[1])
             'm' -> m(coords[0], coords[1])
@@ -204,12 +204,10 @@ class PathBuilder(var position: GeomPoint = GeomPoint.origin) {
         }
     }
 
-    fun toPath(): Path {
-        return Path(this.commands)
-    }
+    fun toPath() = ParsedPath(this.commands)
 }
 
-fun svgPath(startX: Float, startY: Float, build: PathBuilder.() -> Unit): Path {
+fun svgPath(startX: Float, startY: Float, build: PathBuilder.() -> Unit): ParsedPath {
     val builder = PathBuilder()
     builder.M(startX, startY)
 
