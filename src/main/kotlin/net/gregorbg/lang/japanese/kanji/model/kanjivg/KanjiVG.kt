@@ -16,6 +16,7 @@ import net.gregorbg.lang.japanese.kanji.util.math.PerlinRandom
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import nl.adaptivity.xmlutil.serialization.XmlSerialName
 import java.io.File
+import kotlin.math.absoluteValue
 import kotlin.math.min
 import kotlin.math.sign
 
@@ -64,18 +65,21 @@ data class KanjiVG(
         val perlinOffsets = perlin.generateNoise(noisePoints)
 
         val coverPathVelocity = coverPath.derivative()
-        val coverPathNormals = coverPathVelocity.derivative()
 
         val controlPoints = perlinOffsets.mapIndexed { i, noise ->
             val t = (i + 1f) / (noisePoints + 2f)
 
-            val position = coverPath.positionAt(t)
-            val normal = coverPathNormals.positionAt(t)
+            val curveParam = coverPath.arcSectionToParam(t)
 
-            val randomizedNormal = normal * noise.sign
+            val position = coverPath.positionAt(curveParam)
+            val velocity = coverPathVelocity.positionAt(curveParam)
+
+            val unitNormal = velocity.perpendicular().unit()
+
+            val randomizedNormal = unitNormal * noise.sign
 
             val potentialScaling = boundingRect.scalingFactor(position, randomizedNormal)
-            val actualScaling = min(noise, potentialScaling)
+            val actualScaling = min(noise.absoluteValue, potentialScaling)
 
             position + randomizedNormal * actualScaling * globalScaling
         }

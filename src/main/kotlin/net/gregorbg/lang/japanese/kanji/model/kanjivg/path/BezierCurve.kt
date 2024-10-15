@@ -79,16 +79,14 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) {
         return BezierCurve(this.controlPoints.reversed())
     }
 
-    fun positionForArc(t: Float): GeomPoint {
+    fun arcSectionToParam(p: Float): Float {
         val lookupPoints = this.convergingLookupPoints(ARC_LENGTH_EPSILON)
 
         val stableLut = lookupPoints.zipWithNext()
             .map { (a, b) -> BezierCurve(a, b) }
 
-        val (lookupIndex, baseUnitT) = arcLengthRescaling(t, stableLut)
-        val localT = (lookupIndex.toFloat() / stableLut.size) + baseUnitT * (1 / stableLut.size)
-
-        return this.positionAt(localT)
+        val (lookupIndex, baseUnitT) = arcLengthRescaling(p, stableLut)
+        return (lookupIndex.toFloat() / stableLut.size) + baseUnitT * (1f / stableLut.size)
     }
 
     protected fun derivativeControls(): List<GeomPoint> {
@@ -325,16 +323,16 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) {
                 .sum()
         }
 
-        fun arcLengthRescaling(t: Float, components: List<BezierCurve>): Pair<Int, Float> {
+        fun arcLengthRescaling(p: Float, components: List<BezierCurve>): Pair<Int, Float> {
             val cumulativeArcLengths = components.runningFold(0f) { arcAccu, component -> arcAccu + component.arcLength() }
             val totalArcLength = cumulativeArcLengths.last()
 
-            val lookupIndex = cumulativeArcLengths.indexOfLast { it / totalArcLength <= t }
+            val lookupIndex = cumulativeArcLengths.indexOfLast { it / totalArcLength <= p }
 
             val curveStartLength = cumulativeArcLengths[lookupIndex]
             val curveEndLength = cumulativeArcLengths[lookupIndex + 1]
 
-            val localT = (t * totalArcLength - curveStartLength) / (curveEndLength - curveStartLength)
+            val localT = (p * totalArcLength - curveStartLength) / (curveEndLength - curveStartLength)
 
             return lookupIndex to localT
         }
