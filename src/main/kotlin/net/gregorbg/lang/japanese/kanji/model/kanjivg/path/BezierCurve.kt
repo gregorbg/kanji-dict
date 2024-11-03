@@ -225,6 +225,16 @@ data class BezierCurve(val controlPoints: List<GeomPoint>) {
         return BezierCurve(rotatedPoints)
     }
 
+    fun outerControlAngle(): Float {
+        val (start, firstControl) = this.controlPoints
+        val startControl = firstControl.segmentTo(start)
+
+        val (end, lastControl) = this.controlPoints.reversed()
+        val endControl = lastControl.segmentTo(end)
+
+        return startControl.angleTo(endControl)
+    }
+
     companion object {
         const val ARC_LENGTH_EPSILON = 0.00001f
 

@@ -151,7 +151,7 @@ data class KanjiVG(
         return this.copy(elements = this.elements + joiningPathGroup)
     }
 
-    fun markedStrokes(): KanjiVG {
+    fun markedStrokes(colorMap: (Int, Float) -> Triple<Int, Int, Int>): KanjiVG {
         val visibleCommands = this.strokePaths()
             .flatMap { it.commands }
             .filter { it.command != Command.MOVE_TO && it.command != Command.CLOSE_PATH }
@@ -161,7 +161,7 @@ data class KanjiVG(
                 val newPath = svgPath(cmd.tracingCurve.start) { imitate(cmd) }
 
                 val colorIndex = idx.toFloat() / (visibleCommands.size - 1)
-                val (r, g, b) = BezierCurve.rgbTurboColormap(colorIndex)
+                val (r, g, b) = colorMap(idx, colorIndex)
 
                 SvgElement.Path("colorMark${cmd.hashCode()}", newPath.toSvg(), stroke = "rgb($r, $g, $b)")
             }

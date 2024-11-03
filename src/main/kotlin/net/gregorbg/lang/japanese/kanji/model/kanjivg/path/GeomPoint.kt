@@ -1,9 +1,8 @@
 package net.gregorbg.lang.japanese.kanji.model.kanjivg.path
 
-import net.gregorbg.lang.japanese.kanji.model.kanjivg.path.support.Rectangle
 import kotlin.math.PI
 import kotlin.math.abs
-import kotlin.math.absoluteValue
+import kotlin.math.acos
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -105,6 +104,10 @@ data class GeomPoint(
         ) + 2 * PI) % (2 * PI)).toFloat()
     }
 
+    fun angleTo(other: GeomPoint): Float {
+        return acos(this.dotProduct(other) / (this.norm() * other.norm()))
+    }
+
     fun translate(translation: GeomPoint): GeomPoint {
         return this + translation
     }
@@ -202,6 +205,10 @@ data class GeomPoint(
         fun toSvgNumber(value: Float): String {
             val rounded = round(value * 100) / 100
             return rounded.toString().dropLastWhile { it == '0' }.trimEnd('.')
+        }
+
+        fun radiansToDegrees(rad: Float): Float {
+            return rad * 180f / PI.toFloat()
         }
     }
 }
