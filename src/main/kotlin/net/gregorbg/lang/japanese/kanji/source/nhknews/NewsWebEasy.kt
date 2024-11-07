@@ -31,7 +31,11 @@ object NewsWebEasy : ComplexTextSource<WordLevelToken> {
     const val TOP_LIST_API = "https://www3.nhk.or.jp/news/easy/top-list.json"
     const val ARTICLES_BY_DATE_API = "https://www3.nhk.or.jp/news/easy/news-list.json"
 
-    val TOP_ARTICLES: List<TopNewsListItem> by lazy { runBlocking { HTTP_CLIENT.get(TOP_LIST_API).body() } }
+    val TOP_ARTICLES: List<TopNewsListItem> by lazy {
+        runBlocking {
+            HTTP_CLIENT.get(TOP_LIST_API).body()
+        }
+    }
 
     val ALL_ARTICLES_BY_DATE: Map<String, List<EasyNewsListItem>> by lazy {
         runBlocking {
